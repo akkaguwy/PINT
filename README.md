@@ -1,4 +1,4 @@
-# PINT — Cardiff & Vale Edition (v2.2)
+# PINT — Cardiff & Vale Edition (v2.4)
 
 A mobile-friendly, static pub journal built with plain HTML, CSS and JavaScript. Ready for GitHub Pages — no server, API keys or installation required.
 
@@ -7,6 +7,9 @@ A mobile-friendly, static pub journal built with plain HTML, CSS and JavaScript.
 - Browse a curated suggestion directory of roughly 80 pubs across Cardiff and the Vale of Glamorgan.
 - Choose from seven Pub Golf routes (Cardiff centre, match day, Pontcanna, Cardiff Bay, Cowbridge, Penarth or Barry) and keep a local scorecard with completed stops and optional challenge points.
 - Filter by region or neighbourhood, search, favourite, and find places you haven't visited.
+- Switch between a list and an OpenStreetMap neighbourhood-cluster view; map pins are approximate area centres, **not verified pub locations**.
+- Tap **Near me** to sort pubs by approximate distance to their neighbourhood centres. Location is requested only when tapped, and not stored or sent to PINT servers.
+- Open a shareable, dedicated pub details screen with your personal ratings, prior reviews and photos, and a Google Maps venue search link.
 - Add pubs of your own and review each visit: overall 1–5 stars, Guinness quality, atmosphere, setting, optional pint price and notes.
 - Take or select up to three photos per review on a phone or desktop. Images are resized and stored privately in browser IndexedDB.
 - Install it to an iPhone Home Screen as a standalone web app, with a custom PINT icon and cached core screens for offline use.

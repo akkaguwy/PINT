@@ -18,6 +18,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="features.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoT6kLFxMAH2U=" crossorigin="" />
   <style>
     .pub-price{font-size:11px;color:#a9a18f;margin-top:12px;min-height:18px}
     .pub-metrics strong{font-size:17px}
@@ -38,7 +39,7 @@
   <main id="home">
     <section class="hero shell">
       <div class="hero-copy">
-        <div class="eyebrow"><span class="live-dot"></span> CARDIFF & VALE PUB DISCOVERY · VERSION 2.3</div>
+        <div class="eyebrow"><span class="live-dot"></span> CARDIFF & VALE PUB DISCOVERY · VERSION 2.4</div>
         <h1>Find your next<br/><em>local.</em></h1>
         <p>Explore pubs across Cardiff and the Vale of Glamorgan. Pick somewhere new, pay it a visit, then give your honest verdict.</p>
         <div class="hero-actions"><a href="#explore" class="button button-gold">Explore pubs <span>↗</span></a><a href="#pub-golf" class="button button-outline">⛳ Pub Golf</a><button class="button button-ghost" id="log-first-button">Review a pub <span>＋</span></button></div>
@@ -70,8 +71,11 @@
         <select id="area-filter" aria-label="Filter by area"><option value="all">All areas</option></select>
         <select id="sort-filter" aria-label="Sort pubs"><option value="name">Name A–Z</option><option value="unvisited">Not yet visited</option><option value="rated">My highest rated</option><option value="cheapest">Cheapest I've logged</option></select>
         <button class="filter-button" id="favourites-filter" aria-pressed="false">♡ Favourites</button>
+        <button class="filter-button" id="nearby-button" aria-pressed="false">⌖ Near me</button>
       </div>
+      <div class="view-bar"><div class="view-switch" role="group" aria-label="Directory view"><button id="list-view-button" class="active" aria-pressed="true">☷ List</button><button id="map-view-button" aria-pressed="false">⌖ Map</button></div><span id="location-note" aria-live="polite"></span></div>
       <div class="directory-note"><span id="result-count">0 pubs</span><span>Suggestions only. Check opening times and availability; Guinness isn't guaranteed. Images are illustrative.</span></div>
+      <div id="map-container" class="map-container" hidden><div id="pub-map" aria-label="Map of approximate pub neighbourhoods"></div><p class="map-disclaimer">Pins mark approximate neighbourhood centres, not exact pub entrances. Tap a cluster to explore its pubs; use Directions on a pub for a location search.</p></div>
       <div class="pub-grid" id="pub-grid"></div>
       <p class="empty-state" id="empty-state" hidden>No pubs match that search. Try another area or add a new pub.</p>
     </section>
@@ -93,11 +97,14 @@
 
   <dialog id="photo-dialog" class="photo-dialog"><button type="button" class="close" data-close="photo-dialog" aria-label="Close photo">×</button><img id="photo-full" alt="Your pub review photo" /></dialog>
 
+  <dialog id="detail-dialog" class="modal detail-dialog" aria-label="Pub details"><div class="modal-body"><button type="button" class="close" data-close="detail-dialog" aria-label="Close pub details">×</button><div id="detail-content"></div></div></dialog>
+
   <dialog id="pub-dialog" class="modal"><form id="pub-form" class="modal-body"><button type="button" class="close" data-close="pub-dialog" aria-label="Close">×</button><span class="overline">GROW THE DIRECTORY</span><h2>Add a pub<span class="gold-period">.</span></h2><label>Pub name<input name="name" maxlength="90" placeholder="Pub name" required /></label><label>Region<select name="region" required><option value="Cardiff">Cardiff</option><option value="Vale">Vale of Glamorgan</option></select></label><label>Area<input name="area" maxlength="50" placeholder="e.g. Cowbridge" required /></label><label>Address (optional)<input name="address" maxlength="150" placeholder="Street and town" /></label><label>What makes it worth a visit?<textarea name="description" rows="3" maxlength="180" placeholder="A little about the pub..."></textarea></label><button type="submit" class="button button-gold full">Add to my pubs ↗</button></form></dialog>
 
   <dialog id="data-dialog" class="modal"><div class="modal-body"><button type="button" class="close" data-close="data-dialog" aria-label="Close">×</button><span class="overline">BACKUP & RESTORE</span><h2>Your data<span class="gold-period">.</span></h2><p>Your pubs, pint logs and favourites currently live only in this browser. Export a backup before switching devices or clearing browser data.</p><button id="export-button" class="button button-gold full">Download JSON backup ↧</button><label class="import-label">Restore from backup<input id="import-input" type="file" accept=".json,application/json" /></label><p class="small-print">Import replaces the current data on this device, after confirmation. No public submissions or shared accounts yet.</p></div></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="photos.js" defer></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
   <script src="app.js" defer></script>
   <script src="pub_golf.js" defer></script>
   <script src="pwa.js" defer></script>
