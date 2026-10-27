@@ -1,0 +1,16 @@
+{
+  "id": "./",
+  "name": "PINT — Cardiff & The Vale",
+  "short_name": "PINT",
+  "description": "Discover local pubs, rate your visits and play pub golf around Cardiff and the Vale.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#10110f",
+  "theme_color": "#10110f",
+  "orientation": "any",
+  "icons": [
+    {"src":"icons/pint-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"icons/pint-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}

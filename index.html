@@ -4,6 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#10100e" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="PINT" />
+  <meta name="application-name" content="PINT" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/pint-180.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/pint-192.png" />
   <meta name="description" content="PINT — find your next great pint in Cardiff. Save pubs, log Guinness prices and rate your visits." />
   <title>PINT — Cardiff & Vale pub discovery</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -31,7 +38,7 @@
   <main id="home">
     <section class="hero shell">
       <div class="hero-copy">
-        <div class="eyebrow"><span class="live-dot"></span> CARDIFF & VALE PUB DISCOVERY · VERSION 2.1</div>
+        <div class="eyebrow"><span class="live-dot"></span> CARDIFF & VALE PUB DISCOVERY · VERSION 2.2</div>
         <h1>Find your next<br/><em>local.</em></h1>
         <p>Explore pubs across Cardiff and the Vale of Glamorgan. Pick somewhere new, pay it a visit, then give your honest verdict.</p>
         <div class="hero-actions"><a href="#explore" class="button button-gold">Explore pubs <span>↗</span></a><a href="#pub-golf" class="button button-outline">⛳ Pub Golf</a><button class="button button-ghost" id="log-first-button">Review a pub <span>＋</span></button></div>
@@ -70,6 +77,8 @@
     </section>
 
     <section class="journal" id="my-pints"><div class="shell journal-inner"><div><span class="overline">YOUR PERSONAL PUB JOURNAL</span><h2>Every good pub<br/>has a story<span class="gold-period">.</span></h2><p>Review the Guinness, atmosphere, setting and overall experience after each visit. Your entries are saved on this device.</p><button id="journal-log-button" class="button button-gold">Review a pub <span>↗</span></button></div><div class="journal-panel"><div class="panel-head"><strong>RECENT REVIEWS</strong><span id="entry-count">0 LOGGED</span></div><div id="recent-list" class="recent-list"></div></div></div></section>
+
+    <section class="install-section shell" id="install-pint"><div class="install-mark">P<span>.</span></div><div><span class="overline">TAKE PINT WITH YOU</span><h2>Put PINT on your Home Screen.</h2><p>On iPhone, open this page in Safari, tap Share, choose Add to Home Screen, and enable “Open as Web App”.</p></div><span class="install-label">MADE FOR MOBILE ↗</span></section>
   </main>
 
   <footer class="shell footer"><div class="footer-brand">PINT<span>.</span></div><p>FIND IT. VISIT IT. RATE IT.</p><span>Cardiff & the Vale of Glamorgan · © <span id="year"></span></span></footer>
@@ -85,5 +94,6 @@
   <script src="photos.js" defer></script>
   <script src="app.js" defer></script>
   <script src="pub_golf.js" defer></script>
+  <script src="pwa.js" defer></script>
 </body>
 </html>
