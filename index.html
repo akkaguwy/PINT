@@ -38,7 +38,7 @@
   <main id="home">
     <section class="hero shell">
       <div class="hero-copy">
-        <div class="eyebrow"><span class="live-dot"></span> CARDIFF & VALE PUB DISCOVERY · VERSION 2.2</div>
+        <div class="eyebrow"><span class="live-dot"></span> CARDIFF & VALE PUB DISCOVERY · VERSION 2.3</div>
         <h1>Find your next<br/><em>local.</em></h1>
         <p>Explore pubs across Cardiff and the Vale of Glamorgan. Pick somewhere new, pay it a visit, then give your honest verdict.</p>
         <div class="hero-actions"><a href="#explore" class="button button-gold">Explore pubs <span>↗</span></a><a href="#pub-golf" class="button button-outline">⛳ Pub Golf</a><button class="button button-ghost" id="log-first-button">Review a pub <span>＋</span></button></div>
@@ -81,6 +81,12 @@
     <section class="install-section shell" id="install-pint"><div class="install-mark">P<span>.</span></div><div><span class="overline">TAKE PINT WITH YOU</span><h2>Put PINT on your Home Screen.</h2><p>On iPhone, open this page in Safari, tap Share, choose Add to Home Screen, and enable “Open as Web App”.</p></div><span class="install-label">MADE FOR MOBILE ↗</span></section>
   </main>
 
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <a href="#home" aria-label="Home"><span aria-hidden="true">⌂</span><small>Home</small></a>
+    <a href="#explore" aria-label="Explore pubs"><span aria-hidden="true">⌕</span><small>Explore</small></a>
+    <a href="#pub-golf" aria-label="Pub Golf"><span aria-hidden="true">⛳</span><small>Pub Golf</small></a>
+    <a href="#my-pints" aria-label="My reviews"><span aria-hidden="true">★</span><small>My Pints</small></a>
+  </nav>
   <footer class="shell footer"><div class="footer-brand">PINT<span>.</span></div><p>FIND IT. VISIT IT. RATE IT.</p><span>Cardiff & the Vale of Glamorgan · © <span id="year"></span></span></footer>
 
   <dialog id="entry-dialog" class="modal"><form id="entry-form" class="modal-body"><button type="button" class="close" data-close="entry-dialog" aria-label="Close">×</button><span class="overline">YOUR PUB JOURNAL</span><h2>Review a visit<span class="gold-period">.</span></h2><label>Pub<select name="pubId" id="entry-pub" required></select></label><label>Overall experience (out of 5 stars)<select name="rating" required><option value="">Choose stars</option><option value="1">★☆☆☆☆ — 1</option><option value="2">★★☆☆☆ — 2</option><option value="3">★★★☆☆ — 3</option><option value="4">★★★★☆ — 4</option><option value="5">★★★★★ — 5</option></select></label><div class="form-row"><label>Guinness quality<select name="guinness"><option value="">Didn't try / not sure</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label><label>Atmosphere<select name="atmosphere"><option value="">Not rated</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label></div><div class="form-row"><label>Area / setting<select name="setting"><option value="">Not rated</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label><label>Price of pint (£) · optional<input name="price" type="number" min="0.01" max="100" step="0.01" placeholder="5.50" /></label></div><label>Date<input name="date" type="date" id="entry-date" required /></label><label>Your verdict<textarea name="notes" rows="3" maxlength="300" placeholder="Great Guinness, friendly bar, nice beer garden..."></textarea></label><label>Photos (up to three) <span class="photo-help">Take a photo or choose from your camera roll</span><input id="review-photos" name="photos" type="file" accept="image/*" multiple /></label><div class="photo-preview" id="photo-preview" aria-live="polite"></div><button class="button button-gold full" type="submit">Save my review ↗</button></form></dialog>

@@ -1,4 +1,4 @@
-const CACHE_NAME='pint-offline-v2.2';
+const CACHE_NAME='pint-offline-v2.3';
 const CORE=['./','./index.html','./styles.css','./features.css','./app.js','./pub_golf.js','./photos.js','./pwa.js','./manifest.webmanifest','./icons/pint-180.png','./icons/pint-192.png','./icons/pint-512.png'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil(Promise.all([caches.keys().then(names=>Promise.all(names.filter(name=>name.startsWith('pint-offline-')&&name!==CACHE_NAME).map(name=>caches.delete(name)))),self.clients.claim()]))});
