@@ -34,7 +34,7 @@
         <div class="eyebrow"><span class="live-dot"></span> CARDIFF & VALE PUB DISCOVERY · VERSION 2.1</div>
         <h1>Find your next<br/><em>local.</em></h1>
         <p>Explore pubs across Cardiff and the Vale of Glamorgan. Pick somewhere new, pay it a visit, then give your honest verdict.</p>
-        <div class="hero-actions"><a href="#explore" class="button button-gold">Explore Cardiff <span>↗</span></a><button class="button button-ghost" id="log-first-button">Log a pint <span>＋</span></button></div>
+        <div class="hero-actions"><a href="#explore" class="button button-gold">Explore pubs <span>↗</span></a><a href="#pub-golf" class="button button-outline">⛳ Pub Golf</a><button class="button button-ghost" id="log-first-button">Review a pub <span>＋</span></button></div>
         <div class="hero-caption">Independent pub companion. No paid rankings.</div>
       </div>
       <div class="hero-image" role="img" aria-label="A pint of stout in a warmly lit pub"><div class="hero-overlay"><span>YOUR NEXT STOP AWAITS.</span><strong>CARDIFF & THE VALE <span>↗</span></strong></div></div>
@@ -45,6 +45,14 @@
       <div><strong id="stat-logs">0</strong><span>VISITS REVIEWED</span></div>
       <div><strong id="stat-favourites">0</strong><span>YOUR FAVOURITES</span></div>
       <div class="stat-note"><span class="mini-star">✳</span> <span>Find somewhere new.<br/>Make the verdict your own.</span></div>
+    </section>
+
+    <section class="golf-section" id="pub-golf">
+      <div class="shell">
+        <div class="golf-heading"><div><span class="overline">PINT SOCIAL CLUB</span><h2>Pub Golf<span class="gold-period">.</span></h2><p>Choose a course, explore the stops and keep your group's scorecard. Pick your own drinks — alcohol-free rounds count too.</p></div><span class="golf-stamp">⛳ COURSE GUIDE</span></div>
+        <div id="golf-routes" class="golf-routes" aria-label="Pub golf route selection"></div>
+        <div class="golf-detail" id="golf-detail" aria-live="polite"></div>
+      </div>
     </section>
 
     <section class="explore shell" id="explore">
@@ -59,14 +67,6 @@
       <div class="directory-note"><span id="result-count">0 pubs</span><span>Suggestions only. Check opening times and availability; Guinness isn't guaranteed. Images are illustrative.</span></div>
       <div class="pub-grid" id="pub-grid"></div>
       <p class="empty-state" id="empty-state" hidden>No pubs match that search. Try another area or add a new pub.</p>
-    </section>
-
-    <section class="golf-section" id="pub-golf">
-      <div class="shell">
-        <div class="golf-heading"><div><span class="overline">PINT SOCIAL CLUB</span><h2>Pub Golf<span class="gold-period">.</span></h2><p>Choose a course, explore the stops and keep your group's scorecard. Pick your own drinks — alcohol-free rounds count too.</p></div><span class="golf-stamp">⛳ COURSE GUIDE</span></div>
-        <div id="golf-routes" class="golf-routes" aria-label="Pub golf route selection"></div>
-        <div class="golf-detail" id="golf-detail" aria-live="polite"></div>
-      </div>
     </section>
 
     <section class="journal" id="my-pints"><div class="shell journal-inner"><div><span class="overline">YOUR PERSONAL PUB JOURNAL</span><h2>Every good pub<br/>has a story<span class="gold-period">.</span></h2><p>Review the Guinness, atmosphere, setting and overall experience after each visit. Your entries are saved on this device.</p><button id="journal-log-button" class="button button-gold">Review a pub <span>↗</span></button></div><div class="journal-panel"><div class="panel-head"><strong>RECENT REVIEWS</strong><span id="entry-count">0 LOGGED</span></div><div id="recent-list" class="recent-list"></div></div></div></section>
