@@ -5,15 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#10100e" />
   <meta name="description" content="PINT — find your next great pint in Cardiff. Save pubs, log Guinness prices and rate your visits." />
-  <title>PINT — Good pints. Better prices.</title>
+  <title>PINT — Cardiff & Vale pub discovery</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <style>
+    .pub-price{font-size:11px;color:#a9a18f;margin-top:12px;min-height:18px}
+    .pub-metrics strong{font-size:17px}
+    .pub-metrics span{font-size:8px}
+    .modal-body{overflow-y:auto}
+    .modal-body label select{min-height:43px}
+    @media(max-width:900px){.toolbar select,.filter-button{flex:1 1 150px}}
+    @media(max-width:620px){.toolbar select,.filter-button{flex:1 1 43%}.pub-metrics strong{font-size:16px}}
+  </style>
 </head>
 <body>
   <header class="topbar shell">
-    <a class="brand" href="#home" aria-label="PINT home"><span class="brand-mark">P<span class="brand-dot">.</span></span><span class="brand-name">PINT <small>CARDIFF EDITION</small></span></a>
+    <a class="brand" href="#home" aria-label="PINT home"><span class="brand-mark">P<span class="brand-dot">.</span></span><span class="brand-name">PINT <small>CARDIFF & THE VALE</small></span></a>
     <nav aria-label="Primary navigation"><a href="#explore">Explore</a><a href="#my-pints">My pints</a></nav>
     <button class="button button-outline small" id="add-pub-button">+ Add a pub</button>
   </header>
@@ -21,43 +30,44 @@
   <main id="home">
     <section class="hero shell">
       <div class="hero-copy">
-        <div class="eyebrow"><span class="live-dot"></span> THE CARDIFF PUB GUIDE · VERSION 1.0</div>
-        <h1>Find a better<br/><em>pint.</em></h1>
-        <p>Great pubs. Honest ratings. Real prices logged by you. Your next favourite local starts here.</p>
+        <div class="eyebrow"><span class="live-dot"></span> CARDIFF & VALE PUB DISCOVERY · VERSION 2.0</div>
+        <h1>Find your next<br/><em>local.</em></h1>
+        <p>Explore pubs across Cardiff and the Vale of Glamorgan. Pick somewhere new, pay it a visit, then give your honest verdict.</p>
         <div class="hero-actions"><a href="#explore" class="button button-gold">Explore Cardiff <span>↗</span></a><button class="button button-ghost" id="log-first-button">Log a pint <span>＋</span></button></div>
         <div class="hero-caption">Independent pub companion. No paid rankings.</div>
       </div>
-      <div class="hero-image" role="img" aria-label="A pint of stout in a warmly lit pub"><div class="hero-overlay"><span>THE CITY IS YOUR LOCAL.</span><strong>CARDIFF, WALES <span>↗</span></strong></div></div>
+      <div class="hero-image" role="img" aria-label="A pint of stout in a warmly lit pub"><div class="hero-overlay"><span>YOUR NEXT STOP AWAITS.</span><strong>CARDIFF & THE VALE <span>↗</span></strong></div></div>
     </section>
 
     <section class="stat-band shell" aria-label="Your local PINT statistics">
       <div><strong id="stat-pubs">0</strong><span>PUBS TO EXPLORE</span></div>
-      <div><strong id="stat-logs">0</strong><span>PINTS LOGGED</span></div>
+      <div><strong id="stat-logs">0</strong><span>VISITS REVIEWED</span></div>
       <div><strong id="stat-favourites">0</strong><span>YOUR FAVOURITES</span></div>
-      <div class="stat-note"><span class="mini-star">✳</span> <span>Built for the great pub hunt.<br/>Made to grow beyond Cardiff.</span></div>
+      <div class="stat-note"><span class="mini-star">✳</span> <span>Find somewhere new.<br/>Make the verdict your own.</span></div>
     </section>
 
     <section class="explore shell" id="explore">
-      <div class="section-heading"><div><span class="overline">THE PUB DIRECTORY</span><h2>Explore the city<span class="gold-period">.</span></h2><p>Discover a new favourite or keep track of the classics.</p></div><button class="button button-outline" id="open-data-button">↧ Your data</button></div>
+      <div class="section-heading"><div><span class="overline">THE PUB DIRECTORY</span><h2>Where to next<span class="gold-period">?</span></h2><p>Choose a place that catches your eye. Your ratings appear after you visit.</p></div><button class="button button-outline" id="open-data-button">↧ Your data</button></div>
       <div class="toolbar">
         <label class="search-box"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search pubs or areas..." autocomplete="off" /><kbd>⌕</kbd></label>
+        <select id="region-filter" aria-label="Filter by region"><option value="all">Cardiff + Vale</option><option value="Cardiff">Cardiff</option><option value="Vale">Vale of Glamorgan</option></select>
         <select id="area-filter" aria-label="Filter by area"><option value="all">All areas</option></select>
-        <select id="sort-filter" aria-label="Sort pubs"><option value="name">Name A–Z</option><option value="rated">My highest rated</option><option value="cheapest">Cheapest I've logged</option></select>
+        <select id="sort-filter" aria-label="Sort pubs"><option value="name">Name A–Z</option><option value="unvisited">Not yet visited</option><option value="rated">My highest rated</option><option value="cheapest">Cheapest I've logged</option></select>
         <button class="filter-button" id="favourites-filter" aria-pressed="false">♡ Favourites</button>
       </div>
-      <div class="directory-note"><span id="result-count">0 pubs</span><span>Prices and ratings are personal entries, not live venue data.</span></div>
+      <div class="directory-note"><span id="result-count">0 pubs</span><span>Suggestions only. Check opening times and availability; Guinness isn't guaranteed. Images are illustrative.</span></div>
       <div class="pub-grid" id="pub-grid"></div>
       <p class="empty-state" id="empty-state" hidden>No pubs match that search. Try another area or add a new pub.</p>
     </section>
 
-    <section class="journal" id="my-pints"><div class="shell journal-inner"><div><span class="overline">YOUR PERSONAL PUB JOURNAL</span><h2>Every good pint<br/>has a story<span class="gold-period">.</span></h2><p>Log what you paid, how it tasted and when you went. Your entries are saved on this device.</p><button id="journal-log-button" class="button button-gold">Log your next pint <span>↗</span></button></div><div class="journal-panel"><div class="panel-head"><strong>RECENT ENTRIES</strong><span id="entry-count">0 LOGGED</span></div><div id="recent-list" class="recent-list"></div></div></div></section>
+    <section class="journal" id="my-pints"><div class="shell journal-inner"><div><span class="overline">YOUR PERSONAL PUB JOURNAL</span><h2>Every good pub<br/>has a story<span class="gold-period">.</span></h2><p>Review the Guinness, atmosphere, setting and overall experience after each visit. Your entries are saved on this device.</p><button id="journal-log-button" class="button button-gold">Review a pub <span>↗</span></button></div><div class="journal-panel"><div class="panel-head"><strong>RECENT REVIEWS</strong><span id="entry-count">0 LOGGED</span></div><div id="recent-list" class="recent-list"></div></div></div></section>
   </main>
 
-  <footer class="shell footer"><div class="footer-brand">PINT<span>.</span></div><p>GOOD PINTS. BETTER PRICES.</p><span>Made for Cardiff. Built for everywhere. © <span id="year"></span></span></footer>
+  <footer class="shell footer"><div class="footer-brand">PINT<span>.</span></div><p>FIND IT. VISIT IT. RATE IT.</p><span>Cardiff & the Vale of Glamorgan · © <span id="year"></span></span></footer>
 
-  <dialog id="entry-dialog" class="modal"><form id="entry-form" class="modal-body"><button type="button" class="close" data-close="entry-dialog" aria-label="Close">×</button><span class="overline">YOUR PUB JOURNAL</span><h2>Log a pint<span class="gold-period">.</span></h2><label>Pub<select name="pubId" id="entry-pub" required></select></label><label>What did you drink?<input name="drink" placeholder="e.g. Guinness" value="Guinness" maxlength="60" required /></label><div class="form-row"><label>Price (£)<input name="price" type="number" min="0.01" max="100" step="0.01" placeholder="5.50" required /></label><label>Rating /10<input name="rating" type="number" min="1" max="10" step="0.5" placeholder="8.5" required /></label></div><label>Date<input name="date" type="date" id="entry-date" required /></label><label>Notes (optional)<textarea name="notes" rows="3" maxlength="300" placeholder="Creamy head, great atmosphere..."></textarea></label><button class="button button-gold full" type="submit">Save pint ↗</button></form></dialog>
+  <dialog id="entry-dialog" class="modal"><form id="entry-form" class="modal-body"><button type="button" class="close" data-close="entry-dialog" aria-label="Close">×</button><span class="overline">YOUR PUB JOURNAL</span><h2>Review a visit<span class="gold-period">.</span></h2><label>Pub<select name="pubId" id="entry-pub" required></select></label><label>Overall experience (out of 5 stars)<select name="rating" required><option value="">Choose stars</option><option value="1">★☆☆☆☆ — 1</option><option value="2">★★☆☆☆ — 2</option><option value="3">★★★☆☆ — 3</option><option value="4">★★★★☆ — 4</option><option value="5">★★★★★ — 5</option></select></label><div class="form-row"><label>Guinness quality<select name="guinness"><option value="">Didn't try / not sure</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label><label>Atmosphere<select name="atmosphere"><option value="">Not rated</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label></div><div class="form-row"><label>Area / setting<select name="setting"><option value="">Not rated</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label><label>Price of pint (£) · optional<input name="price" type="number" min="0.01" max="100" step="0.01" placeholder="5.50" /></label></div><label>Date<input name="date" type="date" id="entry-date" required /></label><label>Your verdict<textarea name="notes" rows="3" maxlength="300" placeholder="Great Guinness, friendly bar, nice beer garden..."></textarea></label><button class="button button-gold full" type="submit">Save my review ↗</button></form></dialog>
 
-  <dialog id="pub-dialog" class="modal"><form id="pub-form" class="modal-body"><button type="button" class="close" data-close="pub-dialog" aria-label="Close">×</button><span class="overline">GROW THE DIRECTORY</span><h2>Add a pub<span class="gold-period">.</span></h2><label>Pub name<input name="name" maxlength="90" placeholder="Pub name" required /></label><label>Area<input name="area" maxlength="50" placeholder="e.g. City Centre" required /></label><label>Address (optional)<input name="address" maxlength="150" placeholder="Street, Cardiff" /></label><label>What makes it good?<textarea name="description" rows="3" maxlength="180" placeholder="A little about the pub..."></textarea></label><button type="submit" class="button button-gold full">Add to my pubs ↗</button></form></dialog>
+  <dialog id="pub-dialog" class="modal"><form id="pub-form" class="modal-body"><button type="button" class="close" data-close="pub-dialog" aria-label="Close">×</button><span class="overline">GROW THE DIRECTORY</span><h2>Add a pub<span class="gold-period">.</span></h2><label>Pub name<input name="name" maxlength="90" placeholder="Pub name" required /></label><label>Region<select name="region" required><option value="Cardiff">Cardiff</option><option value="Vale">Vale of Glamorgan</option></select></label><label>Area<input name="area" maxlength="50" placeholder="e.g. Cowbridge" required /></label><label>Address (optional)<input name="address" maxlength="150" placeholder="Street and town" /></label><label>What makes it worth a visit?<textarea name="description" rows="3" maxlength="180" placeholder="A little about the pub..."></textarea></label><button type="submit" class="button button-gold full">Add to my pubs ↗</button></form></dialog>
 
   <dialog id="data-dialog" class="modal"><div class="modal-body"><button type="button" class="close" data-close="data-dialog" aria-label="Close">×</button><span class="overline">BACKUP & RESTORE</span><h2>Your data<span class="gold-period">.</span></h2><p>Your pubs, pint logs and favourites currently live only in this browser. Export a backup before switching devices or clearing browser data.</p><button id="export-button" class="button button-gold full">Download JSON backup ↧</button><label class="import-label">Restore from backup<input id="import-input" type="file" accept=".json,application/json" /></label><p class="small-print">Import replaces the current data on this device, after confirmation. No public submissions or shared accounts yet.</p></div></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
