@@ -1,6 +1,6 @@
-# PINT — Cardiff & Vale Edition (v2.4)
+# PINT — Cardiff & Vale Edition (v3.0)
 
-A mobile-friendly, static pub journal built with plain HTML, CSS and JavaScript. Ready for GitHub Pages — no server, API keys or installation required.
+A mobile-friendly pub community built with plain HTML, CSS and JavaScript. The frontend stays on GitHub Pages, with a separately hosted database and photo service for shared submissions. No account or API key is needed to use PINT.
 
 ## What works
 
@@ -9,15 +9,17 @@ A mobile-friendly, static pub journal built with plain HTML, CSS and JavaScript.
 - Filter by region or neighbourhood, search, favourite, and find places you haven't visited.
 - Switch between a list and an OpenStreetMap neighbourhood-cluster view; map pins are approximate area centres, **not verified pub locations**.
 - Tap **Near me** to sort pubs by approximate distance to their neighbourhood centres. Location is requested only when tapped, and not stored or sent to PINT servers.
-- Open a shareable, dedicated pub details screen with your personal ratings, prior reviews and photos, and a Google Maps venue search link.
-- Add pubs of your own and review each visit: overall 1–5 stars, Guinness quality, atmosphere, setting, optional pint price and notes.
-- Take or select up to three photos per review on a phone or desktop. Images are resized and stored privately in browser IndexedDB.
+- Open a shareable, dedicated pub details screen with community ratings, reviews, photos and a Google Maps venue search link.
+- Add pubs for everyone and review each visit: overall 1–5 stars, Guinness quality, atmosphere, setting, optional pint price and notes. Add a display name when posting.
+- Take or select up to three photos per review. Images are resized and uploaded with the shared review.
 - Install it to an iPhone Home Screen as a standalone web app, with a custom PINT icon and cached core screens for offline use.
-- Sort by your own ratings or last logged prices.
+- Sort by community ratings or last logged prices.
 - Open directions in Google Maps.
 - Back up and restore your data in JSON.
 
-Reviews, favourites and scorecards are held in browser `localStorage`; photos are held in IndexedDB. **Nothing syncs across devices**, and the app has no public review sharing yet. The JSON export includes photos and scorecards, so keep a backup before clearing browser data or switching devices. Seeded pubs have **no fabricated prices or ratings**. Venue images are illustrative and not necessarily photos of each named venue. Directory suggestions and walking routes are not guarantees that a venue is open or serves Guinness; check before travelling. The curated list is a starting point, not a comprehensive live business database.
+**Shared data:** New reviews, their photos, and newly submitted pubs are stored in the PINT live-data service and become visible to other PINT users. The app refreshes approximately every 20 seconds while active. It must be online to post. Anyone who uses the public PINT link can submit or read this information, and display names are not verified identities. Public posts have no self-service editing or deletion yet. Basic per-IP submission limits and image limits are applied. Don't publish personal details or photos you wouldn't want publicly visible.
+
+**Device-local data:** Favourites, Pub Golf scorecards, and reviews/photos saved *before v3.0* remain on the original device. Historical reviews are **not uploaded automatically** and are clearly labelled as not shared. JSON export/import continues to cover only device-local data. The export includes older private photos and scorecards, so keep a backup before clearing browser data. Seeded pubs have **no fabricated prices or ratings**. Venue images are illustrative and not necessarily photographs of each named venue. Pub suggestions and walking routes are not guarantees that a venue is open or serves Guinness.
 
 Existing v1 local reviews in the same browser are retained, with their old /10 overall ratings converted to /5 for display.
 
@@ -28,7 +30,7 @@ Existing v1 local reviews in the same browser are retained, with their old /10 o
 3. Choose **Add to Home Screen**.
 4. Enable **Open as Web App**, then tap **Add**.
 
-The Home Screen icon launches PINT full-screen. Its on-device storage may be separate from regular Safari, so reviews already entered in Safari might not appear in the installed app. Export a PINT backup before switching and restore it in the installed version if needed. No account or App Store distribution is involved. For offline use, open PINT once while connected. External map links and illustrative photos require a connection.
+The Home Screen icon launches PINT full-screen. Its local favourites and old private reviews may differ from Safari, but new shared reviews and pubs sync regardless. No account or App Store distribution is involved. For offline use, open PINT once while connected; shared data and new submissions need an internet connection.
 
 ## Run locally
 
@@ -43,9 +45,9 @@ Visit `http://localhost:8000`.
 ## Publish through GitHub Pages
 
 1. Open your existing GitHub repository named `PINT`.
-2. Push the app files (`index.html`, `styles.css`, `features.css`, `app.js`, `photos.js`, `pub_golf.js`, `pwa.js`, `sw.js`, `manifest.webmanifest`, and `icons/`) at the repository root.
+2. Push the app files (`index.html`, `styles.css`, `features.css`, `app.js`, `shared.js`, `photos.js`, `pub_golf.js`, `pwa.js`, `sw.js`, `manifest.webmanifest`, and `icons/`) at the repository root.
 3. In the repository, go to **Settings → Pages → Build and deployment**.
 4. Choose **Deploy from a branch**, select `main` and `/ (root)`, then save.
 5. GitHub will show the published URL once deployment finishes (usually `https://YOUR-USERNAME.github.io/PINT/`).
 
-The hosted source is public if the GitHub Pages repository is public. This first edition is a personal, browser-local prototype, not a shared price-reporting service.
+The GitHub Pages frontend and shared-data service are both public. The backend endpoint configured in `shared.js` is `https://pint-live-data-akka.akkaguwy.chatgpt.site`; it stores public reviews, submitted pubs and JPEG photos in Cloudflare D1/R2 through the Sites hosting service.

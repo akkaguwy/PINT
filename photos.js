@@ -9,5 +9,5 @@
   async function read(id){const db=await open();return new Promise((resolve,reject)=>{const request=db.transaction(STORE,'readonly').objectStore(STORE).get(id);request.onsuccess=()=>resolve(request.result?.images||[]);request.onerror=()=>reject(request.error)})}
   async function exportAll(){const db=await open();return new Promise((resolve,reject)=>{const request=db.transaction(STORE,'readonly').objectStore(STORE).getAll();request.onsuccess=()=>resolve(Object.fromEntries(request.result.map(x=>[x.id,x.images])));request.onerror=()=>reject(request.error)})}
   async function importAll(photoMap){const db=await open();return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite'),s=tx.objectStore(STORE);s.clear();for(const [id,images] of Object.entries(photoMap||{})){if(typeof id==='string'&&id.length<=100&&Array.isArray(images)&&images.length<=3&&images.every(x=>typeof x==='string'&&/^data:image\/jpeg;base64,[a-zA-Z0-9+/=]+$/.test(x)))s.put({id,images})}tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
-  window.PintPhotos={save,read,exportAll,importAll};
+  window.PintPhotos={save,read,resize,exportAll,importAll};
 })();

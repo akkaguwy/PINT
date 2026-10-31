@@ -130,3 +130,7 @@ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
   .detail-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
   .detail-actions .button{padding:12px 7px;font-size:11px;min-width:0;min-height:50px}
 }
+.shared-status{margin:0 auto 18px;padding:13px 18px;border:1px solid rgba(201,163,91,.4);border-radius:12px;background:rgba(201,163,91,.10);color:#b18a3f;font-size:13px;font-weight:700;letter-spacing:.015em}
+.shared-status.online{border-color:rgba(53,125,75,.25);background:rgba(53,125,75,.08);color:#2e7447}
+.shared-status.offline{border-color:rgba(165,75,50,.28);background:rgba(165,75,50,.08);color:#b34e3d}
+.review-author{font-size:11px;letter-spacing:.04em;text-transform:uppercase;opacity:.7;font-weight:700}

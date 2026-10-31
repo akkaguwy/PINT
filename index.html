@@ -39,14 +39,15 @@
   <main id="home">
     <section class="hero shell">
       <div class="hero-copy">
-        <div class="eyebrow"><span class="live-dot"></span> CARDIFF & VALE PUB DISCOVERY · VERSION 2.4</div>
+        <div class="eyebrow"><span class="live-dot"></span> CARDIFF & VALE PUB DISCOVERY · VERSION 3.0</div>
         <h1>Find your next<br/><em>local.</em></h1>
         <p>Explore pubs across Cardiff and the Vale of Glamorgan. Pick somewhere new, pay it a visit, then give your honest verdict.</p>
-        <div class="hero-actions"><a href="#explore" class="button button-gold">Explore pubs <span>↗</span></a><a href="#pub-golf" class="button button-outline">⛳ Pub Golf</a><button class="button button-ghost" id="log-first-button">Review a pub <span>＋</span></button></div>
+        <div class="hero-actions"><a href="#explore" class="button button-gold">Explore pubs <span>↗</span></a><a href="#pub-golf" class="button button-outline">⛳ Pub Golf</a><button class="button button-ghost" id="log-first-button">Review a pub <span>＋</span></button><button class="button button-ghost" id="share-pint-button">Share PINT ↗</button></div>
         <div class="hero-caption">Independent pub companion. No paid rankings.</div>
       </div>
       <div class="hero-image" role="img" aria-label="A pint of stout in a warmly lit pub"><div class="hero-overlay"><span>YOUR NEXT STOP AWAITS.</span><strong>CARDIFF & THE VALE <span>↗</span></strong></div></div>
     </section>
+    <p id="shared-status" class="shared-status shell" role="status" aria-live="polite">↻ Connecting to the live PINT community…</p>
 
     <section class="stat-band shell" aria-label="Your local PINT statistics">
       <div><strong id="stat-pubs">0</strong><span>PUBS TO EXPLORE</span></div>
@@ -64,12 +65,12 @@
     </section>
 
     <section class="explore shell" id="explore">
-      <div class="section-heading"><div><span class="overline">THE PUB DIRECTORY</span><h2>Where to next<span class="gold-period">?</span></h2><p>Choose a place that catches your eye. Your ratings appear after you visit.</p></div><button class="button button-outline" id="open-data-button">↧ Your data</button></div>
+      <div class="section-heading"><div><span class="overline">THE PUB DIRECTORY</span><h2>Where to next<span class="gold-period">?</span></h2><p>Find a pub, read your mates' reviews, and share your own verdict.</p></div><button class="button button-outline" id="open-data-button">↧ Your data</button></div>
       <div class="toolbar">
         <label class="search-box"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search pubs or areas..." autocomplete="off" /><kbd>⌕</kbd></label>
         <select id="region-filter" aria-label="Filter by region"><option value="all">Cardiff + Vale</option><option value="Cardiff">Cardiff</option><option value="Vale">Vale of Glamorgan</option></select>
         <select id="area-filter" aria-label="Filter by area"><option value="all">All areas</option></select>
-        <select id="sort-filter" aria-label="Sort pubs"><option value="name">Name A–Z</option><option value="unvisited">Not yet visited</option><option value="rated">My highest rated</option><option value="cheapest">Cheapest I've logged</option></select>
+        <select id="sort-filter" aria-label="Sort pubs"><option value="name">Name A–Z</option><option value="unvisited">Not yet reviewed</option><option value="rated">Highest community rating</option><option value="cheapest">Cheapest logged pint</option></select>
         <button class="filter-button" id="favourites-filter" aria-pressed="false">♡ Favourites</button>
         <button class="filter-button" id="nearby-button" aria-pressed="false">⌖ Near me</button>
       </div>
@@ -80,7 +81,7 @@
       <p class="empty-state" id="empty-state" hidden>No pubs match that search. Try another area or add a new pub.</p>
     </section>
 
-    <section class="journal" id="my-pints"><div class="shell journal-inner"><div><span class="overline">YOUR PERSONAL PUB JOURNAL</span><h2>Every good pub<br/>has a story<span class="gold-period">.</span></h2><p>Review the Guinness, atmosphere, setting and overall experience after each visit. Your entries are saved on this device.</p><button id="journal-log-button" class="button button-gold">Review a pub <span>↗</span></button></div><div class="journal-panel"><div class="panel-head"><strong>RECENT REVIEWS</strong><span id="entry-count">0 LOGGED</span></div><div id="recent-list" class="recent-list"></div></div></div></section>
+    <section class="journal" id="my-pints"><div class="shell journal-inner"><div><span class="overline">THE PINT COMMUNITY</span><h2>Every good pub<br/>has a story<span class="gold-period">.</span></h2><p>Post a review once and everyone using PINT can see it. No account needed — just give your name.</p><button id="journal-log-button" class="button button-gold">Review a pub <span>↗</span></button></div><div class="journal-panel"><div class="panel-head"><strong>RECENT REVIEWS</strong><span id="entry-count">0 LOGGED</span></div><div id="recent-list" class="recent-list"></div></div></div></section>
 
     <section class="install-section shell" id="install-pint"><div class="install-mark">P<span>.</span></div><div><span class="overline">TAKE PINT WITH YOU</span><h2>Put PINT on your Home Screen.</h2><p>On iPhone, open this page in Safari, tap Share, choose Add to Home Screen, and enable “Open as Web App”.</p></div><span class="install-label">MADE FOR MOBILE ↗</span></section>
   </main>
@@ -104,6 +105,7 @@
   <dialog id="data-dialog" class="modal"><div class="modal-body"><button type="button" class="close" data-close="data-dialog" aria-label="Close">×</button><span class="overline">BACKUP & RESTORE</span><h2>Your data<span class="gold-period">.</span></h2><p>Your pubs, pint logs and favourites currently live only in this browser. Export a backup before switching devices or clearing browser data.</p><button id="export-button" class="button button-gold full">Download JSON backup ↧</button><label class="import-label">Restore from backup<input id="import-input" type="file" accept=".json,application/json" /></label><p class="small-print">Import replaces the current data on this device, after confirmation. No public submissions or shared accounts yet.</p></div></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="photos.js" defer></script>
+  <script src="shared.js" defer></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
   <script src="app.js" defer></script>
   <script src="pub_golf.js" defer></script>
