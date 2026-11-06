@@ -1,0 +1,36 @@
+name: PINT quality checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          for file in ./*.js; do node --check "$file"; done
+      - name: Required app assets and Dublin entries
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, json
+          html=Path('index.html').read_text()
+          scripts=re.findall(r'<script[^>]+src="([^"]+)"',html)
+          for script in scripts:
+              if script.startswith(('http://','https://')):continue
+              assert Path(script.split('?')[0]).is_file(),f'Missing script: {script}'
+          for expected in ['navigation.js','dublin_directory.js','dublin_explore.js','app.js','shared.js']:
+              assert any(x.split('?')[0]==expected for x in scripts),f'Not loaded: {expected}'
+          directory=Path('dublin_directory.js').read_text()
+          assert directory.count('"name":')>=100,'Dublin listings unexpectedly missing'
+          manifest=json.loads(Path('manifest.webmanifest').read_text())
+          assert manifest['display']=='standalone'
+          print('PINT static checks passed')
+          PY
