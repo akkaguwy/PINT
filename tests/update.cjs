@@ -29,11 +29,12 @@ function makeCase(installedVersion,serverVersion){
     assert.equal(options.cache,'no-store');
     return {ok:true,text:async()=>"const CACHE_NAME='pint-offline-v"+serverVersion+"';"};
   };
+  const navigator={onLine:true};
   vm.runInNewContext(source,{
-    window,document,location,navigator:{onLine:true},
+    window,document,location,navigator,
     fetch,URL,console,Date
   });
-  return {nodes,callbacks,location};
+  return {nodes,callbacks,location,window,navigator};
 }
 
 (async()=>{
@@ -59,5 +60,15 @@ function makeCase(installedVersion,serverVersion){
   old.callbacks.load();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(old.nodes['pint-update-notice'].hidden,true);
-  console.log('PINT update detection, cache busting and destination preservation passed');
+  // A sender on an older build must share the *currently published* version.
+  const sender=makeCase('4.5','4.6');
+  assert.equal(await sender.window.PintUpdates.getPublishedVersion(),'4.6');
+  assert.equal(sender.nodes['pint-update-notice'].hidden,false);
+  // Offline sharing can still construct a link; the receiver fetches current HTML.
+  sender.navigator.onLine=false;
+  assert.equal(await sender.window.PintUpdates.getPublishedVersion(),'4.5');
+  const app=fs.readFileSync('app.js','utf8');
+  assert.match(app,/PintUpdates\?\.getPublishedVersion\?\.\(\)/);
+  assert.match(app,/&fresh=/);
+  console.log('PINT update detection, fresh-link sharing, offline fallback and route preservation passed');
 })().catch(err=>{console.error(err);process.exitCode=1});
