@@ -362,7 +362,7 @@
     const pub={id:crypto.randomUUID(),name:String(f.get('name')).trim(),area:String(f.get('area')).trim(),region:['Cardiff','Vale','Dublin'].includes(f.get('region'))?f.get('region'):'Cardiff',address:String(f.get('address')).trim(),description:String(f.get('description')).trim(),pubType:String(f.get('pubType')||'Pub')};
     if(!pub.name||!pub.area)return;
     button.disabled=true;button.textContent='Sharing pub…';
-    try{await window.PintShared.addPub(pub);$('#pub-dialog').close();event.target.reset();toast('Pub added for everyone ✓');await refreshShared();}
+    try{await window.PintShared.addPub(pub);window.PintIdentity?.rememberType(pub,pub.pubType);$('#pub-dialog').close();event.target.reset();toast('Pub added for everyone ✓');await refreshShared();}
     catch(error){toast('Not shared: '+(error.message||'please retry'));}
     finally{button.disabled=false;button.textContent='Add pub for everyone ↗'}
   });
