@@ -110,32 +110,56 @@
   let data;
   try { data = validateData(JSON.parse(localStorage.getItem(KEY))) } catch { data = emptyData() }
   let sharedOnline=false, sharedPubs=[], sharedLogs=[];
+  let lastSuccessfulSync=null;
+  // Retain the last successfully received public community snapshot across app restarts.
+  try {
+    const cached=JSON.parse(localStorage.getItem('pint-community-snapshot-v1')||'null');
+    if(cached&&Array.isArray(cached.pubs)&&Array.isArray(cached.reviews)){
+      sharedPubs=cached.pubs;sharedLogs=cached.reviews;
+      lastSuccessfulSync=cached.syncedAt||null;
+    }
+  }catch{}
+  let requestSerial=0;
   const allPubs = () => [...starterPubs,...sharedPubs,...data.pubs.filter(p=>!sharedPubs.some(s=>s.id===p.id))];
   const getPub = id => allPubs().find(pub=>pub.id===id);
-  const visibleLogs=()=>sharedOnline?[...sharedLogs,...data.logs.filter(l=>!sharedLogs.some(s=>s.id===l.id))]:data.logs;
-  const ratingLogs=()=>sharedOnline?sharedLogs:data.logs;
+  const visibleLogs=()=>[...sharedLogs,...data.logs.filter(l=>!sharedLogs.some(s=>s.id===l.id))];
+  const ratingLogs=()=>sharedLogs.length?sharedLogs:data.logs;
   const latestPrice = id => [...ratingLogs()].filter(log=>log.pubId===id && log.price!=null).sort((a,b)=>b.date.localeCompare(a.date))[0]?.price;
   const averageRating = id => {const logs=ratingLogs().filter(log=>log.pubId===id);return logs.length?logs.reduce((s,l)=>s+l.rating,0)/logs.length:null};
   const averageField = (id,field) => {const logs=ratingLogs().filter(l=>l.pubId===id&&l[field]!=null);return logs.length?logs.reduce((sum,l)=>sum+l[field],0)/logs.length:null};
   const logPhotos=log=>log.shared?Promise.resolve(window.PintShared.photoUrls(log)):window.PintPhotos.read(log.id);
   function setSharedStatus(message,mode='') { const el=$('#shared-status');el.textContent=message;el.className='shared-status shell '+mode; }
   async function refreshShared() {
+    const serial=++requestSerial;
     try {
       const result=await window.PintShared.load();
+      if(serial!==requestSerial)return false;
       if(!Array.isArray(result.pubs)||!Array.isArray(result.reviews))throw Error('Unexpected response');
       sharedPubs=result.pubs.filter(p=>p&&typeof p.id==='string'&&typeof p.name==='string');
-      sharedLogs=result.reviews.filter(l=>l&&typeof l.id==='string'&&Number(l.rating)>=1&&Number(l.rating)<=5).map(l=>({...l,shared:true}));
+      const seen=new Set();
+      sharedLogs=result.reviews.filter(l=>{
+        if(!l||typeof l.id!=='string'||seen.has(l.id)||!Number.isFinite(Number(l.rating))||Number(l.rating)<1||Number(l.rating)>5)return false;
+        seen.add(l.id);return true;
+      }).map(l=>({...l,rating:Number(l.rating),shared:true}));
       sharedOnline=true;
-      setSharedStatus('● Live community connected · Reviews, photos and new pubs sync automatically','online');
+      lastSuccessfulSync=Date.now();
+      try{localStorage.setItem('pint-community-snapshot-v1',JSON.stringify({pubs:sharedPubs,reviews:sharedLogs,syncedAt:lastSuccessfulSync}))}catch{}
+      setSharedStatus('● Connected · '+sharedLogs.length+' shared reviews · Synced '+new Date(lastSuccessfulSync).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),'online');
       render();
       const detail=$('#detail-dialog');
-      if(detail.open&&location.hash.startsWith('#pub=')) {
+      if(detail.open&&location.hash.startsWith('#pub=')){
         const id=decodeURIComponent(location.hash.slice(5));
         const pub=getPub(id);
-        if(pub) { $('#detail-content').innerHTML=detailMarkup(pub);renderDetailPhotos(pub.id); }
+        if(pub){$('#detail-content').innerHTML=detailMarkup(pub);renderDetailPhotos(pub.id)}
       }
-    } catch {
-      setSharedStatus(sharedOnline?'⚠ Connection interrupted · Showing last synced reviews':'⚠ Shared reviews unavailable · Check your connection and try again','offline');
+      return true;
+    }catch(error){
+      if(serial!==requestSerial)return false;
+      sharedOnline=false;
+      const last=lastSuccessfulSync?(' · Last synced '+new Date(lastSuccessfulSync).toLocaleString()):'';
+      setSharedStatus('⚠ Live connection unavailable'+last+' · Showing cached reviews','offline');
+      render();
+      return false;
     }
   }
   const money = value => '£'+Number(value).toFixed(2);
@@ -193,7 +217,7 @@
       return `<article class="pub-card"><div class="pub-photo" style="background-image:url('${image}')"><span class="photo-label">${safe(pub.region==='Vale'?'THE VALE · '+pub.area.toUpperCase():'CARDIFF · '+pub.area.toUpperCase())}</span><button class="heart ${fav?'active':''}" data-favourite="${safe(pub.id)}" aria-label="${fav?'Remove':'Add'} ${safe(pub.name)} ${fav?'from':'to'} favourites" aria-pressed="${fav}">${fav?'♥':'♡'}</button></div><div class="pub-body"><h3>${safe(pub.name)}</h3><span class="pub-area">⌖ ${safe(pub.address||pub.area)}${distance==null?'':' · ~'+distance.toFixed(1)+' km'}</span><p class="pub-description">${safe(pub.description||'A pub to explore and review yourself.')}</p><div class="pub-metrics"><div><strong>${rating==null?'Not rated':rating.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} OVERALL /5</span></div><div><strong>${guinness==null?'Not rated':guinness.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} GUINNESS /5</span></div></div><div class="pub-price">${price==null?'No pint price logged yet':'Last logged pint: '+money(price)}</div><div class="pub-actions"><button data-details="${safe(pub.id)}">View pub ↗</button><button data-log="${safe(pub.id)}">★ Review</button></div></div></article>`;
     }).join('');
     $('#entry-count').textContent=`${sharedLogs.length} SHARED · ${data.logs.length} PRIVATE`;
-    $('#community-summary').textContent=sharedOnline?`${sharedLogs.length} shared reviews from the community · ${sharedPubs.length} community-added pubs`:'Community feed temporarily unavailable — local reviews may still appear below';
+    $('#community-summary').textContent=sharedOnline?`${sharedLogs.length} shared reviews available · ${sharedPubs.length} community-added pubs`:`Offline snapshot: ${sharedLogs.length} last-synced reviews. New submissions require an online connection.`;
     const recents=[...visibleLogs()].sort((a,b)=>b.date.localeCompare(a.date)||(b.createdAt||0)-(a.createdAt||0)).slice(0,reviewFeedLimit);
     const reviewMore=$('#more-community-reviews');
     reviewMore.hidden=visibleLogs().length<=reviewFeedLimit;
@@ -235,9 +259,16 @@
       localStorage.setItem('pint-reviewer-name',log.reviewerName);
       $('#entry-dialog').close();clearPhotoPreview();
       toast('Review submitted · checking shared feed…');
-      await refreshShared();
-      if(sharedLogs.some(r=>r.id===log.id))toast('Review confirmed in the community feed ✓');
-      else toast('Review sent, but not yet confirmed in the community feed');
+      const synced=await refreshShared();
+      if(synced&&sharedLogs.some(r=>r.id===log.id))toast('Review confirmed in the community feed ✓');
+      else {
+        toast('Review accepted; checking visibility again shortly');
+        setTimeout(async()=>{
+          const updated=await refreshShared();
+          if(updated&&sharedLogs.some(r=>r.id===log.id))toast('Your review is now visible to everyone ✓');
+          else toast('Review received, but not confirmed in shared feed. Check again later.');
+        },4000);
+      }
     }catch(error){toast('Not shared: '+(error.message||'please retry'));}finally{button.disabled=false;button.textContent='Save my review ↗'}
   });
   $('#recent-list').addEventListener('click',event=>{const image=event.target.closest('.photo-thumb img');if(image){$('#photo-full').src=image.src;$('#photo-dialog').showModal()}});
@@ -289,7 +320,9 @@
   });
   $('#year').textContent=new Date().getFullYear();
   $('#sort-filter').insertAdjacentHTML('beforeend','<option value="nearby">Nearest to me</option>');
-  render();syncPubHash();refreshShared();
+  render();syncPubHash();
+  if(lastSuccessfulSync)setSharedStatus('↻ Loading current reviews · Last synced '+new Date(lastSuccessfulSync).toLocaleString(),'');
+  refreshShared();
   setInterval(()=>{if(!document.hidden)refreshShared()},20000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshShared()});
 })();
