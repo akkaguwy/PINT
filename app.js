@@ -92,8 +92,7 @@
     'The Hare & Hounds|Aberthin|Aberthin Road, Aberthin CF71 7LG|Temporarily closed after fire damage as of November 2026; check before visiting',
     'The Barley Mow|Craig Penllyn|Graig Penllyn, Cowbridge CF71 7RT|Traditional country pub with seasonal meals and ales',
     'The Sycamore Tree|Colwinston|Coed Marsarnen, Colwinston CF71 7NG|Village pub with home-cooked food and a welcoming bar',
-    'The White Lion|Ystradowen|Cowbridge Road, Ystradowen CF71 7SY|Village pub with a bar, dining and accommodation',
-    'The Star Inn|Wick|Ewenny Road, Wick CF71 7QA|Village pub serving food and real ales'
+    'The White Lion|Ystradowen|Cowbridge Road, Ystradowen CF71 7SY|Village pub with a bar, dining and accommodation'
   ];
   // Cowbridge postal district: group villages without changing pub areas or existing IDs.
   const COWBRIDGE_GROUP='cowbridge-area';
