@@ -1,7 +1,7 @@
 /* PINT mobile screen router — navigation history stays in sync with the browser. */
 (() => {
   'use strict';
-  const names={home:'Home',explore:'Explore pubs','pub-golf':'Pub Golf','my-pints':'Reviews'};
+  const names={home:'Home',explore:'Explore pubs','pub-golf':'Pub Golf','my-pints':'Community',profile:'Profile'};
   const allowed=new Set(Object.keys(names));
   const mobileQuery=window.matchMedia('(max-width: 620px)');
   const mobile=()=>mobileQuery.matches;
