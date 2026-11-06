@@ -58,7 +58,7 @@ h1,h2,h3,.brand-name{letter-spacing:-.035em}
 }
 .pub-card:hover{border-color:#697a67;background:#202920}
 .pub-photo{display:contents!important}
-.photo-label{display:none!important}
+.photo-label,.pub-photo:after{display:none!important}
 .heart{
   position:absolute;top:13px;right:13px;background:#273129;border:1px solid #465447;
   border-radius:9px;width:38px;height:38px;font-size:23px;color:#d9dfd3;
