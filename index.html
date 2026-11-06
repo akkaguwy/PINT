@@ -16,11 +16,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=4.1" />
-  <link rel="stylesheet" href="features.css?v=4.1" />
-  <link rel="stylesheet" href="polish.css?v=4.1" />
-  <link rel="stylesheet" href="pub_identity.css?v=4.1" />
-  <link rel="stylesheet" href="profile.css?v=4.1" />
+  <link rel="stylesheet" href="styles.css?v=4.4" />
+  <link rel="stylesheet" href="features.css?v=4.4" />
+  <link rel="stylesheet" href="polish.css?v=4.4" />
+  <link rel="stylesheet" href="pub_identity.css?v=4.4" />
+  <link rel="stylesheet" href="profile.css?v=4.4" />
+  <link rel="stylesheet" href="home.css?v=4.4" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoT6kLFxMAH2U=" crossorigin="" />
   <style>
     .pub-price{font-size:11px;color:#a9a18f;margin-top:12px;min-height:18px}
@@ -41,23 +42,88 @@
 
   <div id="screen-header" class="screen-header shell" hidden><button id="screen-back" type="button" aria-label="Back">‹ <span>Back</span></button><strong id="screen-title">Explore pubs</strong></div>
   <main id="home">
-    <section class="hero shell">
-      <div class="hero-copy">
-        <div class="eyebrow"><span class="live-dot"></span> PINT PUB DISCOVERY · VERSION 4.3</div>
-        <h1>Good pubs.<br/><em>Real opinions.</em></h1>
-        <p>Find a pub worth visiting, see what your friends think, and share your own experience.</p>
-        <div class="hero-actions"><a href="#explore" class="button button-gold">Explore pubs <span>↗</span></a><a href="#pub-golf" class="button button-outline">⛳ Pub Golf</a><button class="button button-ghost" id="log-first-button">Review a pub <span>＋</span></button><button class="button button-ghost" id="share-pint-button">Share PINT ↗</button></div>
-        <div class="hero-caption">Independent pub companion. No paid rankings.</div>
+    <section class="home-dashboard shell" id="home-dashboard" aria-labelledby="home-heading">
+      <div class="home-topline">
+        <span class="home-kicker"><span class="home-kicker-dot" aria-hidden="true"></span> THE PUB COMPANION</span>
+        <a href="#profile" class="home-account-link" aria-label="Open your profile">
+          <span id="home-avatar" class="home-account-avatar" aria-hidden="true">P</span>
+          <span id="home-account-label">Your profile</span>
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
       </div>
-      <div class="hero-image" role="img" aria-label="A pint of stout in a warmly lit pub"><div class="hero-overlay"><span>YOUR NEXT STOP AWAITS.</span><strong>CARDIFF & THE VALE <span>↗</span></strong></div></div>
-    </section>
-    <p id="shared-status" class="shared-status shell" role="status" aria-live="polite">↻ Connecting to the live PINT community…</p>
 
-    <section class="stat-band shell" aria-label="Your local PINT statistics">
-      <div><strong id="stat-pubs">0</strong><span>PUBS TO EXPLORE</span></div>
-      <div><strong id="stat-logs">0</strong><span>VISITS REVIEWED</span></div>
-      <div><strong id="stat-favourites">0</strong><span>YOUR FAVOURITES</span></div>
-      <div class="stat-note"><span class="mini-star">✳</span> <span>Find somewhere new.<br/>Make the verdict your own.</span></div>
+      <div class="home-intro">
+        <span id="home-greeting" class="home-greeting">Welcome to PINT</span>
+        <h1 id="home-heading">Where to<span class="home-heading-mark">?</span></h1>
+        <p>Find a pub, see what people think, and make it your own.</p>
+      </div>
+
+      <div class="home-destination" aria-label="Select a destination">
+        <div class="home-destination-head">
+          <div><span class="home-overline">CURRENT DESTINATION</span><h2 id="home-destination-label">Cardiff</h2></div>
+          <span class="home-map-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+        </div>
+        <div class="home-destination-options" role="group" aria-label="Destination">
+          <button type="button" data-home-region="Cardiff" aria-pressed="true">Cardiff</button>
+          <button type="button" data-home-region="Vale" aria-pressed="false">The Vale</button>
+          <button type="button" data-home-region="Dublin" aria-pressed="false">Dublin</button>
+        </div>
+      </div>
+
+      <div class="home-feature">
+        <div class="home-feature-content">
+          <span class="home-feature-kicker"><span class="home-feature-dot" aria-hidden="true"></span> EXPLORE</span>
+          <h2>Find your<br/>next pub.</h2>
+          <p><strong id="home-hero-count">0 pubs</strong> in <span id="home-hero-city">Cardiff</span></p>
+          <a href="#explore" class="home-feature-button" id="home-browse-link">Browse pubs
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+        <div class="home-feature-art" aria-hidden="true">
+          <div class="home-feature-ring"><span>P<span>.</span></span></div>
+          <span class="home-art-annotation">PINT / PUB DIRECTORY</span>
+        </div>
+      </div>
+
+      <section class="home-shortcuts" aria-labelledby="home-shortcuts-title">
+        <div class="home-section-title"><h2 id="home-shortcuts-title">Quick actions</h2></div>
+        <div class="home-shortcut-grid">
+          <button type="button" id="log-first-button" class="home-shortcut">
+            <span class="home-shortcut-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9Z"/></svg></span>
+            <span><strong>Write a review</strong><small>Rate your last visit</small></span>
+            <span class="home-shortcut-arrow" aria-hidden="true">↗</span>
+          </button>
+          <a href="#pub-golf" class="home-shortcut">
+            <span class="home-shortcut-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V3m0 1 13 3.5L5 11m-2 10h5"/></svg></span>
+            <span><strong>Pub Golf</strong><small>Pick a route</small></span>
+            <span class="home-shortcut-arrow" aria-hidden="true">↗</span>
+          </a>
+          <button type="button" id="share-pint-button" class="home-share-shortcut">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8 11 7.7-4.6M8 13l7.7 4.6"/></svg>
+            <span>Invite your mates to PINT</span>
+            <span aria-hidden="true">↗</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="home-overview" aria-label="Destination statistics">
+        <div class="home-section-title"><h2>At a glance</h2></div>
+        <div class="home-stats-grid">
+          <div><strong id="stat-pubs">0</strong><span>PUBS</span></div>
+          <div><strong id="stat-logs">0</strong><span>REVIEWS</span></div>
+          <div><strong id="stat-favourites">0</strong><span>SAVED</span></div>
+        </div>
+      </section>
+
+      <section class="home-community" aria-labelledby="home-community-heading">
+        <div class="home-section-title">
+          <h2 id="home-community-heading">Recent activity</h2>
+          <a href="#my-pints">Community <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
+        </div>
+        <p id="home-community-note">Latest shared reviews in Cardiff</p>
+        <div class="home-activity-list" id="home-feed-list" aria-live="polite"><div class="home-empty-feed"><strong>Loading recent reviews…</strong></div></div>
+      </section>
+      <p id="shared-status" class="shared-status" role="status" aria-live="polite">Connecting to the PINT community…</p>
     </section>
 
     <section class="golf-section" id="pub-golf">
@@ -79,7 +145,7 @@
         <button class="filter-button" id="nearby-button" aria-pressed="false">⌖ Near me</button>
       </div>
       <p id="directory-hint" class="directory-hint" aria-live="polite"></p><div class="discover-row"><button id="discover-dublin" class="button button-outline" type="button" hidden>Find more Dublin pubs</button><span id="osm-credit">Mapped pubs © OpenStreetMap contributors. Listings may be incomplete.</span></div><div class="view-bar"><div class="view-switch" role="group" aria-label="Directory view"><button id="list-view-button" class="active" aria-pressed="true">☷ List</button><button id="map-view-button" aria-pressed="false">⌖ Map</button></div><span id="location-note" aria-live="polite"></span></div>
-      <div class="directory-note"><span id="result-count">0 pubs</span><span>Suggestions only. Check opening times and availability; Guinness isn't guaranteed. Images are illustrative.</span></div>
+      <div class="directory-note"><span id="result-count">0 pubs</span><span>Listings may be incomplete. Check opening times before visiting. Photos, where available, are contributed by reviewers.</span></div>
       <div id="map-container" class="map-container" hidden><div id="pub-map" aria-label="Map of approximate pub neighbourhoods"></div><p class="map-disclaimer">Pins mark approximate neighbourhood centres, not exact pub entrances. Tap a cluster to explore its pubs; use Directions on a pub for a location search.</p></div>
       <div class="pub-grid" id="pub-grid"></div><button id="show-more-pubs" class="button button-outline directory-more" type="button" hidden>Show more pubs</button>
       <p class="empty-state" id="empty-state" hidden>No pubs match that search. Try another area or add a new pub.</p>
@@ -156,14 +222,15 @@
   <script src="photos.js" defer></script>
   <script src="shared.js" defer></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
-  <script src="dublin_directory.js?v=4.1" defer></script>
-  <script src="dublin_explore.js?v=4.1" defer></script>
-  <script src="pub_identity.js?v=4.1" defer></script>
-  <script src="profile.js?v=4.1" defer></script>
-  <script type="module" src="firebase_auth.js?v=4.3"></script>
-  <script src="app.js?v=4.1" defer></script>
-  <script src="pub_golf.js?v=4.1" defer></script>
+  <script src="dublin_directory.js?v=4.4" defer></script>
+  <script src="dublin_explore.js?v=4.4" defer></script>
+  <script src="pub_identity.js?v=4.4" defer></script>
+  <script src="profile.js?v=4.4" defer></script>
+  <script type="module" src="firebase_auth.js?v=4.4"></script>
+  <script src="home.js?v=4.4" defer></script>
+  <script src="app.js?v=4.4" defer></script>
+  <script src="pub_golf.js?v=4.4" defer></script>
   <script src="pwa.js" defer></script>
-  <script src="navigation.js?v=4.1" defer></script>
+  <script src="navigation.js?v=4.4" defer></script>
 </body>
 </html>

@@ -247,7 +247,10 @@
     const destination=$('#region-filter').value;
     $('#discover-dublin').hidden=destination!=='Dublin';
     $('#destination-title').textContent=destination==='Dublin'?'Explore Dublin pubs':destination==='Vale'?'Explore Vale of Glamorgan pubs':'Explore Cardiff pubs';
-    $('#stat-pubs').textContent=pubs.filter(p=>p.region===destination).length;$('#stat-logs').textContent=visibleLogs().length;$('#stat-favourites').textContent=data.favourites.length;
+    const currentPubs=pubs.filter(p=>p.region===destination);
+    $('#stat-pubs').textContent=currentPubs.length;
+    $('#stat-logs').textContent=visibleLogs().filter(l=>getPub(l.pubId)?.region===destination).length;
+    $('#stat-favourites').textContent=currentPubs.filter(p=>data.favourites.includes(p.id)).length;
     const selectedArea=$('#area-filter').value;
     const selectedRegion=$('#region-filter').value;
     $('#directory-hint').textContent='Directory: '+pubs.filter(p=>p.region===selectedRegion).length+' '+selectedRegion+' pubs (browse in batches of 12).';
@@ -289,6 +292,7 @@
     recents.forEach(async log=>{try{const images=await logPhotos(log);const el=[...document.querySelectorAll('[data-review-photos]')].find(x=>x.dataset.reviewPhotos===log.id);if(el)el.innerHTML=images.map((src,i)=>`<button class="photo-thumb" type="button" aria-label="View photo ${i+1}"><img alt="Photo ${i+1} from ${safe(getPub(log.pubId)?.name||'pub')}" src="${src}" /></button>`).join('')}catch{}});
     if(view==='map')renderMap();
     window.PintProfile?.render(visibleLogs(),getPub);
+    window.PintHome?.render({destination,pubs,reviews:sharedLogs.filter(l=>getPub(l.pubId)?.region===destination),connected:sharedOnline,favourites:data.favourites});
   }
   function showView(next){view=next;$('#show-more-pubs').hidden=next==='map'||lastFiltered.length<=directoryLimit;$('#pub-grid').hidden=next==='map';$('#map-container').hidden=next!=='map';$('#list-view-button').classList.toggle('active',next==='list');$('#map-view-button').classList.toggle('active',next==='map');$('#list-view-button').setAttribute('aria-pressed',next==='list');$('#map-view-button').setAttribute('aria-pressed',next==='map');if(next==='map')requestAnimationFrame(renderMap)}
   function renderMap(){

@@ -16,6 +16,8 @@ jobs:
       - name: JavaScript syntax
         run: |
           for file in ./*.js; do node --check "$file"; done
+      - name: Home screen behaviour
+        run: node tests/home.cjs
       - name: Required app assets and Dublin entries
         run: |
           python3 - <<'PY'
@@ -26,7 +28,7 @@ jobs:
           for script in scripts:
               if script.startswith(('http://','https://')):continue
               assert Path(script.split('?')[0]).is_file(),f'Missing script: {script}'
-          for expected in ['navigation.js','dublin_directory.js','dublin_explore.js','app.js','shared.js']:
+          for expected in ['navigation.js','dublin_directory.js','dublin_explore.js','home.js','app.js','shared.js']:
               assert any(x.split('?')[0]==expected for x in scripts),f'Not loaded: {expected}'
           directory=Path('dublin_directory.js').read_text()
           assert directory.count('"name":')>=100,'Dublin listings unexpectedly missing'
