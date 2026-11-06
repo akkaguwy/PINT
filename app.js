@@ -94,15 +94,34 @@
     'The Star Inn|Wick|Wick, Vale of Glamorgan|Village pub near the Heritage Coast',
     'The Three Golden Cups|Southerndown|Southerndown, Vale of Glamorgan|Pub option close to the coast'
   ];
+  const dublinSuggestions = [
+    "The Palace Bar|Temple Bar|21 Fleet Street, Dublin 2|Historic literary pub in the heart of town",
+    "Bowe's Lounge Bar|Temple Bar|31 Fleet Street, Dublin 2|Traditional Fleet Street bar near Temple Bar",
+    "The Temple Bar Pub|Temple Bar|47-48 Temple Bar, Dublin 2|Famous lively pub in the tourist quarter",
+    "The Old Storehouse|Temple Bar|3 Crown Alley, Temple Bar, Dublin 2|Popular traditional music pub",
+    "The Auld Dubliner|Temple Bar|24-25 Temple Bar, Dublin 2|Lively central pub for a night out",
+    "The Stag's Head|City Centre South|1 Dame Court, Dublin 2|Victorian bar tucked away off Dame Street",
+    "The Long Hall|City Centre South|51 South Great George's Street, Dublin 2|Classic Victorian interior",
+    "Grogan's Castle Lounge|City Centre South|15 South William Street, Dublin 2|Art-filled Dublin local",
+    "Kehoe's|Grafton Street|9 South Anne Street, Dublin 2|Old-fashioned snugs near Grafton Street",
+    "Neary's|Grafton Street|1 Chatham Street, Dublin 2|Traditional pub near the shopping streets",
+    "Mulligan's|Trinity|8 Poolbeg Street, Dublin 2|Traditional pub close to Tara Street",
+    "O'Donoghue's|Merrion Row|15 Merrion Row, Dublin 2|Traditional music and Dublin pub history",
+    "Toners|Baggot Street|139 Baggot Street Lower, Dublin 2|Traditional pub with a beer garden",
+    "Doheny & Nesbitt|Baggot Street|5 Baggot Street Lower, Dublin 2|Old-school bar with Victorian character",
+    "The Cobblestone|Smithfield|77 King Street North, Dublin 7|Traditional Irish music sessions",
+    "The Brazen Head|The Liberties|20 Lower Bridge Street, Dublin 8|Historic Dublin pub by the Liffey",
+    "John Kavanagh's (The Gravediggers)|Glasnevin|1 Prospect Square, Glasnevin, Dublin 9|Traditional pub by Glasnevin Cemetery"
+  ];
   const parseSuggestions = (rows,region) => rows.map((row,index)=>{const [name,area,address,description]=row.split('|');return {id:`suggestion-${region.toLowerCase()}-${index}`,name,area,address,description,region}});
-  const starterPubs=[...parseSuggestions(cardiffSuggestions,'Cardiff'),...parseSuggestions(valeSuggestions,'Vale')];
+  const starterPubs=[...parseSuggestions(cardiffSuggestions,'Cardiff'),...parseSuggestions(valeSuggestions,'Vale'),...parseSuggestions(dublinSuggestions,'Dublin')];
   ['city-arms','old-arcade','queens-vaults','cambrian-tap','tiny-rebel','head-of-steam'].forEach((id,index)=>starterPubs[index].id=id);
   const $ = (selector) => document.querySelector(selector);
   const safe = (value) => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const emptyData = () => ({pubs:[],logs:[],favourites:[]});
   function validateData(data){
     if (!data || !Array.isArray(data.pubs) || !Array.isArray(data.logs) || !Array.isArray(data.favourites)) throw Error('Not a PINT backup');
-    const pubs = data.pubs.slice(0,500).filter(p=>p && typeof p.id==='string' && typeof p.name==='string' && typeof p.area==='string').map(p=>({id:p.id.slice(0,100),name:p.name.slice(0,90),area:p.area.slice(0,50),address:String(p.address||'').slice(0,150),description:String(p.description||'').slice(0,180),region:p.region==='Vale'?'Vale':'Cardiff'}));
+    const pubs = data.pubs.slice(0,500).filter(p=>p && typeof p.id==='string' && typeof p.name==='string' && typeof p.area==='string').map(p=>({id:p.id.slice(0,100),name:p.name.slice(0,90),area:p.area.slice(0,50),address:String(p.address||'').slice(0,150),description:String(p.description||'').slice(0,180),region:['Vale','Cardiff','Dublin'].includes(p.region)?p.region:'Cardiff'}));
     const score = v => v==null||v===''?null:(Number(v)>=1&&Number(v)<=5?Number(v):null);
     const logs = data.logs.slice(0,5000).filter(l=>l && typeof l.pubId==='string' && Number(l.rating)>=1 && Number(l.rating)<=10 && (l.price==null||l.price===''||(Number(l.price)>0&&Number(l.price)<=100))).map(l=>({id:String(l.id||crypto.randomUUID()).slice(0,100),pubId:l.pubId,drink:String(l.drink||'').slice(0,60),price:l.price==null||l.price===''?null:Number(l.price),rating:l.guinness===undefined&&l.atmosphere===undefined&&l.setting===undefined?Number(l.rating)/2:Number(l.rating),guinness:score(l.guinness),atmosphere:score(l.atmosphere),setting:score(l.setting),date:String(l.date||'').slice(0,10),notes:String(l.notes||'').slice(0,300)}));
     return {pubs,logs,favourites:data.favourites.filter(id=>typeof id==='string').slice(0,500)};
@@ -162,7 +181,7 @@
       return false;
     }
   }
-  const money = value => '£'+Number(value).toFixed(2);
+  const money = (value,pubId) => (getPub(pubId)?.region==='Dublin'?'€':'£')+Number(value).toFixed(2);
   // Approximate neighbourhood centres for discovery; never used as exact pub coordinates.
   const centres={
     'City Centre':[51.4801,-3.1791],Pontcanna:[51.4875,-3.2040],Canton:[51.4819,-3.2124],Roath:[51.4924,-3.1616],Cathays:[51.4905,-3.1767],
@@ -170,25 +189,31 @@
     Cowbridge:[51.4622,-3.4483],Aberthin:[51.4670,-3.4740],Llanblethian:[51.4538,-3.4550],Penllyn:[51.4740,-3.4760],
     'St Hilary':[51.4510,-3.4220],Sigingstone:[51.4280,-3.4200],Monknash:[51.4230,-3.5590],Aberthaw:[51.3920,-3.3870],
     'Llantwit Major':[51.4083,-3.4850],Llanmaes:[51.4170,-3.4730],Boverton:[51.4060,-3.4630],Penarth:[51.4388,-3.1737],
-    Barry:[51.4069,-3.2694],Rhoose:[51.3890,-3.3520],'Ogmore-by-Sea':[51.4640,-3.6310],'St Athan':[51.4030,-3.4140],Wick:[51.4390,-3.5490],Southerndown:[51.4470,-3.6060]
+    Barry:[51.4069,-3.2694],Rhoose:[51.3890,-3.3520],'Ogmore-by-Sea':[51.4640,-3.6310],'St Athan':[51.4030,-3.4140],Wick:[51.4390,-3.5490],Southerndown:[51.4470,-3.6060],
+    'Dublin|Temple Bar':[53.3455,-6.2635],'Dublin|City Centre South':[53.3428,-6.2640],'Dublin|Grafton Street':[53.3422,-6.2600],
+    'Dublin|Trinity':[53.3462,-6.2516],'Dublin|Merrion Row':[53.3385,-6.2516],'Dublin|Baggot Street':[53.3375,-6.2470],
+    'Dublin|Smithfield':[53.3496,-6.2786],'Dublin|The Liberties':[53.3445,-6.2766],'Dublin|Glasnevin':[53.3698,-6.2716]
   };
   const distanceKm=(a,b)=>{const rad=Math.PI/180,dLat=(b[0]-a[0])*rad,dLon=(b[1]-a[1])*rad,x=Math.sin(dLat/2)**2+Math.cos(a[0]*rad)*Math.cos(b[0]*rad)*Math.sin(dLon/2)**2;return 6371*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))};
-  const pubDistance=pub=>nearPosition&&centres[pub.area]?distanceKm(nearPosition,centres[pub.area]):null;
-  const mapSearch=pub=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(pub.name+', '+(pub.address||pub.area)+', Wales');
+  const pubCentre=pub=>centres[pub.region+'|'+pub.area]||centres[pub.area];
+  const pubDistance=pub=>nearPosition&&pubCentre(pub)?distanceKm(nearPosition,pubCentre(pub)):null;
+  const mapSearch=pub=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(pub.name+', '+(pub.address||pub.area)+(pub.region==='Dublin'?', Ireland':', Wales'));
   let nearPosition=null,view='list',pubMap=null,mapMarkers=null,lastFiltered=[];
   function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
   let toastTimer;
   function toast(message){const el=$('#toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3000)}
   let photoPreviewUrls=[];
   function clearPhotoPreview(){photoPreviewUrls.forEach(url=>URL.revokeObjectURL(url));photoPreviewUrls=[];$('#photo-preview').innerHTML=''}
-  function openDialog(id){if(id==='entry-dialog'){$('#entry-form').reset();$('#entry-form [name=reviewerName]').value=localStorage.getItem('pint-reviewer-name')||'';clearPhotoPreview();const today=new Date();$('#entry-date').value=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);updateEntryPubs()}document.getElementById(id).showModal()}
-  function updateEntryPubs(){const select=$('#entry-pub');const current=select.value;select.innerHTML=allPubs().map(p=>`<option value="${safe(p.id)}">${safe(p.name)} — ${safe(p.area)}</option>`).join('');if(allPubs().some(p=>p.id===current))select.value=current}
+  function openDialog(id){if(id==='pub-dialog'){$('#pub-form [name=region]').value=$('#region-filter').value}if(id==='entry-dialog'){$('#entry-form').reset();$('#entry-form [name=reviewerName]').value=localStorage.getItem('pint-reviewer-name')||'';clearPhotoPreview();const today=new Date();$('#entry-date').value=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);updateEntryPubs()}document.getElementById(id).showModal()}
+  function updateEntryPubs(){const select=$('#entry-pub');const current=select.value;const selected=$('#region-filter').value;select.innerHTML=allPubs().filter(p=>p.region===selected).map(p=>`<option value="${safe(p.id)}">${safe(p.name)} — ${safe(p.area)}</option>`).join('');if(allPubs().some(p=>p.id===current&&p.region===selected))select.value=current}
   let favouritesOnly=false;
   let directoryLimit=12;
   let reviewFeedLimit=12;
   const DIRECTORY_PAGE_SIZE=12;
   function render(){
     const pubs=allPubs();
+    const destination=$('#region-filter').value;
+    $('#destination-title').textContent=destination==='Dublin'?'Explore Dublin pubs':destination==='Vale'?'Explore Vale of Glamorgan pubs':'Explore Cardiff pubs';
     $('#stat-pubs').textContent=pubs.length;$('#stat-logs').textContent=visibleLogs().length;$('#stat-favourites').textContent=data.favourites.length;
     const selectedArea=$('#area-filter').value;
     const selectedRegion=$('#region-filter').value;
@@ -214,7 +239,7 @@
       const price=latestPrice(pub.id),rating=averageRating(pub.id),guinness=averageField(pub.id,'guinness'),fav=data.favourites.includes(pub.id);
       const image=photos[Math.abs([...pub.id].reduce((n,c)=>n+c.charCodeAt(0),0))%photos.length];
       const distance=pubDistance(pub);
-      return `<article class="pub-card"><div class="pub-photo" style="background-image:url('${image}')"><span class="photo-label">${safe(pub.region==='Vale'?'THE VALE · '+pub.area.toUpperCase():'CARDIFF · '+pub.area.toUpperCase())}</span><button class="heart ${fav?'active':''}" data-favourite="${safe(pub.id)}" aria-label="${fav?'Remove':'Add'} ${safe(pub.name)} ${fav?'from':'to'} favourites" aria-pressed="${fav}">${fav?'♥':'♡'}</button></div><div class="pub-body"><h3>${safe(pub.name)}</h3><span class="pub-area">⌖ ${safe(pub.address||pub.area)}${distance==null?'':' · ~'+distance.toFixed(1)+' km'}</span><p class="pub-description">${safe(pub.description||'A pub to explore and review yourself.')}</p><div class="pub-metrics"><div><strong>${rating==null?'Not rated':rating.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} OVERALL /5</span></div><div><strong>${guinness==null?'Not rated':guinness.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} GUINNESS /5</span></div></div><div class="pub-price">${price==null?'No pint price logged yet':'Last logged pint: '+money(price)}</div><div class="pub-actions"><button data-details="${safe(pub.id)}">View pub ↗</button><button data-log="${safe(pub.id)}">★ Review</button></div></div></article>`;
+      return `<article class="pub-card"><div class="pub-photo" style="background-image:url('${image}')"><span class="photo-label">${safe((pub.region==='Vale'?'THE VALE':pub.region.toUpperCase())+' · '+pub.area.toUpperCase())}</span><button class="heart ${fav?'active':''}" data-favourite="${safe(pub.id)}" aria-label="${fav?'Remove':'Add'} ${safe(pub.name)} ${fav?'from':'to'} favourites" aria-pressed="${fav}">${fav?'♥':'♡'}</button></div><div class="pub-body"><h3>${safe(pub.name)}</h3><span class="pub-area">⌖ ${safe(pub.address||pub.area)}${distance==null?'':' · ~'+distance.toFixed(1)+' km'}</span><p class="pub-description">${safe(pub.description||'A pub to explore and review yourself.')}</p><div class="pub-metrics"><div><strong>${rating==null?'Not rated':rating.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} OVERALL /5</span></div><div><strong>${guinness==null?'Not rated':guinness.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} GUINNESS /5</span></div></div><div class="pub-price">${price==null?'No pint price logged yet':'Last logged pint: '+money(price,pub.id)}</div><div class="pub-actions"><button data-details="${safe(pub.id)}">View pub ↗</button><button data-log="${safe(pub.id)}">★ Review</button></div></div></article>`;
     }).join('');
     $('#entry-count').textContent=`${sharedLogs.length} SHARED · ${data.logs.length} PRIVATE`;
     $('#community-summary').textContent=sharedOnline?`${sharedLogs.length} shared reviews available · ${sharedPubs.length} community-added pubs`:`Offline snapshot: ${sharedLogs.length} last-synced reviews. New submissions require an online connection.`;
@@ -222,7 +247,7 @@
     const reviewMore=$('#more-community-reviews');
     reviewMore.hidden=visibleLogs().length<=reviewFeedLimit;
     reviewMore.textContent='Show more reviews ('+(visibleLogs().length-reviewFeedLimit)+' remaining)';
-    $('#recent-list').innerHTML=recents.length?recents.map(l=>`<div class="recent-entry"><div><strong>${safe(getPub(l.pubId)?.name||'Unknown pub')}</strong><div class="review-author">${safe(l.shared?l.reviewerName:'Your saved review · not shared')}</div><small>${safe(l.date)}${l.guinness!=null?' · Guinness '+l.guinness+'★':''}${l.price!=null?' · '+money(l.price):''}</small>${l.notes?`<div class="review-notes">${safe(l.notes)}</div>`:''}<div class="review-photos" data-review-photos="${safe(l.id)}"></div></div><b>${Number(l.rating).toFixed(1)} ★</b></div>`).join(''):'<div class="recent-empty">No pub reviews yet.<br/>Your adventures start with the first one.</div>';
+    $('#recent-list').innerHTML=recents.length?recents.map(l=>`<div class="recent-entry"><div><strong>${safe(getPub(l.pubId)?.name||'Unknown pub')}</strong><div class="review-author">${safe(l.shared?l.reviewerName:'Your saved review · not shared')}</div><small>${safe(l.date)}${l.guinness!=null?' · Guinness '+l.guinness+'★':''}${l.price!=null?' · '+money(l.price,l.pubId):''}</small>${l.notes?`<div class="review-notes">${safe(l.notes)}</div>`:''}<div class="review-photos" data-review-photos="${safe(l.id)}"></div></div><b>${Number(l.rating).toFixed(1)} ★</b></div>`).join(''):'<div class="recent-empty">No pub reviews yet.<br/>Your adventures start with the first one.</div>';
     recents.forEach(async log=>{try{const images=await logPhotos(log);const el=[...document.querySelectorAll('[data-review-photos]')].find(x=>x.dataset.reviewPhotos===log.id);if(el)el.innerHTML=images.map((src,i)=>`<button class="photo-thumb" type="button" aria-label="View photo ${i+1}"><img alt="Photo ${i+1} from ${safe(getPub(log.pubId)?.name||'pub')}" src="${src}" /></button>`).join('')}catch{}});
     if(view==='map')renderMap();
   }
@@ -231,12 +256,12 @@
     if(view!=='map')return;
     if(!window.L){$('#pub-map').textContent='The interactive map needs an internet connection. Switch to List for all pub suggestions.';return}
     if(!pubMap){pubMap=L.map('pub-map',{scrollWheelZoom:false}).setView([51.467,-3.29],10);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:18}).addTo(pubMap);mapMarkers=L.layerGroup().addTo(pubMap)}
-    mapMarkers.clearLayers();const grouped=new Map();lastFiltered.forEach(p=>{if(!centres[p.area])return;const key=p.region+'|'+p.area;if(!grouped.has(key))grouped.set(key,[]);grouped.get(key).push(p)});
-    const bounds=[];grouped.forEach((pubs,key)=>{const area=pubs[0].area,pos=centres[area];bounds.push(pos);const marker=L.marker(pos).addTo(mapMarkers);const summary=document.createElement('div');const heading=document.createElement('strong');heading.textContent=area+' · '+pubs.length+' pubs';summary.append(heading,document.createElement('br'));const btn=document.createElement('button');btn.type='button';btn.textContent='Show pubs in this area ↗';btn.className='map-popup-button';btn.addEventListener('click',()=>{$('#region-filter').value=pubs[0].region;render();$('#area-filter').value=area;showView('list');render();$('#explore').scrollIntoView({behavior:'smooth'})});summary.append(btn);marker.bindPopup(summary)});
+    mapMarkers.clearLayers();const grouped=new Map();lastFiltered.forEach(p=>{if(!pubCentre(p))return;const key=p.region+'|'+p.area;if(!grouped.has(key))grouped.set(key,[]);grouped.get(key).push(p)});
+    const bounds=[];grouped.forEach((pubs,key)=>{const area=pubs[0].area,pos=pubCentre(pubs[0]);bounds.push(pos);const marker=L.marker(pos).addTo(mapMarkers);const summary=document.createElement('div');const heading=document.createElement('strong');heading.textContent=area+' · '+pubs.length+' pubs';summary.append(heading,document.createElement('br'));const btn=document.createElement('button');btn.type='button';btn.textContent='Show pubs in this area ↗';btn.className='map-popup-button';btn.addEventListener('click',()=>{$('#region-filter').value=pubs[0].region;render();$('#area-filter').value=area;showView('list');render();$('#explore').scrollIntoView({behavior:'smooth'})});summary.append(btn);marker.bindPopup(summary)});
     if(nearPosition){const you=L.circleMarker(nearPosition,{radius:8,color:'#f6e7c7',fillColor:'#c9a35b',fillOpacity:1}).addTo(mapMarkers);you.bindPopup('Your approximate location');bounds.push(nearPosition)}
     pubMap.invalidateSize();if(bounds.length)pubMap.fitBounds(bounds,{padding:[25,25],maxZoom:13});
   }
-  function detailMarkup(pub){const rating=averageRating(pub.id),guinness=averageField(pub.id,'guinness'),atmosphere=averageField(pub.id,'atmosphere'),setting=averageField(pub.id,'setting'),price=latestPrice(pub.id),logs=[...visibleLogs()].filter(l=>l.pubId===pub.id).sort((a,b)=>b.date.localeCompare(a.date));const image=photos[Math.abs([...pub.id].reduce((n,c)=>n+c.charCodeAt(0),0))%photos.length];return `<div class="detail-cover" style="background-image:url('${image}')"><span>${safe(pub.region==='Vale'?'VALE OF GLAMORGAN':'CARDIFF')} · ${safe(pub.area)}</span></div><span class="overline">THE PINT COMMUNITY</span><h2>${safe(pub.name)}<span class="gold-period">.</span></h2><p class="detail-address">⌖ ${safe(pub.address||pub.area)}</p><p>${safe(pub.description||'A pub to visit and discover for yourself.')}</p><div class="detail-scores">${[['Overall',rating],['Guinness',guinness],['Atmosphere',atmosphere],['Setting',setting]].map(([label,value])=>`<div><small>${label}</small><strong>${value==null?'—':value.toFixed(1)+' ★'}</strong></div>`).join('')}</div><p class="detail-price">${price==null?'No pint price recorded yet':'Last logged pint: '+money(price)}</p><div class="detail-actions"><button class="button button-gold" data-detail-review="${safe(pub.id)}">★ Review this pub</button><a class="button button-outline" href="${mapSearch(pub)}" target="_blank" rel="noopener noreferrer">Directions ↗</a></div><h3>Reviews (${logs.length})</h3><div class="detail-reviews">${logs.length?logs.map(l=>`<div class="detail-review"><strong>${Number(l.rating).toFixed(1)} ★</strong><div class="review-author">${safe(l.shared?l.reviewerName:'Your saved review · not shared')}</div><small>${safe(l.date)}${l.guinness!=null?' · Guinness '+l.guinness+'★':''}</small>${l.notes?`<p>${safe(l.notes)}</p>`:''}<div class="review-photos" data-detail-photos="${safe(l.id)}"></div></div>`).join(''):'<p>No reviews yet. Be the first to add one.</p>'}</div><p class="small-print">Check opening times, availability and Guinness before travelling. Cover photo is illustrative.</p>`}
+  function detailMarkup(pub){const rating=averageRating(pub.id),guinness=averageField(pub.id,'guinness'),atmosphere=averageField(pub.id,'atmosphere'),setting=averageField(pub.id,'setting'),price=latestPrice(pub.id),logs=[...visibleLogs()].filter(l=>l.pubId===pub.id).sort((a,b)=>b.date.localeCompare(a.date));const image=photos[Math.abs([...pub.id].reduce((n,c)=>n+c.charCodeAt(0),0))%photos.length];return `<div class="detail-cover" style="background-image:url('${image}')"><span>${safe(pub.region==='Vale'?'VALE OF GLAMORGAN':pub.region.toUpperCase())} · ${safe(pub.area)}</span></div><span class="overline">THE PINT COMMUNITY</span><h2>${safe(pub.name)}<span class="gold-period">.</span></h2><p class="detail-address">⌖ ${safe(pub.address||pub.area)}</p><p>${safe(pub.description||'A pub to visit and discover for yourself.')}</p><div class="detail-scores">${[['Overall',rating],['Guinness',guinness],['Atmosphere',atmosphere],['Setting',setting]].map(([label,value])=>`<div><small>${label}</small><strong>${value==null?'—':value.toFixed(1)+' ★'}</strong></div>`).join('')}</div><p class="detail-price">${price==null?'No pint price recorded yet':'Last logged pint: '+money(price)}</p><div class="detail-actions"><button class="button button-gold" data-detail-review="${safe(pub.id)}">★ Review this pub</button><a class="button button-outline" href="${mapSearch(pub)}" target="_blank" rel="noopener noreferrer">Directions ↗</a></div><h3>Reviews (${logs.length})</h3><div class="detail-reviews">${logs.length?logs.map(l=>`<div class="detail-review"><strong>${Number(l.rating).toFixed(1)} ★</strong><div class="review-author">${safe(l.shared?l.reviewerName:'Your saved review · not shared')}</div><small>${safe(l.date)}${l.guinness!=null?' · Guinness '+l.guinness+'★':''}</small>${l.notes?`<p>${safe(l.notes)}</p>`:''}<div class="review-photos" data-detail-photos="${safe(l.id)}"></div></div>`).join(''):'<p>No reviews yet. Be the first to add one.</p>'}</div><p class="small-print">Check opening times, availability and Guinness before travelling. Cover photo is illustrative.</p>`}
   async function renderDetailPhotos(id){const dialog=$('#detail-dialog');const logs=visibleLogs().filter(l=>l.pubId===id);for(const log of logs){try{const images=await logPhotos(log);const el=[...dialog.querySelectorAll('[data-detail-photos]')].find(node=>node.dataset.detailPhotos===log.id);if(el)el.innerHTML=images.map((src,i)=>`<button class="photo-thumb" type="button" aria-label="View visit photo ${i+1}"><img src="${src}" alt="Pub visit photo" /></button>`).join('')}catch{}}}
   async function openPubDetail(id){const pub=getPub(id);if(!pub)return;const dialog=$('#detail-dialog');$('#detail-content').innerHTML=detailMarkup(pub);if(!dialog.open)dialog.showModal();await renderDetailPhotos(id)}
   function syncPubHash(){const match=location.hash.match(/^#pub=(.+)$/);if(match){let id;try{id=decodeURIComponent(match[1])}catch{return}openPubDetail(id)}else if($('#detail-dialog').open)$('#detail-dialog').close()}
@@ -275,7 +300,7 @@
   $('#pub-form').addEventListener('submit',async event=>{
     event.preventDefault();
     const button=event.target.querySelector('[type=submit]'),f=new FormData(event.target);
-    const pub={id:crypto.randomUUID(),name:String(f.get('name')).trim(),area:String(f.get('area')).trim(),region:f.get('region')==='Vale'?'Vale':'Cardiff',address:String(f.get('address')).trim(),description:String(f.get('description')).trim()};
+    const pub={id:crypto.randomUUID(),name:String(f.get('name')).trim(),area:String(f.get('area')).trim(),region:['Cardiff','Vale','Dublin'].includes(f.get('region'))?f.get('region'):'Cardiff',address:String(f.get('address')).trim(),description:String(f.get('description')).trim()};
     if(!pub.name||!pub.area)return;
     button.disabled=true;button.textContent='Sharing pub…';
     try{await window.PintShared.addPub(pub);$('#pub-dialog').close();event.target.reset();toast('Pub added for everyone ✓');await refreshShared();}
@@ -283,7 +308,7 @@
     finally{button.disabled=false;button.textContent='Add pub for everyone ↗'}
   });
   const resetDirectory=()=>{directoryLimit=DIRECTORY_PAGE_SIZE;render()};
-   $('#search').addEventListener('input',resetDirectory);$('#region-filter').addEventListener('change',resetDirectory);$('#area-filter').addEventListener('change',resetDirectory);$('#sort-filter').addEventListener('change',resetDirectory);
+   $('#search').addEventListener('input',resetDirectory);$('#region-filter').addEventListener('change',()=>{localStorage.setItem('pint-destination-v1',$('#region-filter').value);$('#area-filter').value='all';resetDirectory();if(view==='map')renderMap()});$('#area-filter').addEventListener('change',resetDirectory);$('#sort-filter').addEventListener('change',resetDirectory);
    $('#show-more-pubs').addEventListener('click',()=>{directoryLimit+=DIRECTORY_PAGE_SIZE;render()});
    $('#refresh-community').addEventListener('click',async()=>{const btn=$('#refresh-community');btn.disabled=true;try{await refreshShared()}finally{btn.disabled=false}});
    $('#more-community-reviews').addEventListener('click',()=>{reviewFeedLimit+=12;render()});
@@ -314,11 +339,13 @@
   $('#share-pint-button').addEventListener('click',async()=>{
     const url='https://akkaguwy.github.io/PINT/';
     try{
-      if(navigator.share)await navigator.share({title:'PINT — Cardiff & the Vale',text:'Join me on PINT. Rate the pubs and share your Guinness reviews 🍺',url});
+      if(navigator.share)await navigator.share({title:'PINT — Discover & review pubs',text:'Join me on PINT. Rate the pubs and share your Guinness reviews 🍺',url});
       else{await navigator.clipboard.writeText(url);toast('PINT link copied ✓')}
     }catch(error){if(error.name!=='AbortError')toast('Share this link: '+url)}
   });
   $('#year').textContent=new Date().getFullYear();
+  const savedDestination=localStorage.getItem('pint-destination-v1');
+  if(['Cardiff','Vale','Dublin'].includes(savedDestination))$('#region-filter').value=savedDestination;
   $('#sort-filter').insertAdjacentHTML('beforeend','<option value="nearby">Nearest to me</option>');
   render();syncPubHash();
   if(lastSuccessfulSync)setSharedStatus('↻ Loading current reviews · Last synced '+new Date(lastSuccessfulSync).toLocaleString(),'');
