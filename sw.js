@@ -1,5 +1,5 @@
-const CACHE_NAME='pint-offline-v3.8';
-const CORE=['./','./index.html','./styles.css','./features.css','./polish.css','./app.js','./dublin_directory.js','./dublin_explore.js','./navigation.js','./shared.js','./pub_golf.js','./photos.js','./pwa.js','./manifest.webmanifest','./icons/pint-180.png','./icons/pint-192.png','./icons/pint-512.png'];
+const CACHE_NAME='pint-offline-v3.9';
+const CORE=['./','./index.html','./styles.css','./features.css','./polish.css','./pub_identity.css','./pub_identity.js','./app.js','./dublin_directory.js','./dublin_explore.js','./navigation.js','./shared.js','./pub_golf.js','./photos.js','./pwa.js','./manifest.webmanifest','./icons/pint-180.png','./icons/pint-192.png','./icons/pint-512.png'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting()))
 });

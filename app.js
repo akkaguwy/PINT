@@ -1,14 +1,6 @@
 (() => {
   'use strict';
   const KEY = 'pint-cardiff-v1';
-  const photos = [
-    'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=800&q=80'
-  ];
   // Curated destination suggestions, not endorsements or live venue records.
   // Fields: name | area | address/search location | suggested reason to explore.
   const cardiffSuggestions = [
@@ -159,6 +151,34 @@
   const averageRating = id => {const logs=ratingLogs().filter(log=>log.pubId===id);return logs.length?logs.reduce((s,l)=>s+l.rating,0)/logs.length:null};
   const averageField = (id,field) => {const logs=ratingLogs().filter(l=>l.pubId===id&&l[field]!=null);return logs.length?logs.reduce((sum,l)=>sum+l[field],0)/logs.length:null};
   const logPhotos=log=>log.shared?Promise.resolve(window.PintShared.photoUrls(log)):window.PintPhotos.read(log.id);
+  const pubTags=pub=>window.PintIdentity?.tags(pub)||['Pub'];
+  const tagsMarkup=pub=>'<div class="pub-tags" aria-label="Pub types">'+pubTags(pub).map(tag=>'<span class="pub-tag">'+safe(tag)+'</span>').join('')+'</div>';
+  // Display genuine photos uploaded with pub reviews, never unrelated stock photos.
+  async function pubCover(pubId){
+    const logs=visibleLogs().filter(l=>l.pubId===pubId).sort((a,b)=>Number(Boolean(b.coverPhoto))-Number(Boolean(a.coverPhoto))||String(b.date||'').localeCompare(String(a.date||'')));
+    for(const log of logs){
+      if(log.shared&&(!Number(log.photoCount)||Number(log.photoCount)<1))continue;
+      try{const urls=await logPhotos(log);if(urls.length)return urls[0]}catch{}
+    }
+    return null;
+  }
+  async function hydratePubCovers(root=document){
+    const nodes=[...root.querySelectorAll('[data-pub-cover]')];
+    await Promise.all(nodes.map(async node=>{
+      const pubId=node.dataset.pubCover;
+      const url=await pubCover(pubId);
+      if(!url||!node.isConnected||node.dataset.pubCover!==pubId)return;
+      const img=new Image();img.alt='Photo shared by a PINT reviewer';img.loading='lazy';img.decoding='async';
+      img.onload=()=>{
+        if(!node.isConnected||node.dataset.pubCover!==pubId)return;
+        node.querySelector('.pub-photo-placeholder')?.remove();
+        node.querySelector('.pub-cover-img')?.remove();
+        img.className='pub-cover-img';node.prepend(img);node.classList.add('has-real-photo');
+      };
+      img.onerror=()=>node.classList.remove('has-real-photo');
+      img.src=url;
+    }));
+  }
   function setSharedStatus(message,mode='') { const el=$('#shared-status');el.textContent=message;el.className='shared-status shell '+mode; }
   async function refreshShared() {
     const serial=++requestSerial;
@@ -181,7 +201,7 @@
       if(detail.open&&location.hash.startsWith('#pub=')){
         const id=decodeURIComponent(location.hash.slice(5));
         const pub=getPub(id);
-        if(pub){$('#detail-content').innerHTML=detailMarkup(pub);renderDetailPhotos(pub.id)}
+        if(pub){$('#detail-content').innerHTML=detailMarkup(pub);hydratePubCovers($('#detail-content'));renderDetailPhotos(pub.id)}
       }
       return true;
     }catch(error){
@@ -235,7 +255,7 @@
     $('#area-filter').innerHTML='<option value="all">All areas</option>'+areas.map(a=>`<option value="${safe(a)}">${safe(a)}</option>`).join('');
     $('#area-filter').value=areas.includes(selectedArea)?selectedArea:'all';
     const q=$('#search').value.trim().toLowerCase();
-    let filtered=pubs.filter(p=>(p.name+' '+p.area+' '+p.address+' '+p.description).toLowerCase().includes(q)&&(selectedRegion==='all'||p.region===selectedRegion)&&($('#area-filter').value==='all'||p.area===$('#area-filter').value)&&(!favouritesOnly||data.favourites.includes(p.id)));
+    let filtered=pubs.filter(p=>(p.name+' '+p.area+' '+p.address+' '+p.description+' '+pubTags(p).join(' ')).toLowerCase().includes(q)&&(selectedRegion==='all'||p.region===selectedRegion)&&($('#area-filter').value==='all'||p.area===$('#area-filter').value)&&(!favouritesOnly||data.favourites.includes(p.id)));
     const sort=$('#sort-filter').value;
     if(sort==='cheapest')filtered.sort((a,b)=>(latestPrice(a.id)??Infinity)-(latestPrice(b.id)??Infinity)||a.name.localeCompare(b.name));
     else if(sort==='rated')filtered.sort((a,b)=>(averageRating(b.id)??-1)-(averageRating(a.id)??-1)||a.name.localeCompare(b.name));
@@ -252,10 +272,10 @@
     if(filtered.length===0&&pubs.some(p=>p.region===selectedRegion))$('#empty-state').textContent='No pubs match your filters. Clear the search or tap Favourites to see all pubs.';
     $('#pub-grid').innerHTML=filtered.slice(0,directoryLimit).map((pub,i)=>{
       const price=latestPrice(pub.id),rating=averageRating(pub.id),guinness=averageField(pub.id,'guinness'),fav=data.favourites.includes(pub.id);
-      const image=photos[Math.abs([...pub.id].reduce((n,c)=>n+c.charCodeAt(0),0))%photos.length];
       const distance=pubDistance(pub);
-      return `<article class="pub-card"><div class="pub-photo" style="background-image:url('${image}')"><span class="photo-label">${safe((pub.region==='Vale'?'THE VALE':pub.region.toUpperCase())+' · '+pub.area.toUpperCase())}</span><button class="heart ${fav?'active':''}" data-favourite="${safe(pub.id)}" aria-label="${fav?'Remove':'Add'} ${safe(pub.name)} ${fav?'from':'to'} favourites" aria-pressed="${fav}">${fav?'♥':'♡'}</button></div><div class="pub-body"><h3>${safe(pub.name)}</h3><span class="pub-area">⌖ ${safe(pub.address||pub.area)}${distance==null?'':' · ~'+distance.toFixed(1)+' km'}</span><p class="pub-description">${safe(pub.description||'A pub to explore and review yourself.')}</p><div class="pub-metrics"><div><strong>${rating==null?'Not rated':rating.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} OVERALL /5</span></div><div><strong>${guinness==null?'Not rated':guinness.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} GUINNESS /5</span></div></div><div class="pub-price">${price==null?'No pint price logged yet':'Last logged pint: '+money(price,pub.id)}</div><div class="pub-actions"><button data-details="${safe(pub.id)}">View pub ↗</button><button data-log="${safe(pub.id)}">★ Review</button></div></div></article>`;
+      return `<article class="pub-card"><div class="pub-photo" data-pub-cover="${safe(pub.id)}"><span class="pub-photo-placeholder" aria-hidden="true">P<span>.</span><small>No photo yet</small></span><button class="heart ${fav?'active':''}" data-favourite="${safe(pub.id)}" aria-label="${fav?'Remove':'Add'} ${safe(pub.name)} ${fav?'from':'to'} favourites" aria-pressed="${fav}">${fav?'♥':'♡'}</button></div><div class="pub-body"><h3>${safe(pub.name)}</h3>${tagsMarkup(pub)}<span class="pub-area">⌖ ${safe(pub.address||pub.area)}${distance==null?'':' · ~'+distance.toFixed(1)+' km'}</span><p class="pub-description">${safe(pub.description||'A pub to explore and review yourself.')}</p><div class="pub-metrics"><div><strong>${rating==null?'Not rated':rating.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} OVERALL /5</span></div><div><strong>${guinness==null?'Not rated':guinness.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} GUINNESS /5</span></div></div><div class="pub-price">${price==null?'No pint price logged yet':'Last logged pint: '+money(price,pub.id)}</div><div class="pub-actions"><button data-details="${safe(pub.id)}">View pub ↗</button><button data-log="${safe(pub.id)}">★ Review</button></div></div></article>`;
     }).join('');
+    hydratePubCovers($('#pub-grid'));
     const destinationReviews=visibleLogs().filter(l=>getPub(l.pubId)?.region===$('#region-filter').value);
     $('#entry-count').textContent=`${destinationReviews.filter(l=>l.shared).length} SHARED · ${destinationReviews.filter(l=>!l.shared).length} PRIVATE`;
     const destinationName=$('#region-filter').selectedOptions[0]?.textContent||'destination';
@@ -279,9 +299,9 @@
     if(nearPosition){const you=L.circleMarker(nearPosition,{radius:8,color:'#f6e7c7',fillColor:'#c9a35b',fillOpacity:1}).addTo(mapMarkers);you.bindPopup('Your approximate location');bounds.push(nearPosition)}
     pubMap.invalidateSize();if(bounds.length)pubMap.fitBounds(bounds,{padding:[25,25],maxZoom:13});
   }
-  function detailMarkup(pub){const rating=averageRating(pub.id),guinness=averageField(pub.id,'guinness'),atmosphere=averageField(pub.id,'atmosphere'),setting=averageField(pub.id,'setting'),price=latestPrice(pub.id),logs=[...visibleLogs()].filter(l=>l.pubId===pub.id).sort((a,b)=>b.date.localeCompare(a.date));const image=photos[Math.abs([...pub.id].reduce((n,c)=>n+c.charCodeAt(0),0))%photos.length];return `<div class="detail-cover" style="background-image:url('${image}')"><span>${safe(pub.region==='Vale'?'VALE OF GLAMORGAN':pub.region.toUpperCase())} · ${safe(pub.area)}</span></div><span class="overline">THE PINT COMMUNITY</span><h2>${safe(pub.name)}<span class="gold-period">.</span></h2><p class="detail-address">⌖ ${safe(pub.address||pub.area)}</p><p>${safe(pub.description||'A pub to visit and discover for yourself.')}</p><div class="detail-scores">${[['Overall',rating],['Guinness',guinness],['Atmosphere',atmosphere],['Setting',setting]].map(([label,value])=>`<div><small>${label}</small><strong>${value==null?'—':value.toFixed(1)+' ★'}</strong></div>`).join('')}</div><p class="detail-price">${price==null?'No pint price recorded yet':'Last logged pint: '+money(price,pub.id)}</p><div class="detail-actions"><button class="button button-gold" data-detail-review="${safe(pub.id)}">★ Review this pub</button><a class="button button-outline" href="${mapSearch(pub)}" target="_blank" rel="noopener noreferrer">Directions ↗</a></div><h3>Reviews (${logs.length})</h3><div class="detail-reviews">${logs.length?logs.map(l=>`<div class="detail-review"><strong>${Number(l.rating).toFixed(1)} ★</strong><div class="review-author">${safe(l.shared?l.reviewerName:'Your saved review · not shared')}</div><small>${safe(l.date)}${l.guinness!=null?' · Guinness '+l.guinness+'★':''}</small>${l.notes?`<p>${safe(l.notes)}</p>`:''}<div class="review-photos" data-detail-photos="${safe(l.id)}"></div></div>`).join(''):'<p>No reviews yet. Be the first to add one.</p>'}</div><p class="small-print">Check opening times, availability and Guinness before travelling. Cover photo is illustrative.</p>`}
+  function detailMarkup(pub){const rating=averageRating(pub.id),guinness=averageField(pub.id,'guinness'),atmosphere=averageField(pub.id,'atmosphere'),setting=averageField(pub.id,'setting'),price=latestPrice(pub.id),logs=[...visibleLogs()].filter(l=>l.pubId===pub.id).sort((a,b)=>b.date.localeCompare(a.date));return `<div class="detail-cover" data-pub-cover="${safe(pub.id)}"><span class="pub-photo-placeholder" aria-hidden="true">P<span>.</span><small>No photo yet</small></span><span>${safe(pub.region==='Vale'?'VALE OF GLAMORGAN':pub.region.toUpperCase())} · ${safe(pub.area)}</span></div><span class="overline">THE PINT COMMUNITY</span><h2>${safe(pub.name)}</h2>${tagsMarkup(pub)}<p class="detail-address">⌖ ${safe(pub.address||pub.area)}</p><p>${safe(pub.description||'A pub to visit and discover for yourself.')}</p><div class="detail-scores">${[['Overall',rating],['Guinness',guinness],['Atmosphere',atmosphere],['Setting',setting]].map(([label,value])=>`<div><small>${label}</small><strong>${value==null?'—':value.toFixed(1)+' ★'}</strong></div>`).join('')}</div><p class="detail-price">${price==null?'No pint price recorded yet':'Last logged pint: '+money(price,pub.id)}</p><div class="detail-actions"><button class="button button-gold" data-detail-review="${safe(pub.id)}">★ Review this pub</button><a class="button button-outline" href="${mapSearch(pub)}" target="_blank" rel="noopener noreferrer">Directions ↗</a></div><h3>Reviews (${logs.length})</h3><div class="detail-reviews">${logs.length?logs.map(l=>`<div class="detail-review"><strong>${Number(l.rating).toFixed(1)} ★</strong><div class="review-author">${safe(l.shared?l.reviewerName:'Your saved review · not shared')}</div><small>${safe(l.date)}${l.guinness!=null?' · Guinness '+l.guinness+'★':''}</small>${l.notes?`<p>${safe(l.notes)}</p>`:''}<div class="review-photos" data-detail-photos="${safe(l.id)}"></div></div>`).join(''):'<p>No reviews yet. Be the first to add one.</p>'}</div><p class="small-print">Check opening times, availability and Guinness before travelling. Photos are contributed by reviewers and may show a drink or the pub.</p>`}
   async function renderDetailPhotos(id){const dialog=$('#detail-dialog');const logs=visibleLogs().filter(l=>l.pubId===id);for(const log of logs){try{const images=await logPhotos(log);const el=[...dialog.querySelectorAll('[data-detail-photos]')].find(node=>node.dataset.detailPhotos===log.id);if(el)el.innerHTML=images.map((src,i)=>`<button class="photo-thumb" type="button" aria-label="View visit photo ${i+1}"><img src="${src}" alt="Pub visit photo" /></button>`).join('')}catch{}}}
-  async function openPubDetail(id){const pub=getPub(id);if(!pub)return;const dialog=$('#detail-dialog');$('#detail-content').innerHTML=detailMarkup(pub);if(!dialog.open)dialog.showModal();await renderDetailPhotos(id)}
+  async function openPubDetail(id){const pub=getPub(id);if(!pub)return;const dialog=$('#detail-dialog');$('#detail-content').innerHTML=detailMarkup(pub);if(!dialog.open)dialog.showModal();hydratePubCovers($('#detail-content'));await renderDetailPhotos(id)}
   function syncPubHash(){const match=location.hash.match(/^#pub=(.+)$/);if(match){let id;try{id=decodeURIComponent(match[1])}catch{return}openPubDetail(id)}else if($('#detail-dialog').open)$('#detail-dialog').close()}
   async function ensureSharedPub(id){
     const pub=getPub(id);if(!pub||!pub.osmDiscovered)return true;
@@ -313,11 +333,12 @@
     const button=event.target.querySelector('[type=submit]');button.disabled=true;
     const f=new FormData(event.target),optionalScore=name=>f.get(name)===''?null:Number(f.get(name));
     const price=f.get('price')===''?null:Number(f.get('price'));
-    const log={id:crypto.randomUUID(),pubId:String(f.get('pubId')),reviewerName:String(f.get('reviewerName')).trim(),price,rating:Number(f.get('rating')),guinness:optionalScore('guinness'),atmosphere:optionalScore('atmosphere'),setting:optionalScore('setting'),date:String(f.get('date')),notes:String(f.get('notes')).trim()};
+    const log={id:crypto.randomUUID(),pubId:String(f.get('pubId')),reviewerName:String(f.get('reviewerName')).trim(),price,rating:Number(f.get('rating')),guinness:optionalScore('guinness'),atmosphere:optionalScore('atmosphere'),setting:optionalScore('setting'),date:String(f.get('date')),notes:String(f.get('notes')).trim(),coverPhoto:Boolean(f.get('coverPhoto'))};
     try{
       if(!getPub(log.pubId)||!log.reviewerName||(price!=null&&(price<=0||price>100))||log.rating<1||log.rating>5){toast('Check your review details');return}
       button.textContent='Sharing review…';
       const images=await Promise.all([...$('#review-photos').files].slice(0,3).map(window.PintPhotos.resize));
+      log.coverPhoto=log.coverPhoto&&images.length>0;
       await window.PintShared.addReview({...log,images});
       localStorage.setItem('pint-reviewer-name',log.reviewerName);
       $('#entry-dialog').close();clearPhotoPreview();
@@ -338,10 +359,10 @@
   $('#pub-form').addEventListener('submit',async event=>{
     event.preventDefault();
     const button=event.target.querySelector('[type=submit]'),f=new FormData(event.target);
-    const pub={id:crypto.randomUUID(),name:String(f.get('name')).trim(),area:String(f.get('area')).trim(),region:['Cardiff','Vale','Dublin'].includes(f.get('region'))?f.get('region'):'Cardiff',address:String(f.get('address')).trim(),description:String(f.get('description')).trim()};
+    const pub={id:crypto.randomUUID(),name:String(f.get('name')).trim(),area:String(f.get('area')).trim(),region:['Cardiff','Vale','Dublin'].includes(f.get('region'))?f.get('region'):'Cardiff',address:String(f.get('address')).trim(),description:String(f.get('description')).trim(),pubType:String(f.get('pubType')||'Pub')};
     if(!pub.name||!pub.area)return;
     button.disabled=true;button.textContent='Sharing pub…';
-    try{await window.PintShared.addPub(pub);$('#pub-dialog').close();event.target.reset();toast('Pub added for everyone ✓');await refreshShared();}
+    try{await window.PintShared.addPub(pub);window.PintIdentity?.rememberType(pub,pub.pubType);$('#pub-dialog').close();event.target.reset();toast('Pub added for everyone ✓');await refreshShared();}
     catch(error){toast('Not shared: '+(error.message||'please retry'));}
     finally{button.disabled=false;button.textContent='Add pub for everyone ↗'}
   });
