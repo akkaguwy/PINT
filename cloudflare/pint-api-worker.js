@@ -56,7 +56,7 @@ export default {
     const url=new URL(request.url);
     if(request.headers.get('Origin')&&request.headers.get('Origin')!==ORIGIN)
       return json({error:'Origin not allowed'},403);
-    if(request.method==='OPTIONS')return json({},204);
+    if(request.method==='OPTIONS')return new Response(null,{status:204,headers:{'Access-Control-Allow-Origin':ORIGIN,'Access-Control-Allow-Methods':'GET,POST,PUT,OPTIONS','Access-Control-Allow-Headers':'Authorization,Content-Type','Vary':'Origin'}});
     if(url.pathname==='/api/health'&&request.method==='GET')
       return json({app:'PINT API',status:'online',accounts:'firebase',database:!!env.DB});
     if(url.pathname!=='/api/me'||!['GET','POST','PUT'].includes(request.method))
