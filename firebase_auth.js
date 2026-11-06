@@ -6,7 +6,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js';
 
 const firebaseConfig={
-  apiKey:'AIzaSyAtT7-Mp8OIsZ94m0mO_iLSTtxemThqIY4',
+  apiKey:'AIzaSyAtT7-Mp8OIsZ94mOmO_iLSTtxemThqIY4',
   authDomain:'pint-a05d1.firebaseapp.com',
   projectId:'pint-a05d1',
   storageBucket:'pint-a05d1.firebasestorage.app',
@@ -26,6 +26,7 @@ const label=(error)=>{
     'auth/popup-blocked':'The browser blocked sign-in. Allow pop-ups and try again.',
     'auth/popup-closed-by-user':'Google sign-in was cancelled.',
     'auth/unauthorized-domain':'This site needs to be added to Firebase authorized domains.',
+    'auth/api-key-not-valid':'PINT sign-in configuration is out of date. Reload the latest version of the app.',
     'auth/operation-not-allowed':'This sign-in method is not enabled in Firebase.',
     'auth/too-many-requests':'Too many attempts. Try again later.'
   };
