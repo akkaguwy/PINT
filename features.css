@@ -182,3 +182,5 @@ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
 @media(max-width:620px){.destination-picker{padding:16px;margin-bottom:12px}.destination-picker h3{font-size:26px}.toolbar #region-filter{grid-column:1/-1;min-height:54px;background:#302b1e;border-color:#b28f50;font-weight:750;font-size:16px}}
 
 .directory-hint{color:#baa77d;font-size:12px;margin:8px 0 12px}
+
+.discover-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:12px 0}.discover-row button{min-height:46px}.discover-row [hidden]{display:none!important}#osm-credit{font-size:11px;color:#999184}@media(max-width:620px){.discover-row{display:block}.discover-row button{width:100%;margin-bottom:7px}}
