@@ -255,7 +255,7 @@
     $('#area-filter').innerHTML='<option value="all">All areas</option>'+areas.map(a=>`<option value="${safe(a)}">${safe(a)}</option>`).join('');
     $('#area-filter').value=areas.includes(selectedArea)?selectedArea:'all';
     const q=$('#search').value.trim().toLowerCase();
-    let filtered=pubs.filter(p=>(p.name+' '+p.area+' '+p.address+' '+p.description).toLowerCase().includes(q)&&(selectedRegion==='all'||p.region===selectedRegion)&&($('#area-filter').value==='all'||p.area===$('#area-filter').value)&&(!favouritesOnly||data.favourites.includes(p.id)));
+    let filtered=pubs.filter(p=>(p.name+' '+p.area+' '+p.address+' '+p.description+' '+pubTags(p).join(' ')).toLowerCase().includes(q)&&(selectedRegion==='all'||p.region===selectedRegion)&&($('#area-filter').value==='all'||p.area===$('#area-filter').value)&&(!favouritesOnly||data.favourites.includes(p.id)));
     const sort=$('#sort-filter').value;
     if(sort==='cheapest')filtered.sort((a,b)=>(latestPrice(a.id)??Infinity)-(latestPrice(b.id)??Infinity)||a.name.localeCompare(b.name));
     else if(sort==='rated')filtered.sort((a,b)=>(averageRating(b.id)??-1)-(averageRating(a.id)??-1)||a.name.localeCompare(b.name));
