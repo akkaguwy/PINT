@@ -1,56 +1,71 @@
-/* PINT mobile app navigation: discrete screens instead of anchor scrolling. */
+/* PINT mobile screen router — navigation history stays in sync with the browser. */
 (() => {
   'use strict';
-  const screens={home:'Home',explore:'Explore pubs','pub-golf':'Pub Golf','my-pints':'Reviews'};
-  const ids=Object.keys(screens), mobile=()=>matchMedia('(max-width: 620px)').matches;
-  const back=document.getElementById('screen-back'), header=document.getElementById('screen-header');
-  let current='home', screenHistory=0;
-  const screenParam=()=>new URL(location.href).searchParams.get('screen');
-  function activate(id, push=false){
-    if(!ids.includes(id))id='home';
-    if(push&&id===current)return;
-    if(push){
-      const u=new URL(location.href);u.searchParams.set('screen',id);u.hash='';
-      history.pushState({pintScreen:id},'',u);
-      screenHistory++;
-    }
-    current=id;
-    document.body.dataset.screen=id;
-    if(header)header.hidden=!mobile()||id==='home';
-    if(back)back.setAttribute('aria-label','Back from '+screens[id]);
-    const label=document.getElementById('screen-title');
-    if(label)label.textContent=screens[id];
-    document.querySelectorAll('.mobile-nav a[href^="#"]').forEach(a=>{
-      const active=a.getAttribute('href')==='#'+id;
-      if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');
+  const names={home:'Home',explore:'Explore pubs','pub-golf':'Pub Golf','my-pints':'Reviews'};
+  const allowed=new Set(Object.keys(names));
+  const mobileQuery=window.matchMedia('(max-width: 620px)');
+  const mobile=()=>mobileQuery.matches;
+  const header=document.getElementById('screen-header');
+  const back=document.getElementById('screen-back');
+  const screenLabel=document.getElementById('screen-title');
+  const fromURL=()=>new URL(location.href).searchParams.get('screen');
+  const valid=id=>allowed.has(id)?id:'home';
+  let current=valid(fromURL());
+  let depth=Number.isInteger(history.state?.pintDepth)?history.state.pintDepth:0;
+  function urlFor(id){
+    const url=new URL(location.href);
+    url.searchParams.set('screen',id);
+    url.hash='';
+    return url;
+  }
+  function display(id){
+    current=valid(id);
+    document.body.classList.toggle('pint-mobile-screens',mobile());
+    document.body.dataset.screen=current;
+    if(header)header.hidden=!mobile()||current==='home';
+    if(screenLabel)screenLabel.textContent=names[current];
+    if(back)back.setAttribute('aria-label','Back from '+names[current]);
+    document.querySelectorAll('.mobile-nav a[href^="#"]').forEach(link=>{
+      if(link.getAttribute('href')==='#'+current)link.setAttribute('aria-current','page');
+      else link.removeAttribute('aria-current');
     });
-    if(mobile())window.scrollTo({top:0,behavior:'instant'});
+    if(mobile())window.scrollTo(0,0);
   }
   function navigate(id){
+    id=valid(id);
     if(!mobile()){
-      const target=document.getElementById(id);if(target)target.scrollIntoView({behavior:'smooth'});
+      const target=document.getElementById(id);
+      if(target)target.scrollIntoView({behavior:'smooth'});
       return;
     }
-    activate(id,true);
+    if(current===id)return;
+    depth+=1;
+    history.pushState({pintScreen:id,pintDepth:depth},'',urlFor(id));
+    display(id);
   }
-  document.addEventListener('click',e=>{
-    const link=e.target.closest('a[href^="#"]');
-    if(!link)return;
-    const id=link.getAttribute('href').slice(1);
-    if(!ids.includes(id))return;
-    e.preventDefault();navigate(id);
+  document.addEventListener('click',event=>{
+    const anchor=event.target.closest('a[href^="#"]');
+    if(!anchor)return;
+    const id=anchor.getAttribute('href').slice(1);
+    if(!allowed.has(id))return;
+    event.preventDefault();
+    navigate(id);
   });
-  if(back)back.addEventListener('click',()=>{
-    if(screenHistory>0){screenHistory--;history.back()}
-    else navigate('home');
+  back?.addEventListener('click',()=>{
+    if(depth>0){history.back();return}
+    if(current!=='home'){
+      history.replaceState({pintScreen:'home',pintDepth:0},'',urlFor('home'));
+      display('home');
+    }
   });
-  window.addEventListener('popstate',()=>activate(screenParam()||'home'));
-  const breakpoint=matchMedia('(max-width: 620px)');
-  breakpoint.addEventListener?.('change',()=>{
-    document.body.classList.toggle('pint-mobile-screens',mobile());
-    activate(screenParam()||current);
+  window.addEventListener('popstate',()=>{
+    depth=Number.isInteger(history.state?.pintDepth)?history.state.pintDepth:0;
+    display(valid(fromURL()));
   });
-  document.body.classList.toggle('pint-mobile-screens',mobile());
-  activate(screenParam()||'home');
+  mobileQuery.addEventListener?.('change',()=>display(current));
+  if(!history.state?.pintScreen){
+    history.replaceState({...(history.state||{}),pintScreen:current,pintDepth:depth},'',location.href);
+  }
+  display(current);
   window.PintNavigate=navigate;
 })();
