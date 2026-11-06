@@ -16,8 +16,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=3.6" />
-  <link rel="stylesheet" href="features.css?v=3.6" />
+  <link rel="stylesheet" href="styles.css?v=3.7" />
+  <link rel="stylesheet" href="features.css?v=3.7" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoT6kLFxMAH2U=" crossorigin="" />
   <style>
     .pub-price{font-size:11px;color:#a9a18f;margin-top:12px;min-height:18px}
@@ -40,7 +40,7 @@
   <main id="home">
     <section class="hero shell">
       <div class="hero-copy">
-        <div class="eyebrow"><span class="live-dot"></span> PINT PUB DISCOVERY · VERSION 3.6</div>
+        <div class="eyebrow"><span class="live-dot"></span> PINT PUB DISCOVERY · VERSION 3.7</div>
         <h1>Find your next<br/><em>local.</em></h1>
         <p>Explore pubs across Cardiff and the Vale of Glamorgan. Pick somewhere new, pay it a visit, then give your honest verdict.</p>
         <div class="hero-actions"><a href="#explore" class="button button-gold">Explore pubs <span>↗</span></a><a href="#pub-golf" class="button button-outline">⛳ Pub Golf</a><button class="button button-ghost" id="log-first-button">Review a pub <span>＋</span></button><button class="button button-ghost" id="share-pint-button">Share PINT ↗</button></div>
@@ -93,7 +93,7 @@
     <a href="#pub-golf" aria-label="Pub Golf"><span aria-hidden="true">⛳</span><small>Pub Golf</small></a>
     <a href="#my-pints" aria-label="Reviews"><span aria-hidden="true">★</span><small>Reviews</small></a>
   </nav>
-  <footer class="shell footer"><div class="footer-brand">PINT<span>.</span></div><p>FIND IT. VISIT IT. RATE IT.</p><span>Cardiff & the Vale of Glamorgan · © <span id="year"></span></span></footer>
+  <footer class="shell footer"><div class="footer-brand">PINT<span>.</span></div><p>FIND IT. VISIT IT. RATE IT.</p><span>Cardiff · Vale of Glamorgan · Dublin · © <span id="year"></span></span></footer>
 
   <dialog id="entry-dialog" class="modal"><form id="entry-form" class="modal-body"><button type="button" class="close" data-close="entry-dialog" aria-label="Close">×</button><span class="overline">YOUR PUB JOURNAL</span><h2>Review a visit<span class="gold-period">.</span></h2><label>Pub<select name="pubId" id="entry-pub" required></select></label><label>Overall experience (out of 5 stars)<select name="rating" required><option value="">Choose stars</option><option value="1">★☆☆☆☆ — 1</option><option value="2">★★☆☆☆ — 2</option><option value="3">★★★☆☆ — 3</option><option value="4">★★★★☆ — 4</option><option value="5">★★★★★ — 5</option></select></label><div class="form-row"><label>Guinness quality<select name="guinness"><option value="">Didn't try / not sure</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label><label>Atmosphere<select name="atmosphere"><option value="">Not rated</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label></div><div class="form-row"><label>Area / setting<select name="setting"><option value="">Not rated</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label><label>Price of pint (local currency: £ / €) · optional<input name="price" type="number" min="0.01" max="100" step="0.01" placeholder="5.50" /></label></div><label>Date<input name="date" type="date" id="entry-date" required /></label><label>Your verdict<textarea name="notes" rows="3" maxlength="300" placeholder="Great Guinness, friendly bar, nice beer garden..."></textarea></label><label>Photos (up to three) <span class="photo-help">Take a photo or choose from your camera roll</span><input id="review-photos" name="photos" type="file" accept="image/*" multiple /></label><div class="photo-preview" id="photo-preview" aria-live="polite"></div><button class="button button-gold full" type="submit">Save my review ↗</button></form></dialog>
 
@@ -108,11 +108,11 @@
   <script src="photos.js" defer></script>
   <script src="shared.js" defer></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
-  <script src="dublin_directory.js?v=3.6" defer></script>
-  <script src="dublin_explore.js?v=3.6" defer></script>
-  <script src="app.js?v=3.6" defer></script>
-  <script src="pub_golf.js?v=3.6" defer></script>
+  <script src="dublin_directory.js?v=3.7" defer></script>
+  <script src="dublin_explore.js?v=3.7" defer></script>
+  <script src="app.js?v=3.7" defer></script>
+  <script src="pub_golf.js?v=3.7" defer></script>
   <script src="pwa.js" defer></script>
-  <script src="navigation.js?v=3.6" defer></script>
+  <script src="navigation.js?v=3.7" defer></script>
 </body>
 </html>
