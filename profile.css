@@ -45,3 +45,5 @@
  .profile-header h3{font-size:20px}
  .profile-edit-row .button{min-width:75px;padding-left:13px;padding-right:13px}
 }
+
+.profile-review-photos{display:flex;gap:7px;margin:10px 0;flex-wrap:wrap}.profile-review-photos:empty{display:none}.profile-review-photos img{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #455448}
