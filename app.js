@@ -161,6 +161,7 @@
   function updateEntryPubs(){const select=$('#entry-pub');const current=select.value;select.innerHTML=allPubs().map(p=>`<option value="${safe(p.id)}">${safe(p.name)} — ${safe(p.area)}</option>`).join('');if(allPubs().some(p=>p.id===current))select.value=current}
   let favouritesOnly=false;
   let directoryLimit=12;
+  let reviewFeedLimit=12;
   const DIRECTORY_PAGE_SIZE=12;
   function render(){
     const pubs=allPubs();
@@ -193,7 +194,10 @@
     }).join('');
     $('#entry-count').textContent=`${sharedLogs.length} SHARED · ${data.logs.length} PRIVATE`;
     $('#community-summary').textContent=sharedOnline?`${sharedLogs.length} shared reviews from the community · ${sharedPubs.length} community-added pubs`:'Community feed temporarily unavailable — local reviews may still appear below';
-    const recents=[...visibleLogs()].sort((a,b)=>b.date.localeCompare(a.date)||(b.createdAt||0)-(a.createdAt||0)).slice(0,12);
+    const recents=[...visibleLogs()].sort((a,b)=>b.date.localeCompare(a.date)||(b.createdAt||0)-(a.createdAt||0)).slice(0,reviewFeedLimit);
+    const reviewMore=$('#more-community-reviews');
+    reviewMore.hidden=visibleLogs().length<=reviewFeedLimit;
+    reviewMore.textContent='Show more reviews ('+(visibleLogs().length-reviewFeedLimit)+' remaining)';
     $('#recent-list').innerHTML=recents.length?recents.map(l=>`<div class="recent-entry"><div><strong>${safe(getPub(l.pubId)?.name||'Unknown pub')}</strong><div class="review-author">${safe(l.shared?l.reviewerName:'Your saved review · not shared')}</div><small>${safe(l.date)}${l.guinness!=null?' · Guinness '+l.guinness+'★':''}${l.price!=null?' · '+money(l.price):''}</small>${l.notes?`<div class="review-notes">${safe(l.notes)}</div>`:''}<div class="review-photos" data-review-photos="${safe(l.id)}"></div></div><b>${Number(l.rating).toFixed(1)} ★</b></div>`).join(''):'<div class="recent-empty">No pub reviews yet.<br/>Your adventures start with the first one.</div>';
     recents.forEach(async log=>{try{const images=await logPhotos(log);const el=[...document.querySelectorAll('[data-review-photos]')].find(x=>x.dataset.reviewPhotos===log.id);if(el)el.innerHTML=images.map((src,i)=>`<button class="photo-thumb" type="button" aria-label="View photo ${i+1}"><img alt="Photo ${i+1} from ${safe(getPub(log.pubId)?.name||'pub')}" src="${src}" /></button>`).join('')}catch{}});
     if(view==='map')renderMap();
@@ -251,6 +255,7 @@
    $('#search').addEventListener('input',resetDirectory);$('#region-filter').addEventListener('change',resetDirectory);$('#area-filter').addEventListener('change',resetDirectory);$('#sort-filter').addEventListener('change',resetDirectory);
    $('#show-more-pubs').addEventListener('click',()=>{directoryLimit+=DIRECTORY_PAGE_SIZE;render()});
    $('#refresh-community').addEventListener('click',async()=>{const btn=$('#refresh-community');btn.disabled=true;try{await refreshShared()}finally{btn.disabled=false}});
+   $('#more-community-reviews').addEventListener('click',()=>{reviewFeedLimit+=12;render()});
   $('#list-view-button').addEventListener('click',()=>showView('list'));
   $('#map-view-button').addEventListener('click',()=>showView('map'));
   $('#nearby-button').addEventListener('click',()=>{
