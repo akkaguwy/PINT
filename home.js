@@ -46,6 +46,8 @@
     if(label)label.textContent=chosen;
     if(city)city.textContent=chosen;
     if(heroCount)heroCount.textContent=count.toLocaleString('en-GB')+' '+(count===1?'pub':'pubs');
+    const cowbridgeLink=$('home-cowbridge-link');
+    if(cowbridgeLink)cowbridgeLink.hidden=activeDestination!=='Vale';
     const browse=$('home-browse-link');
     if(browse)browse.setAttribute('aria-label','Explore pubs in '+chosen);
     document.querySelectorAll('[data-home-region]').forEach(button=>{
