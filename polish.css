@@ -1,0 +1,151 @@
+/* PINT v3.8 — editorial, data-first visual identity */
+:root{
+  --black:#121512;--panel:#1b201c;--cream:#f1f2eb;--muted:#adb5aa;
+  --gold:#c5ac79;--border:#343d36;--display:'DM Sans',system-ui,sans-serif;
+}
+body{background:var(--black);color:var(--cream);font-family:'DM Sans',system-ui,sans-serif}
+h1,h2,h3,.brand-name{letter-spacing:-.035em}
+.topbar{height:76px;border-color:#29312a}
+.brand-mark{border:0;background:#d2b782;color:#141713;width:39px;height:39px;border-radius:11px;font:800 23px 'DM Sans',sans-serif}
+.brand-dot{color:#141713}
+.brand-name{letter-spacing:.005em;font-size:22px}
+.brand-name small{color:#9da79c;letter-spacing:.02em;font-size:10px;font-weight:500;margin-top:3px}
+.topbar nav{font-weight:600;gap:22px}
+.button,.toolbar select,.filter-button,.community-refresh,.directory-more{
+  border-radius:10px;letter-spacing:0;font-weight:650;
+}
+.button{gap:10px}
+.button:hover{transform:none;filter:brightness(1.07)}
+.button-gold,.pub-actions button{background:#c5ac79;color:#161a16;border-color:#c5ac79}
+.button-outline{border-color:#4b564c}
+.eyebrow,.overline{letter-spacing:.07em;text-transform:uppercase;color:#c5ac79;font-size:10px;font-weight:700}
+.gold-period{color:inherit}
+.hero{min-height:480px;align-items:center;gap:20px}
+.hero-copy{padding:45px 18px 38px 0}
+.hero h1{font:700 clamp(60px,7vw,101px)/1.03 'DM Sans',sans-serif;letter-spacing:-.07em;margin:18px 0 22px}
+.hero h1 em{font-style:normal;color:#d5bc89}
+.hero-copy>p{line-height:1.65;max-width:420px}
+.hero-image{min-height:420px;border-radius:14px;filter:saturate(.72)}
+.hero-overlay{display:none}
+.hero-caption,.mini-star{display:none!important}
+.stat-band{margin-top:15px}
+.stat-band strong{font:750 30px 'DM Sans',sans-serif;letter-spacing:-.04em}
+.stat-band span{letter-spacing:.04em}
+.section-heading h2,.journal h2,.modal h2,.golf-heading h2{
+  font-family:'DM Sans',sans-serif;font-weight:730;letter-spacing:-.045em;
+}
+.section-heading h2{font-size:clamp(30px,3.4vw,45px)}
+.explore{padding-top:65px}
+.destination-picker{background:#1b221d;border:1px solid #39463b;border-radius:14px;padding:22px 24px}
+.destination-picker label{color:#afbcad;letter-spacing:.055em;font-size:11px}
+.destination-picker h3{font:730 clamp(23px,3vw,32px)/1.15 'DM Sans',sans-serif;letter-spacing:-.04em;margin:8px 0 6px}
+.destination-picker p{color:#9ea99d;font-size:13px}
+.toolbar{margin-top:22px;gap:10px}
+.search-box input,.toolbar select,.filter-button{background:#1d241f;color:#f3f2ec;border:1px solid #3c473e;border-radius:10px}
+.search-box input{padding-left:46px}
+.search-box>span{color:#a7b2a5}
+.search-box kbd{display:none}
+.view-switch{border:1px solid #343e35;background:#1b221d;border-radius:10px}
+.view-switch button{font-weight:650}
+.view-switch button.active{background:#384b3c;color:#f4f4ed}
+.directory-note{font-size:12px;color:#9fa89d}
+.directory-note span:first-child{color:#e3dfd2}
+.directory-hint{color:#97a598}
+.pub-grid{gap:13px}
+.pub-card{
+  border:1px solid #384139;border-radius:13px;background:#1b211c;
+  box-shadow:none;position:relative;transition:border-color .15s ease,background .15s ease;
+}
+.pub-card:hover{border-color:#697a67;background:#202920}
+.pub-photo{display:contents!important}
+.photo-label{display:none!important}
+.heart{
+  position:absolute;top:13px;right:13px;background:#273129;border:1px solid #465447;
+  border-radius:9px;width:38px;height:38px;font-size:23px;color:#d9dfd3;
+}
+.heart.active{color:#e2bf79}
+.pub-body{padding:23px;gap:0}
+.pub-body h3{font:730 22px/1.2 'DM Sans',sans-serif;letter-spacing:-.035em;padding-right:41px;margin:0 0 8px}
+.pub-area{font-size:12px;letter-spacing:0;text-transform:none;color:#b0bda9;line-height:1.45}
+.pub-description{min-height:0;margin:15px 0;color:#aab4a8;line-height:1.55}
+.pub-metrics{border-color:#364237;margin-top:auto;padding:14px 0}
+.pub-metrics strong{font:700 18px 'DM Sans',sans-serif}
+.pub-metrics span{font-size:10px;letter-spacing:0}
+.pub-price{color:#b5bcb1;font-size:12px}
+.pub-actions button,.pub-actions a{
+  font-size:12px;font-weight:700;border-radius:9px;min-height:43px;
+}
+.pub-actions button:first-child{background:#2c3b30;color:#f1f2eb;border-color:#435546}
+.pub-actions button:last-child{background:#c5ac79;color:#161a16;border-color:#c5ac79}
+.journal{background:#171d18;border-color:#303c32}
+.journal-panel{background:#1c251e;border:1px solid #38463b;border-radius:14px}
+.journal h2{font-size:clamp(34px,4vw,48px);line-height:1.13}
+.panel-head{color:#d4d9ce;letter-spacing:.045em}
+.recent-entry strong{font:700 16px 'DM Sans',sans-serif;letter-spacing:-.02em}
+.review-author{letter-spacing:0;text-transform:none;color:#aebaad;font-size:12px;font-weight:550;opacity:1}
+.community-summary{color:#aebaad!important}
+.shared-status{border-color:#39463d;background:#1b241d;color:#bec9bb;font-weight:550;letter-spacing:0}
+.shared-status.online{border-color:#34483a;background:#1d2920;color:#bdd9bc}
+.shared-status.offline{border-color:#694439;background:#2b201d;color:#e7b9a3}
+.golf-section{background:#161c17;border-color:#303b31}
+.golf-route{background:#202921;border:1px solid #39493d;border-radius:13px;min-height:175px}
+.golf-route.selected,.golf-route:hover{background:#29382c;border-color:#a58f68}
+.golf-route strong{font:700 19px 'DM Sans',sans-serif}
+.golf-route-tag{letter-spacing:.04em}
+.golf-detail{background:#1b251e;border-color:#39483d;border-radius:13px}
+.golf-detail h3,.hole-info strong{font-family:'DM Sans',sans-serif}
+.golf-score strong,.hole-number{font-family:'DM Sans',sans-serif}
+.modal{border-color:#435246;background:#1b221d;border-radius:15px}
+.modal label{color:#d4ddd0;font-size:12px}
+.modal input,.modal select,.modal textarea{background:#141b16;border:1px solid #455348;border-radius:9px}
+.modal .close{color:#e8e9e2}
+.detail-cover{height:115px;background-image:none!important;background:#26352a;display:flex}
+.detail-cover:before{display:none}
+.detail-cover span{font-size:12px;letter-spacing:.02em}
+.detail-scores strong{font-family:'DM Sans',sans-serif}
+.detail-dialog h3{font:700 22px 'DM Sans',sans-serif}
+.screen-header:not([hidden]){background:#171e19;border-bottom:1px solid #354237}
+.screen-header strong{font-weight:700}
+#screen-back{color:#d6c49e}
+@media(max-width:620px){
+  .topbar{height:61px}
+  .brand-mark{width:34px;height:34px;font-size:21px}
+  .brand-name{font-size:21px}
+  .brand-name small{font-size:8px}
+  .hero h1{font-size:clamp(44px,12vw,65px)!important}
+  .hero-copy{padding:20px 0!important}
+  .hero-actions{display:grid;gap:9px!important}
+  .hero-actions .button{border-radius:10px}
+  .stat-band strong{font-size:23px}
+  .explore{padding-top:20px!important}
+  .section-heading h2{font-size:31px;margin:7px 0}
+  .section-heading p{line-height:1.5}
+  .destination-picker{padding:17px;margin-bottom:14px}
+  .destination-picker h3{font-size:25px}
+  .toolbar{gap:9px;margin-top:15px}
+  .toolbar #region-filter{border-color:#687b68;background:#253328}
+  .pub-grid{gap:9px!important}
+  .pub-grid .pub-card{display:flex!important;flex-direction:column!important;min-height:0!important;border-radius:12px}
+  .pub-body{padding:17px!important}
+  .pub-body h3{font-size:19px!important;line-height:1.2;margin-bottom:6px!important}
+  .pub-area{font-size:11px!important;color:#acb9ad}
+  .pub-metrics{padding:10px 0!important;margin-top:11px!important}
+  .pub-metrics strong{font-size:16px!important}
+  .pub-metrics span{font-size:9px!important}
+  .pub-actions{margin-top:11px!important}
+  .pub-actions button{min-height:44px!important;font-size:12px}
+  .heart{height:35px!important;width:35px!important;right:14px!important;top:14px!important;border-radius:9px}
+  .mobile-nav{background:rgba(20,27,22,.98);border-top:1px solid #3b483d;box-shadow:none}
+  .mobile-nav a{color:#9faea0;border-radius:10px;gap:3px}
+  .mobile-nav a span{color:inherit;font-size:22px}
+  .mobile-nav a[aria-current="page"]{color:#ecd5a6;background:#2d3a30}
+  .mobile-nav a small{font-size:10px;letter-spacing:0;font-weight:650}
+  .golf-route{border-radius:12px;min-height:165px}
+  .journal-inner{padding-top:26px!important}
+  .journal h2{font-size:34px}
+  .journal-panel{padding:16px}
+  .modal{border-radius:16px 16px 0 0}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
