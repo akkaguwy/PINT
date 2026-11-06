@@ -1,14 +1,6 @@
 (() => {
   'use strict';
   const KEY = 'pint-cardiff-v1';
-  const photos = [
-    'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=800&q=80'
-  ];
   // Curated destination suggestions, not endorsements or live venue records.
   // Fields: name | area | address/search location | suggested reason to explore.
   const cardiffSuggestions = [
@@ -346,6 +338,7 @@
       if(!getPub(log.pubId)||!log.reviewerName||(price!=null&&(price<=0||price>100))||log.rating<1||log.rating>5){toast('Check your review details');return}
       button.textContent='Sharing review…';
       const images=await Promise.all([...$('#review-photos').files].slice(0,3).map(window.PintPhotos.resize));
+      log.coverPhoto=log.coverPhoto&&images.length>0;
       await window.PintShared.addReview({...log,images});
       localStorage.setItem('pint-reviewer-name',log.reviewerName);
       $('#entry-dialog').close();clearPhotoPreview();
