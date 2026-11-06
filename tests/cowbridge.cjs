@@ -27,7 +27,7 @@ const original=[
 assert.equal(venues.slice(0,original.length).map(x=>x.name).join('|'),original.join('|'));
 const expected=[
   '1 Town Hall Square','Horse & Groom',"Harry's Bar",'Barbacoa Bar & Tapas',
-  'The Hare & Hounds','The Barley Mow','The Sycamore Tree','The White Lion','The Star Inn'
+  'The Hare & Hounds','The Barley Mow','The Sycamore Tree','The White Lion'
 ];
 assert.deepEqual(venues.slice(original.length).map(x=>x.name),expected);
 const identities=venues.map(v=>(v.name+'|'+v.area).toLowerCase());
