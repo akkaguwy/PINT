@@ -2,6 +2,7 @@ name: Firebase key diagnostic (non-mutating)
 on:
   pull_request:
     paths:
+      - 'firebase_auth.js'
       - '.github/workflows/firebase-key-diagnostic.yml'
   workflow_dispatch:
 jobs:
