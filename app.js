@@ -144,8 +144,11 @@
     }
   }catch{}
   let requestSerial=0;
+  let discoveredPubs=[];
+  const cachedDiscover=window.PintDublinExplore?.readCache();
+  if(cachedDiscover?.pubs)discoveredPubs=cachedDiscover.pubs;
   const allPubs = () => {
-    const pubs=[...starterPubs,...sharedPubs,...data.pubs];
+    const pubs=[...starterPubs,...sharedPubs,...data.pubs,...discoveredPubs];
     const seen=new Set();
     return pubs.filter(p=>{if(!p||!p.name)return false;const key=(p.region+'|'+p.name+'|'+p.area).toLowerCase();if(seen.has(key))return false;seen.add(key);return true});
   };
@@ -204,7 +207,7 @@
     'Dublin|Smithfield':[53.3496,-6.2786],'Dublin|The Liberties':[53.3445,-6.2766],'Dublin|Glasnevin':[53.3698,-6.2716]
   };
   const distanceKm=(a,b)=>{const rad=Math.PI/180,dLat=(b[0]-a[0])*rad,dLon=(b[1]-a[1])*rad,x=Math.sin(dLat/2)**2+Math.cos(a[0]*rad)*Math.cos(b[0]*rad)*Math.sin(dLon/2)**2;return 6371*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))};
-  const pubCentre=pub=>centres[pub.region+'|'+pub.area]||centres[pub.area];
+  const pubCentre=pub=>(Number.isFinite(pub.lat)&&Number.isFinite(pub.lon)?[pub.lat,pub.lon]:(centres[pub.region+'|'+pub.area]||centres[pub.area]));
   const pubDistance=pub=>nearPosition&&pubCentre(pub)?distanceKm(nearPosition,pubCentre(pub)):null;
   const mapSearch=pub=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(pub.name+', '+(pub.address||pub.area)+(pub.region==='Dublin'?', Ireland':', Wales'));
   let nearPosition=null,view='list',pubMap=null,mapMarkers=null,lastFiltered=[];
@@ -222,6 +225,7 @@
   function render(){
     const pubs=allPubs();
     const destination=$('#region-filter').value;
+    $('#discover-dublin').hidden=destination!=='Dublin';
     $('#destination-title').textContent=destination==='Dublin'?'Explore Dublin pubs':destination==='Vale'?'Explore Vale of Glamorgan pubs':'Explore Cardiff pubs';
     $('#stat-pubs').textContent=pubs.length;$('#stat-logs').textContent=visibleLogs().length;$('#stat-favourites').textContent=data.favourites.length;
     const selectedArea=$('#area-filter').value;
@@ -243,7 +247,7 @@
     const moreButton=$('#show-more-pubs');
     moreButton.hidden=view==='map'||filtered.length<=directoryLimit;
     moreButton.textContent='Show more pubs ('+Math.min(DIRECTORY_PAGE_SIZE,Math.max(0,filtered.length-directoryLimit))+' of '+(filtered.length-directoryLimit)+' remaining)';
-    $('#result-count').textContent=`${filtered.length} ${filtered.length===1?'pub':'pubs'}`;
+    $('#result-count').textContent=`${filtered.length} ${filtered.length===1?'pub':'pubs'}` + (destination==='Dublin'&&discoveredPubs.length?' · with mapped pubs':'');
     $('#empty-state').hidden=filtered.length>0;
     if(filtered.length===0&&pubs.some(p=>p.region===selectedRegion))$('#empty-state').textContent='No pubs match your filters. Clear the search or tap Favourites to see all pubs.';
     $('#pub-grid').innerHTML=filtered.slice(0,directoryLimit).map((pub,i)=>{
@@ -279,8 +283,28 @@
   async function renderDetailPhotos(id){const dialog=$('#detail-dialog');const logs=visibleLogs().filter(l=>l.pubId===id);for(const log of logs){try{const images=await logPhotos(log);const el=[...dialog.querySelectorAll('[data-detail-photos]')].find(node=>node.dataset.detailPhotos===log.id);if(el)el.innerHTML=images.map((src,i)=>`<button class="photo-thumb" type="button" aria-label="View visit photo ${i+1}"><img src="${src}" alt="Pub visit photo" /></button>`).join('')}catch{}}}
   async function openPubDetail(id){const pub=getPub(id);if(!pub)return;const dialog=$('#detail-dialog');$('#detail-content').innerHTML=detailMarkup(pub);if(!dialog.open)dialog.showModal();await renderDetailPhotos(id)}
   function syncPubHash(){const match=location.hash.match(/^#pub=(.+)$/);if(match){let id;try{id=decodeURIComponent(match[1])}catch{return}openPubDetail(id)}else if($('#detail-dialog').open)$('#detail-dialog').close()}
-  $('#pub-grid').addEventListener('click',event=>{const heart=event.target.closest('[data-favourite]');if(heart){const id=heart.dataset.favourite;data.favourites=data.favourites.includes(id)?data.favourites.filter(x=>x!==id):[...data.favourites,id];save();toast('Favourites updated');return}const details=event.target.closest('[data-details]');if(details){location.hash='pub='+encodeURIComponent(details.dataset.details);return}const log=event.target.closest('[data-log]');if(log){openDialog('entry-dialog');$('#entry-pub').value=log.dataset.log}});
-  $('#detail-content').addEventListener('click',event=>{const review=event.target.closest('[data-detail-review]');if(review){$('#detail-dialog').close();openDialog('entry-dialog');$('#entry-pub').value=review.dataset.detailReview;return}const image=event.target.closest('.photo-thumb img');if(image){$('#photo-full').src=image.src;$('#photo-dialog').showModal()}});
+  async function ensureSharedPub(id){
+    const pub=getPub(id);if(!pub||!pub.osmDiscovered)return true;
+    if(sharedPubs.some(p=>p.id===id))return true;
+    try{
+      await window.PintShared.addPub({id:pub.id,name:pub.name,region:'Dublin',area:pub.area,address:pub.address,description:pub.description});
+      await refreshShared();
+      return true;
+    }catch(err){toast('Could not add mapped pub to shared reviews: '+(err.message||'try again'));return false}
+  }
+  $('#discover-dublin').addEventListener('click',async()=>{
+    const button=$('#discover-dublin');button.disabled=true;button.textContent='Finding mapped Dublin pubs…';
+    try{
+      const result=await window.PintDublinExplore.find();
+      discoveredPubs=result.pubs;
+      $('#search').value='';$('#area-filter').value='all';favouritesOnly=false;$('#favourites-filter').setAttribute('aria-pressed','false');
+      directoryLimit=12;render();
+      toast('Mapped pub results loaded'+(result.stale?' (saved copy)':'')+' ✓');
+    }catch(error){toast('Pub search unavailable: '+(error.message||'try again later'))}
+    finally{button.disabled=false;button.textContent='Find more Dublin pubs'}
+  });
+  $('#pub-grid').addEventListener('click',async event=>{const heart=event.target.closest('[data-favourite]');if(heart){const id=heart.dataset.favourite;data.favourites=data.favourites.includes(id)?data.favourites.filter(x=>x!==id):[...data.favourites,id];save();toast('Favourites updated');return}const details=event.target.closest('[data-details]');if(details){location.hash='pub='+encodeURIComponent(details.dataset.details);return}const log=event.target.closest('[data-log]');if(log){if(!await ensureSharedPub(log.dataset.log))return;openDialog('entry-dialog');$('#entry-pub').value=log.dataset.log}});
+  $('#detail-content').addEventListener('click',async event=>{const review=event.target.closest('[data-detail-review]');if(review){if(!await ensureSharedPub(review.dataset.detailReview))return;$('#detail-dialog').close();openDialog('entry-dialog');$('#entry-pub').value=review.dataset.detailReview;return}const image=event.target.closest('.photo-thumb img');if(image){$('#photo-full').src=image.src;$('#photo-dialog').showModal()}});
   $('#detail-dialog').addEventListener('close',()=>{if(location.hash.startsWith('#pub='))history.replaceState(null,'','#explore')});
   window.addEventListener('hashchange',syncPubHash);
   $('#review-photos').addEventListener('change',event=>{clearPhotoPreview();const files=[...event.target.files];if(files.length>3){toast('Only the first three photos will be saved')}files.slice(0,3).forEach(file=>{const url=URL.createObjectURL(file);photoPreviewUrls.push(url);const image=document.createElement('img');image.src=url;image.alt='Selected review photo';$('#photo-preview').appendChild(image)});if(files.length)$('#photo-preview').insertAdjacentHTML('beforeend',`<span class="photo-count">${Math.min(3,files.length)} selected</span>`)});
