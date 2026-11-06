@@ -56,13 +56,23 @@
     "head of steam":["Craft beer","Food"]
   };
   const allowed=new Set(["Pub","Traditional","Historic","Guinness","Cocktails","Live music","Late bar","Sports","Craft beer","Brewpub","Beer garden","Food","Comedy","Nightlife","Art","Tourist favourite","Games","Scenic","Rugby"]);
+  const storageKey='pint-user-pub-types-v1';
+  const key=pub=>[pub.region,pub.name,pub.area].map(v=>String(v||'').toLowerCase().trim()).join('|');
+  function localTypes(){
+    try{const x=JSON.parse(localStorage.getItem(storageKey)||'{}');return x&&typeof x==='object'?x:{}}catch{return {}}
+  }
+  function rememberType(pub,type){
+    if(!allowed.has(type))return;
+    const saved=localTypes();saved[key(pub)]=type;
+    try{localStorage.setItem(storageKey,JSON.stringify(saved))}catch{}
+  }
   function tags(pub) {
     const explicit=pub.typeTags||pub.tags||pub.categories;
-    const custom=Array.isArray(explicit)?explicit:
-      (typeof pub.pubType==='string'?[pub.pubType]:[]);
+    const custom=Array.isArray(explicit)?explicit:(typeof pub.pubType==='string'?[pub.pubType]:[]);
+    const local=localTypes()[key(pub)];
     const knownTags=known[String(pub.name||'').toLowerCase().trim()]||[];
-    const result=[...new Set([...custom,...knownTags].map(String).filter(x=>allowed.has(x)))];
+    const result=[...new Set([local,...custom,...knownTags].filter(Boolean).map(String).filter(x=>allowed.has(x)))];
     return result.length?result.slice(0,3):['Pub'];
   }
-  window.PintIdentity={tags,allowed:[...allowed]};
+  window.PintIdentity={tags,rememberType,allowed:[...allowed]};
 })();
