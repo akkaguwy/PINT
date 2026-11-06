@@ -20,6 +20,8 @@ jobs:
         run: node tests/home.cjs
       - name: PWA update flow
         run: node tests/update.cjs
+      - name: Cowbridge venue coverage and stable IDs
+        run: node tests/cowbridge.cjs
       - name: Required app assets and Dublin entries
         run: |
           python3 - <<'PY'
