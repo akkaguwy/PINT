@@ -70,18 +70,18 @@
         <label class="search-box"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search pubs or areas..." autocomplete="off" /><kbd>⌕</kbd></label>
         <select id="region-filter" aria-label="Filter by region"><option value="all">Cardiff + Vale</option><option value="Cardiff">Cardiff</option><option value="Vale">Vale of Glamorgan</option></select>
         <select id="area-filter" aria-label="Filter by area"><option value="all">All areas</option></select>
-        <select id="sort-filter" aria-label="Sort pubs"><option value="name">Name A–Z</option><option value="unvisited">Not yet reviewed</option><option value="rated">Highest community rating</option><option value="cheapest">Cheapest logged pint</option></select>
+        <select id="sort-filter" aria-label="Sort pubs"><option value="name">Name A–Z</option><option value="unvisited">Not yet reviewed</option><option value="rated">Highest community rating</option><option value="activity">Recently reviewed</option><option value="cheapest">Cheapest logged pint</option></select>
         <button class="filter-button" id="favourites-filter" aria-pressed="false">♡ Favourites</button>
         <button class="filter-button" id="nearby-button" aria-pressed="false">⌖ Near me</button>
       </div>
       <div class="view-bar"><div class="view-switch" role="group" aria-label="Directory view"><button id="list-view-button" class="active" aria-pressed="true">☷ List</button><button id="map-view-button" aria-pressed="false">⌖ Map</button></div><span id="location-note" aria-live="polite"></span></div>
       <div class="directory-note"><span id="result-count">0 pubs</span><span>Suggestions only. Check opening times and availability; Guinness isn't guaranteed. Images are illustrative.</span></div>
       <div id="map-container" class="map-container" hidden><div id="pub-map" aria-label="Map of approximate pub neighbourhoods"></div><p class="map-disclaimer">Pins mark approximate neighbourhood centres, not exact pub entrances. Tap a cluster to explore its pubs; use Directions on a pub for a location search.</p></div>
-      <div class="pub-grid" id="pub-grid"></div>
+      <div class="pub-grid" id="pub-grid"></div><button id="show-more-pubs" class="button button-outline directory-more" type="button" hidden>Show more pubs</button>
       <p class="empty-state" id="empty-state" hidden>No pubs match that search. Try another area or add a new pub.</p>
     </section>
 
-    <section class="journal" id="my-pints"><div class="shell journal-inner"><div><span class="overline">THE PINT COMMUNITY</span><h2>Every good pub<br/>has a story<span class="gold-period">.</span></h2><p>Post a review once and everyone using PINT can see it. No account needed — just give your name.</p><button id="journal-log-button" class="button button-gold">Review a pub <span>↗</span></button></div><div class="journal-panel"><div class="panel-head"><strong>RECENT REVIEWS</strong><span id="entry-count">0 LOGGED</span></div><div id="recent-list" class="recent-list"></div></div></div></section>
+    <section class="journal" id="my-pints"><div class="shell journal-inner"><div><span class="overline">THE PINT COMMUNITY</span><h2>Every good pub<br/>has a story<span class="gold-period">.</span></h2><p>Post a review once and everyone using PINT can see it. No account needed — just give your name.</p><button id="journal-log-button" class="button button-gold">Review a pub <span>↗</span></button></div><div class="journal-panel"><p id="community-summary" class="community-summary" aria-live="polite">Loading community activity…</p><button id="refresh-community" type="button" class="community-refresh">↻ Refresh reviews</button><div class="panel-head"><strong>RECENT REVIEWS</strong><span id="entry-count">0 LOGGED</span></div><div id="recent-list" class="recent-list"></div></div></div></section>
 
     <section class="install-section shell" id="install-pint"><div class="install-mark">P<span>.</span></div><div><span class="overline">TAKE PINT WITH YOU</span><h2>Put PINT on your Home Screen.</h2><p>On iPhone, open this page in Safari, tap Share, choose Add to Home Screen, and enable “Open as Web App”.</p></div><span class="install-label">MADE FOR MOBILE ↗</span></section>
   </main>
