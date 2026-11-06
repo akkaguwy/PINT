@@ -227,10 +227,10 @@
     const destination=$('#region-filter').value;
     $('#discover-dublin').hidden=destination!=='Dublin';
     $('#destination-title').textContent=destination==='Dublin'?'Explore Dublin pubs':destination==='Vale'?'Explore Vale of Glamorgan pubs':'Explore Cardiff pubs';
-    $('#stat-pubs').textContent=pubs.length;$('#stat-logs').textContent=visibleLogs().length;$('#stat-favourites').textContent=data.favourites.length;
+    $('#stat-pubs').textContent=pubs.filter(p=>p.region===destination).length;$('#stat-logs').textContent=visibleLogs().length;$('#stat-favourites').textContent=data.favourites.length;
     const selectedArea=$('#area-filter').value;
     const selectedRegion=$('#region-filter').value;
-    $('#directory-hint').textContent='Showing '+selectedRegion+' pubs. Search or filter by neighbourhood to explore.';
+    $('#directory-hint').textContent='Directory: '+pubs.filter(p=>p.region===selectedRegion).length+' '+selectedRegion+' pubs (browse in batches of 12).';
     const areas=[...new Set(pubs.filter(p=>selectedRegion==='all'||p.region===selectedRegion).map(p=>p.area))].sort();
     $('#area-filter').innerHTML='<option value="all">All areas</option>'+areas.map(a=>`<option value="${safe(a)}">${safe(a)}</option>`).join('');
     $('#area-filter').value=areas.includes(selectedArea)?selectedArea:'all';

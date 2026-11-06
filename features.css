@@ -184,3 +184,32 @@ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
 .directory-hint{color:#baa77d;font-size:12px;margin:8px 0 12px}
 
 .discover-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:12px 0}.discover-row button{min-height:46px}.discover-row [hidden]{display:none!important}#osm-credit{font-size:11px;color:#999184}@media(max-width:620px){.discover-row{display:block}.discover-row button{width:100%;margin-bottom:7px}}
+
+/* PINT v3.6: real mobile views; no page-length anchor scrolling */
+.screen-header{display:none}
+@media(max-width:620px){
+ html{scroll-behavior:auto}
+ body.pint-mobile-screens #home>.hero,
+ body.pint-mobile-screens #home>.stat-band,
+ body.pint-mobile-screens #home>.golf-section,
+ body.pint-mobile-screens #home>.explore,
+ body.pint-mobile-screens #home>.journal,
+ body.pint-mobile-screens #home>.install-section{display:none!important}
+ body.pint-mobile-screens[data-screen="home"] #home>.hero{display:block!important}
+ body.pint-mobile-screens[data-screen="home"] #home>.stat-band{display:grid!important}
+ body.pint-mobile-screens[data-screen="home"] #home>.install-section{display:flex!important}
+ body.pint-mobile-screens[data-screen="pub-golf"] #home>.golf-section{display:block!important}
+ body.pint-mobile-screens[data-screen="explore"] #home>.explore{display:block!important}
+ body.pint-mobile-screens[data-screen="my-pints"] #home>.journal{display:block!important}
+ body.pint-mobile-screens[data-screen="home"] #shared-status{display:block!important}
+ body.pint-mobile-screens:not([data-screen="home"]) #shared-status{display:none!important}
+ .screen-header:not([hidden]){display:flex;align-items:center;gap:15px;position:sticky;top:0;z-index:14;background:#151611;min-height:55px;border-bottom:1px solid #4b4335;padding-top:7px;padding-bottom:7px}
+ .screen-header button{font:700 16px 'DM Sans',sans-serif;background:transparent;border:0;color:#d6b777;min-height:42px;padding:5px}
+ .screen-header button:first-letter{font-size:25px}
+ .screen-header strong{font-size:16px;color:#f5f0e6}
+ .mobile-nav a[aria-current="page"]{color:#e6bd71;background:#3a3326}
+ body.pint-mobile-screens[data-screen="my-pints"] .journal-inner{padding-top:25px}
+ body.pint-mobile-screens[data-screen="pub-golf"] .golf-section{padding-top:24px!important}
+ body.pint-mobile-screens[data-screen="explore"] .explore{padding-top:25px!important}
+ body.pint-mobile-screens .footer{display:none}
+}
