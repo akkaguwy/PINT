@@ -26,6 +26,7 @@ const label=(error)=>{
     'auth/popup-blocked':'The browser blocked sign-in. Allow pop-ups and try again.',
     'auth/popup-closed-by-user':'Google sign-in was cancelled.',
     'auth/unauthorized-domain':'This site needs to be added to Firebase authorized domains.',
+    'auth/api-key-not-valid':'PINT sign-in configuration is out of date. Reload the latest version of the app.',
     'auth/operation-not-allowed':'This sign-in method is not enabled in Firebase.',
     'auth/too-many-requests':'Too many attempts. Try again later.'
   };
