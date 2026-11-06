@@ -173,3 +173,10 @@ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
  .recent-entry strong{font-size:16px!important}
 }
 #more-community-reviews{display:block;width:100%;text-align:center;margin-top:16px}#more-community-reviews[hidden]{display:none}
+
+/* PINT destination selector */
+.destination-picker{border:1px solid #675633;border-radius:16px;background:linear-gradient(120deg,#28271f,#171915);padding:20px 24px;margin-bottom:18px}
+.destination-picker label{display:block;color:#c9a35b;font-weight:800;letter-spacing:.12em;font-size:11px}
+.destination-picker h3{font:700 clamp(26px,4vw,39px)/1.1 'Playfair Display',Georgia,serif;margin:10px 0}
+.destination-picker p{font-size:13px;color:#c0b6a5;margin:0}
+@media(max-width:620px){.destination-picker{padding:16px;margin-bottom:12px}.destination-picker h3{font-size:26px}.toolbar #region-filter{grid-column:1/-1;min-height:54px;background:#302b1e;border-color:#b28f50;font-weight:750;font-size:16px}}
