@@ -241,12 +241,15 @@
       const distance=pubDistance(pub);
       return `<article class="pub-card"><div class="pub-photo" style="background-image:url('${image}')"><span class="photo-label">${safe((pub.region==='Vale'?'THE VALE':pub.region.toUpperCase())+' · '+pub.area.toUpperCase())}</span><button class="heart ${fav?'active':''}" data-favourite="${safe(pub.id)}" aria-label="${fav?'Remove':'Add'} ${safe(pub.name)} ${fav?'from':'to'} favourites" aria-pressed="${fav}">${fav?'♥':'♡'}</button></div><div class="pub-body"><h3>${safe(pub.name)}</h3><span class="pub-area">⌖ ${safe(pub.address||pub.area)}${distance==null?'':' · ~'+distance.toFixed(1)+' km'}</span><p class="pub-description">${safe(pub.description||'A pub to explore and review yourself.')}</p><div class="pub-metrics"><div><strong>${rating==null?'Not rated':rating.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} OVERALL /5</span></div><div><strong>${guinness==null?'Not rated':guinness.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} GUINNESS /5</span></div></div><div class="pub-price">${price==null?'No pint price logged yet':'Last logged pint: '+money(price,pub.id)}</div><div class="pub-actions"><button data-details="${safe(pub.id)}">View pub ↗</button><button data-log="${safe(pub.id)}">★ Review</button></div></div></article>`;
     }).join('');
-    $('#entry-count').textContent=`${sharedLogs.length} SHARED · ${data.logs.length} PRIVATE`;
-    $('#community-summary').textContent=sharedOnline?`${sharedLogs.length} shared reviews available · ${sharedPubs.length} community-added pubs`:`Offline snapshot: ${sharedLogs.length} last-synced reviews. New submissions require an online connection.`;
-    const recents=[...visibleLogs()].sort((a,b)=>b.date.localeCompare(a.date)||(b.createdAt||0)-(a.createdAt||0)).slice(0,reviewFeedLimit);
+    const destinationReviews=visibleLogs().filter(l=>getPub(l.pubId)?.region===$('#region-filter').value);
+    $('#entry-count').textContent=`${destinationReviews.filter(l=>l.shared).length} SHARED · ${destinationReviews.filter(l=>!l.shared).length} PRIVATE`;
+    const destinationName=$('#region-filter').selectedOptions[0]?.textContent||'destination';
+    const destinationShared=sharedLogs.filter(l=>getPub(l.pubId)?.region===$('#region-filter').value).length;
+    $('#community-summary').textContent=sharedOnline?`${destinationShared} shared reviews in ${destinationName}`:`Offline snapshot: ${destinationShared} reviews in ${destinationName}. Posting requires an internet connection.`;
+    const recents=[...destinationReviews].sort((a,b)=>b.date.localeCompare(a.date)||(b.createdAt||0)-(a.createdAt||0)).slice(0,reviewFeedLimit);
     const reviewMore=$('#more-community-reviews');
-    reviewMore.hidden=visibleLogs().length<=reviewFeedLimit;
-    reviewMore.textContent='Show more reviews ('+(visibleLogs().length-reviewFeedLimit)+' remaining)';
+    reviewMore.hidden=destinationReviews.length<=reviewFeedLimit;
+    reviewMore.textContent='Show more reviews ('+(destinationReviews.length-reviewFeedLimit)+' remaining)';
     $('#recent-list').innerHTML=recents.length?recents.map(l=>`<div class="recent-entry"><div><strong>${safe(getPub(l.pubId)?.name||'Unknown pub')}</strong><div class="review-author">${safe(l.shared?l.reviewerName:'Your saved review · not shared')}</div><small>${safe(l.date)}${l.guinness!=null?' · Guinness '+l.guinness+'★':''}${l.price!=null?' · '+money(l.price,l.pubId):''}</small>${l.notes?`<div class="review-notes">${safe(l.notes)}</div>`:''}<div class="review-photos" data-review-photos="${safe(l.id)}"></div></div><b>${Number(l.rating).toFixed(1)} ★</b></div>`).join(''):'<div class="recent-empty">No pub reviews yet.<br/>Your adventures start with the first one.</div>';
     recents.forEach(async log=>{try{const images=await logPhotos(log);const el=[...document.querySelectorAll('[data-review-photos]')].find(x=>x.dataset.reviewPhotos===log.id);if(el)el.innerHTML=images.map((src,i)=>`<button class="photo-thumb" type="button" aria-label="View photo ${i+1}"><img alt="Photo ${i+1} from ${safe(getPub(log.pubId)?.name||'pub')}" src="${src}" /></button>`).join('')}catch{}});
     if(view==='map')renderMap();
@@ -337,15 +340,17 @@
   backupDialog.querySelector('p').textContent='Your old reviews, photos, favourites and Pub Golf scorecards are kept on this device. New shared reviews and pubs are stored online. A JSON backup includes your local data only.';
   backupDialog.querySelector('.small-print').textContent='Import replaces only the local data on this device. It does not erase shared reviews or pubs. Old private reviews are not published automatically.';
   $('#share-pint-button').addEventListener('click',async()=>{
-    const url='https://akkaguwy.github.io/PINT/';
+    const url='https://akkaguwy.github.io/PINT/?destination='+encodeURIComponent($('#region-filter').value);
     try{
       if(navigator.share)await navigator.share({title:'PINT — Discover & review pubs',text:'Join me on PINT. Rate the pubs and share your Guinness reviews 🍺',url});
       else{await navigator.clipboard.writeText(url);toast('PINT link copied ✓')}
     }catch(error){if(error.name!=='AbortError')toast('Share this link: '+url)}
   });
   $('#year').textContent=new Date().getFullYear();
+  const requestedDestination=new URLSearchParams(location.search).get('destination');
   const savedDestination=localStorage.getItem('pint-destination-v1');
-  if(['Cardiff','Vale','Dublin'].includes(savedDestination))$('#region-filter').value=savedDestination;
+  const startDestination=['Cardiff','Vale','Dublin'].includes(requestedDestination)?requestedDestination:savedDestination;
+  if(['Cardiff','Vale','Dublin'].includes(startDestination))$('#region-filter').value=startDestination;
   $('#sort-filter').insertAdjacentHTML('beforeend','<option value="nearby">Nearest to me</option>');
   render();syncPubHash();
   if(lastSuccessfulSync)setSharedStatus('↻ Loading current reviews · Last synced '+new Date(lastSuccessfulSync).toLocaleString(),'');
