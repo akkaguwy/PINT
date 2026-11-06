@@ -2,7 +2,7 @@
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js';
 import {
   getAuth,GoogleAuthProvider,signInWithPopup,createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,sendPasswordResetEmail,signOut,onAuthStateChanged
+  signInWithEmailAndPassword,sendPasswordResetEmail,sendEmailVerification,signOut,onAuthStateChanged
 } from 'https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js';
 
 const firebaseConfig={
@@ -39,7 +39,7 @@ async function checkBackend(user){
   const token=await user.getIdToken();
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
   try{
-    const response=await fetch(API+'/api/me',{headers:{Authorization:'Bearer '+token},signal:controller.signal,cache:'no-store'});
+    const response=await fetch(API+'/api/me',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({display_name:user.displayName||user.email?.split('@')[0]||'PINT member'}),signal:controller.signal,cache:'no-store'});
     const data=await response.json().catch(()=>({}));
     if(!response.ok)throw Error(data.error||'Account API not ready');
     verifiedBackend=true;
@@ -48,8 +48,8 @@ async function checkBackend(user){
       const name=$('auth-name');
       if(name)name.textContent=data.profile.display_name;
     }
-  }catch{
-    status('Signed in to Firebase. PINT cloud profiles are not connected yet; existing reviews remain on the original service.');
+  }catch(error){
+    status(error.message?.includes('Verify your email')?'Please verify your email from the Firebase message before using your cloud profile.':'Signed in to Firebase. PINT cloud profiles are not connected yet; existing reviews remain on the original service.');
   }finally{clearTimeout(timer)}
 }
 onAuthStateChanged(auth,user=>{
@@ -74,7 +74,13 @@ $('auth-form')?.addEventListener('submit',event=>{
   event.preventDefault();
   const f=new FormData(event.currentTarget),email=String(f.get('email')||'').trim(),password=String(f.get('password')||''),mode=String(f.get('mode')||'login');
   const action=mode==='register'?createUserWithEmailAndPassword:signInWithEmailAndPassword;
-  doAction(event.submitter||$('auth-email-submit'),()=>action(auth,email,password));
+  doAction(event.submitter||$('auth-email-submit'),async()=>{
+    const result=await action(auth,email,password);
+    if(mode==='register'){
+      await sendEmailVerification(result.user);
+      status('Account created. Check your email and verify your address, then sign in again.');
+    }
+  });
 });
 $('auth-reset')?.addEventListener('click',event=>doAction(event.currentTarget,async()=>{
   const email=String($('auth-email-input')?.value||'').trim();
@@ -83,4 +89,14 @@ $('auth-reset')?.addEventListener('click',event=>doAction(event.currentTarget,as
   status('If the address is eligible, a password reset email has been sent.');
 }));
 $('auth-signout')?.addEventListener('click',event=>doAction(event.currentTarget,()=>signOut(auth)));
+document.getElementById('profile-form')?.addEventListener('submit',async()=>{
+  if(!verifiedBackend||!auth.currentUser)return;
+  try{
+    const token=await auth.currentUser.getIdToken();
+    const input=$('profile-display-name');
+    const response=await fetch(API+'/api/me',{method:'PUT',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({display_name:input.value.trim()})});
+    if(response.ok)status('Display name saved to your cloud profile.');
+    else status('Device name saved; cloud name could not be updated.',true);
+  }catch{status('Device name saved; cloud name could not be updated.',true)}
+});
 window.PintAuth={auth,currentUser:null,getToken:async()=>auth.currentUser?.getIdToken()||null,isBackendReady:()=>verifiedBackend};
