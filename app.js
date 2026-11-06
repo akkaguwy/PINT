@@ -84,8 +84,22 @@
     'The Pelican in Her Piety|Ogmore-by-Sea|Ogmore-by-Sea, Vale of Glamorgan|Coastal pub for a sea-air stop',
     'The Three Horseshoes|St Athan|St Athan, Vale of Glamorgan|Village pub inland from the coast',
     'The Star Inn|Wick|Wick, Vale of Glamorgan|Village pub near the Heritage Coast',
-    'The Three Golden Cups|Southerndown|Southerndown, Vale of Glamorgan|Pub option close to the coast'
+    'The Three Golden Cups|Southerndown|Southerndown, Vale of Glamorgan|Pub option close to the coast',
+    '1 Town Hall Square|Cowbridge|1 Town Hall Square, Cowbridge CF71 7DD|Small independent freehouse with a courtyard off the High Street',
+    'Horse & Groom|Cowbridge|19 High Street, Cowbridge CF71 7AD|Traditional town pub with drinks, games and occasional live music',
+    'Harry\'s Bar|Cowbridge|2 Westgate, Cowbridge CF71 7AR|Westgate bar and grill serving drinks and food',
+    'Barbacoa Bar & Tapas|Cowbridge|69 High Street, Cowbridge CF71 7AF|Independent tapas and drinks bar on the High Street',
+    'The Hare & Hounds|Aberthin|Aberthin Road, Aberthin CF71 7LG|Temporarily closed after fire damage as of November 2026; check before visiting',
+    'The Barley Mow|Craig Penllyn|Graig Penllyn, Cowbridge CF71 7RT|Traditional country pub with seasonal meals and ales',
+    'The Sycamore Tree|Colwinston|Coed Marsarnen, Colwinston CF71 7NG|Village pub with home-cooked food and a welcoming bar',
+    'The White Lion|Ystradowen|Cowbridge Road, Ystradowen CF71 7SY|Village pub with a bar, dining and accommodation'
   ];
+  // Cowbridge postal district: group villages without changing pub areas or existing IDs.
+  const COWBRIDGE_GROUP='cowbridge-area';
+  const COWBRIDGE_AREAS=new Set([
+    'Cowbridge','Aberthin','Llanblethian','Penllyn','Craig Penllyn',
+    'Colwinston','Ystradowen','St Hilary','Sigingstone','Wick','Monknash','Llysworney'
+  ]);
   const dublinSuggestions = [
     "The Palace Bar|Temple Bar|21 Fleet Street, Dublin 2|Historic literary pub in the heart of town",
     "Bowe's Lounge Bar|Temple Bar|31 Fleet Street, Dublin 2|Traditional Fleet Street bar near Temple Bar",
@@ -219,6 +233,7 @@
     'City Centre':[51.4801,-3.1791],Pontcanna:[51.4875,-3.2040],Canton:[51.4819,-3.2124],Roath:[51.4924,-3.1616],Cathays:[51.4905,-3.1767],
     'Cardiff Bay':[51.4633,-3.1643],Lisvane:[51.5440,-3.1630],Birchgrove:[51.5170,-3.1910],Whitchurch:[51.5149,-3.2200],
     Cowbridge:[51.4622,-3.4483],Aberthin:[51.4670,-3.4740],Llanblethian:[51.4538,-3.4550],Penllyn:[51.4740,-3.4760],
+    'Craig Penllyn':[51.485294,-3.473981],Colwinston:[51.4693,-3.52466],Ystradowen:[51.489671,-3.423927],
     'St Hilary':[51.4510,-3.4220],Sigingstone:[51.4280,-3.4200],Monknash:[51.4230,-3.5590],Aberthaw:[51.3920,-3.3870],
     'Llantwit Major':[51.4083,-3.4850],Llanmaes:[51.4170,-3.4730],Boverton:[51.4060,-3.4630],Penarth:[51.4388,-3.1737],
     Barry:[51.4069,-3.2694],Rhoose:[51.3890,-3.3520],'Ogmore-by-Sea':[51.4640,-3.6310],'St Athan':[51.4030,-3.4140],Wick:[51.4390,-3.5490],Southerndown:[51.4470,-3.6060],
@@ -253,12 +268,17 @@
     $('#stat-favourites').textContent=currentPubs.filter(p=>data.favourites.includes(p.id)).length;
     const selectedArea=$('#area-filter').value;
     const selectedRegion=$('#region-filter').value;
-    $('#directory-hint').textContent='Directory: '+pubs.filter(p=>p.region===selectedRegion).length+' '+selectedRegion+' pubs (browse in batches of 12).';
     const areas=[...new Set(pubs.filter(p=>selectedRegion==='all'||p.region===selectedRegion).map(p=>p.area))].sort();
-    $('#area-filter').innerHTML='<option value="all">All areas</option>'+areas.map(a=>`<option value="${safe(a)}">${safe(a)}</option>`).join('');
-    $('#area-filter').value=areas.includes(selectedArea)?selectedArea:'all';
+    const cowbridgeOption=selectedRegion==='Vale'?'<option value="'+COWBRIDGE_GROUP+'">Cowbridge & nearby villages</option>':'';
+    $('#area-filter').innerHTML='<option value="all">All areas</option>'+cowbridgeOption+areas.map(a=>`<option value="${safe(a)}">${safe(a)}</option>`).join('');
+    $('#area-filter').value=areas.includes(selectedArea)||(selectedRegion==='Vale'&&selectedArea===COWBRIDGE_GROUP)?selectedArea:'all';
+    const cowbridgeSelected=selectedRegion==='Vale'&&$('#area-filter').value===COWBRIDGE_GROUP;
+    $('#directory-hint').textContent=cowbridgeSelected
+      ?'Cowbridge & nearby villages · '+pubs.filter(p=>p.region==='Vale'&&COWBRIDGE_AREAS.has(p.area)).length+' pubs and bars listed. Check opening status before visiting.'
+      :'Directory: '+pubs.filter(p=>p.region===selectedRegion).length+' '+selectedRegion+' pubs (browse in batches of 12).';
+    if(cowbridgeSelected)$('#destination-title').textContent='Explore Cowbridge & nearby villages';
     const q=$('#search').value.trim().toLowerCase();
-    let filtered=pubs.filter(p=>(p.name+' '+p.area+' '+p.address+' '+p.description+' '+pubTags(p).join(' ')).toLowerCase().includes(q)&&(selectedRegion==='all'||p.region===selectedRegion)&&($('#area-filter').value==='all'||p.area===$('#area-filter').value)&&(!favouritesOnly||data.favourites.includes(p.id)));
+    let filtered=pubs.filter(p=>(p.name+' '+p.area+' '+p.address+' '+p.description+' '+pubTags(p).join(' ')).toLowerCase().includes(q)&&(selectedRegion==='all'||p.region===selectedRegion)&&($('#area-filter').value==='all'||($('#area-filter').value===COWBRIDGE_GROUP&&COWBRIDGE_AREAS.has(p.area))||p.area===$('#area-filter').value)&&(!favouritesOnly||data.favourites.includes(p.id)));
     const sort=$('#sort-filter').value;
     if(sort==='cheapest')filtered.sort((a,b)=>(latestPrice(a.id)??Infinity)-(latestPrice(b.id)??Infinity)||a.name.localeCompare(b.name));
     else if(sort==='rated')filtered.sort((a,b)=>(averageRating(b.id)??-1)-(averageRating(a.id)??-1)||a.name.localeCompare(b.name));
@@ -276,7 +296,7 @@
     $('#pub-grid').innerHTML=filtered.slice(0,directoryLimit).map((pub,i)=>{
       const price=latestPrice(pub.id),rating=averageRating(pub.id),guinness=averageField(pub.id,'guinness'),fav=data.favourites.includes(pub.id);
       const distance=pubDistance(pub);
-      return `<article class="pub-card"><div class="pub-photo" data-pub-cover="${safe(pub.id)}"><span class="pub-photo-placeholder" aria-hidden="true">P<span>.</span><small>No photo yet</small></span><button class="heart ${fav?'active':''}" data-favourite="${safe(pub.id)}" aria-label="${fav?'Remove':'Add'} ${safe(pub.name)} ${fav?'from':'to'} favourites" aria-pressed="${fav}">${fav?'♥':'♡'}</button></div><div class="pub-body"><h3>${safe(pub.name)}</h3>${tagsMarkup(pub)}<span class="pub-area">⌖ ${safe(pub.address||pub.area)}${distance==null?'':' · ~'+distance.toFixed(1)+' km'}</span><p class="pub-description">${safe(pub.description||'A pub to explore and review yourself.')}</p><div class="pub-metrics"><div><strong>${rating==null?'Not rated':rating.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} OVERALL /5</span></div><div><strong>${guinness==null?'Not rated':guinness.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} GUINNESS /5</span></div></div><div class="pub-price">${price==null?'No pint price logged yet':'Last logged pint: '+money(price,pub.id)}</div><div class="pub-actions"><button data-details="${safe(pub.id)}">View pub ↗</button><button data-log="${safe(pub.id)}">★ Review</button></div></div></article>`;
+      return `<article class="pub-card"><div class="pub-photo" data-pub-cover="${safe(pub.id)}"><span class="pub-photo-placeholder" aria-hidden="true">P<span>.</span><small>No photo yet</small></span><button class="heart ${fav?'active':''}" data-favourite="${safe(pub.id)}" aria-label="${fav?'Remove':'Add'} ${safe(pub.name)} ${fav?'from':'to'} favourites" aria-pressed="${fav}">${fav?'♥':'♡'}</button></div><div class="pub-body"><h3>${safe(pub.name)}</h3>${/Temporarily closed/i.test(pub.description||'')?'<span class="pint-temporary-closed">Temporarily closed</span>':''}${tagsMarkup(pub)}<span class="pub-area">⌖ ${safe(pub.address||pub.area)}${distance==null?'':' · ~'+distance.toFixed(1)+' km'}</span><p class="pub-description">${safe(pub.description||'A pub to explore and review yourself.')}</p><div class="pub-metrics"><div><strong>${rating==null?'Not rated':rating.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} OVERALL /5</span></div><div><strong>${guinness==null?'Not rated':guinness.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} GUINNESS /5</span></div></div><div class="pub-price">${price==null?'No pint price logged yet':'Last logged pint: '+money(price,pub.id)}</div><div class="pub-actions"><button data-details="${safe(pub.id)}">View pub ↗</button><button data-log="${safe(pub.id)}">★ Review</button></div></div></article>`;
     }).join('');
     hydratePubCovers($('#pub-grid'));
     const destinationReviews=visibleLogs().filter(l=>getPub(l.pubId)?.region===$('#region-filter').value);
@@ -373,6 +393,14 @@
     finally{button.disabled=false;button.textContent='Add pub for everyone ↗'}
   });
   const resetDirectory=()=>{directoryLimit=DIRECTORY_PAGE_SIZE;render()};
+  // A single tap opens Cowbridge and all the neighbouring villages from Home.
+  $('#home-cowbridge-link')?.addEventListener('click',()=>{
+    const region=$('#region-filter');
+    if(region.value!=='Vale'){region.value='Vale';region.dispatchEvent(new Event('change',{bubbles:true}));}
+    $('#search').value='';
+    $('#area-filter').value=COWBRIDGE_GROUP;
+    resetDirectory();
+  });
    $('#search').addEventListener('input',resetDirectory);$('#region-filter').addEventListener('change',()=>{
       localStorage.setItem('pint-destination-v1',$('#region-filter').value);
       $('#search').value='';
@@ -432,7 +460,14 @@
   // A destination link takes priority over filters left from another city.
   if(requestedDestination){$('#search').value='';favouritesOnly=false;$('#favourites-filter').setAttribute('aria-pressed','false');$('#area-filter').value='all';}
   $('#sort-filter').insertAdjacentHTML('beforeend','<option value="nearby">Nearest to me</option>');
-  render();syncPubHash();
+  render();
+  // Shareable link: ?destination=Vale&area=cowbridge-area&screen=explore
+  const requestedArea=new URLSearchParams(location.search).get('area');
+  if($('#region-filter').value==='Vale'&&requestedArea===COWBRIDGE_GROUP){
+    $('#area-filter').value=COWBRIDGE_GROUP;
+    resetDirectory();
+  }
+  syncPubHash();
   if(lastSuccessfulSync)setSharedStatus('↻ Loading current reviews · Last synced '+new Date(lastSuccessfulSync).toLocaleString(),'');
   refreshShared();
   // Poll less aggressively for a public-sized audience; manual refresh and tab focus still work.
