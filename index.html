@@ -16,11 +16,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=4.0" />
-  <link rel="stylesheet" href="features.css?v=4.0" />
-  <link rel="stylesheet" href="polish.css?v=4.0" />
-  <link rel="stylesheet" href="pub_identity.css?v=4.0" />
-  <link rel="stylesheet" href="profile.css?v=4.0" />
+  <link rel="stylesheet" href="styles.css?v=4.1" />
+  <link rel="stylesheet" href="features.css?v=4.1" />
+  <link rel="stylesheet" href="polish.css?v=4.1" />
+  <link rel="stylesheet" href="pub_identity.css?v=4.1" />
+  <link rel="stylesheet" href="profile.css?v=4.1" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoT6kLFxMAH2U=" crossorigin="" />
   <style>
     .pub-price{font-size:11px;color:#a9a18f;margin-top:12px;min-height:18px}
@@ -43,7 +43,7 @@
   <main id="home">
     <section class="hero shell">
       <div class="hero-copy">
-        <div class="eyebrow"><span class="live-dot"></span> PINT PUB DISCOVERY · VERSION 4.0</div>
+        <div class="eyebrow"><span class="live-dot"></span> PINT PUB DISCOVERY · VERSION 4.1</div>
         <h1>Good pubs.<br/><em>Real opinions.</em></h1>
         <p>Find a pub worth visiting, see what your friends think, and share your own experience.</p>
         <div class="hero-actions"><a href="#explore" class="button button-gold">Explore pubs <span>↗</span></a><a href="#pub-golf" class="button button-outline">⛳ Pub Golf</a><button class="button button-ghost" id="log-first-button">Review a pub <span>＋</span></button><button class="button button-ghost" id="share-pint-button">Share PINT ↗</button></div>
@@ -88,7 +88,31 @@
     <section class="journal" id="my-pints"><div class="shell journal-inner"><div><span class="overline">COMMUNITY</span><h2>Community reviews</h2><p>See recent visits and share your own. Reviews are visible to everyone using PINT.</p><button id="journal-log-button" class="button button-gold">Review a pub <span>↗</span></button></div><div class="journal-panel"><p id="community-summary" class="community-summary" aria-live="polite">Loading community activity…</p><button id="refresh-community" type="button" class="community-refresh">↻ Refresh reviews</button><div class="panel-head"><strong>COMMUNITY REVIEWS</strong><span id="entry-count">0 LOGGED</span></div><div id="recent-list" class="recent-list"></div><button id="more-community-reviews" type="button" class="community-refresh" hidden>Show more reviews</button></div></div></section>
 
     <section class="profile-section shell" id="profile" aria-label="My PINT profile">
-      <div class="profile-intro"><span class="overline">YOUR PINT</span><h2>Profile</h2><p>Your display name and the reviews you've submitted on this device.</p></div>
+      <div class="profile-intro"><span class="overline">YOUR PINT</span><h2>Profile</h2><p>Manage your sign-in and review history.</p></div>
+      
+      <section class="auth-panel" aria-labelledby="auth-title">
+        <h3 id="auth-title">PINT account</h3>
+        <p class="auth-lede">Sign in with Google or email. Your account will be linked to shared reviews when the new Cloudflare backend is enabled.</p>
+        <div id="pint-auth-guest">
+          <button type="button" class="button button-outline auth-google" id="auth-google">Continue with Google</button>
+          <div class="auth-divider">or use email</div>
+          <form id="auth-form" class="auth-form">
+            <label for="auth-email-input">Email address</label>
+            <input id="auth-email-input" type="email" name="email" autocomplete="email" required />
+            <label for="auth-password">Password</label>
+            <input id="auth-password" type="password" name="password" autocomplete="current-password" minlength="6" required />
+            <div class="auth-radio"><label><input type="radio" name="mode" value="login" checked /> Sign in</label><label><input type="radio" name="mode" value="register" /> Create account</label></div>
+            <button type="submit" id="auth-email-submit" class="button button-gold">Continue</button>
+          </form>
+          <button type="button" id="auth-reset" class="auth-link">Forgot password?</button>
+        </div>
+        <div id="pint-auth-user" hidden>
+          <strong id="auth-name">PINT member</strong>
+          <p id="auth-email"></p>
+          <button type="button" id="auth-signout" class="button button-outline">Sign out</button>
+        </div>
+        <p id="auth-status" role="status" aria-live="polite">Connecting to Firebase…</p>
+      </section>
       <div class="profile-panel">
         <div class="profile-header" id="profile-header">
           <span class="profile-avatar" id="profile-avatar" aria-hidden="true">P</span>
@@ -99,7 +123,7 @@
           <div class="profile-edit-row"><input id="profile-display-name" name="name" type="text" autocomplete="nickname" maxlength="40" minlength="2" placeholder="How your name appears on reviews" required/><button type="submit" class="button button-gold">Save</button></div>
           <p id="profile-message" role="status" aria-live="polite"></p>
         </form>
-        <p class="profile-privacy"><strong>Device profile, not a verified account.</strong> Anyone can currently type the same name. Your profile and review history are saved in this browser; signing in across phones will require account support on PINT's shared server.</p>
+        <p class="profile-privacy"><strong>Legacy review identity.</strong> The existing community review service still uses this device display name, not your Firebase account. Older posts cannot be claimed by matching names. Verified review ownership requires the Cloudflare backend migration.</p>
       </div>
       <div class="profile-history">
         <div class="profile-history-heading"><h3>My reviews</h3><span id="profile-review-count">0 reviews</span></div>
@@ -132,13 +156,14 @@
   <script src="photos.js" defer></script>
   <script src="shared.js" defer></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
-  <script src="dublin_directory.js?v=4.0" defer></script>
-  <script src="dublin_explore.js?v=4.0" defer></script>
-  <script src="pub_identity.js?v=4.0" defer></script>
-  <script src="profile.js?v=4.0" defer></script>
-  <script src="app.js?v=4.0" defer></script>
-  <script src="pub_golf.js?v=4.0" defer></script>
+  <script src="dublin_directory.js?v=4.1" defer></script>
+  <script src="dublin_explore.js?v=4.1" defer></script>
+  <script src="pub_identity.js?v=4.1" defer></script>
+  <script src="profile.js?v=4.1" defer></script>
+  <script type="module" src="firebase_auth.js?v=4.1"></script>
+  <script src="app.js?v=4.1" defer></script>
+  <script src="pub_golf.js?v=4.1" defer></script>
   <script src="pwa.js" defer></script>
-  <script src="navigation.js?v=4.0" defer></script>
+  <script src="navigation.js?v=4.1" defer></script>
 </body>
 </html>
