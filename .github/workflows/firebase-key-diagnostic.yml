@@ -1,0 +1,35 @@
+name: Firebase key diagnostic (non-mutating)
+on:
+  pull_request:
+    paths:
+      - 'firebase_auth.js'
+      - '.github/workflows/firebase-key-diagnostic.yml'
+  workflow_dispatch:
+jobs:
+  verify-firebase-key:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Firebase's identity API without creating an account
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, json, urllib.request, urllib.error
+          js=Path('firebase_auth.js').read_text()
+          key=re.search(r"apiKey:\s*'([^']+)'",js).group(1)
+          endpoint='https://identitytoolkit.googleapis.com/v1/accounts:createAuthUri?key='+key
+          data=json.dumps({'identifier':'nonexistent-pint-key-check@example.invalid','continueUri':'https://akkaguwy.github.io/PINT/'}).encode()
+          req=urllib.request.Request(endpoint,data=data,headers={'Content-Type':'application/json','Referer':'https://akkaguwy.github.io/PINT/','Origin':'https://akkaguwy.github.io'},method='POST')
+          try:
+              with urllib.request.urlopen(req,timeout=20) as resp:
+                  body=json.load(resp)
+                  print('HTTP:',resp.status)
+                  print('Result: KEY_ACCEPTED')
+          except urllib.error.HTTPError as exc:
+              details=json.loads(exc.read().decode())
+              message=details.get('error',{}).get('message','UNKNOWN')
+              print('HTTP:',exc.code)
+              print('Firebase error:',message)
+              print('Note: no account was created; this is a read-only authentication lookup.')
+              raise SystemExit(1)
+          PY

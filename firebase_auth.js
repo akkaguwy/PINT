@@ -6,7 +6,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js';
 
 const firebaseConfig={
-  apiKey:'AIzaSyAtT7-Mp8OIsZ94mOmO_iLSTtxemThqIY4',
+  apiKey:'AIzaSyAtT7-Mp8OIsZ94mOmO_ilSTtxemThqIY4',
   authDomain:'pint-a05d1.firebaseapp.com',
   projectId:'pint-a05d1',
   storageBucket:'pint-a05d1.firebasestorage.app',
