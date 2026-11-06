@@ -18,6 +18,8 @@ jobs:
           for file in ./*.js; do node --check "$file"; done
       - name: Home screen behaviour
         run: node tests/home.cjs
+      - name: PWA update flow
+        run: node tests/update.cjs
       - name: Required app assets and Dublin entries
         run: |
           python3 - <<'PY'

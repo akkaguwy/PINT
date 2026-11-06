@@ -412,7 +412,10 @@
   backupDialog.querySelector('p').textContent='Your old reviews, photos, favourites and Pub Golf scorecards are kept on this device. New shared reviews and pubs are stored online. A JSON backup includes your local data only.';
   backupDialog.querySelector('.small-print').textContent='Import replaces only the local data on this device. It does not erase shared reviews or pubs. Old private reviews are not published automatically.';
   $('#share-pint-button').addEventListener('click',async()=>{
-    const url='https://akkaguwy.github.io/PINT/?destination='+encodeURIComponent($('#region-filter').value);
+    // Version the shared URL so first-time visitors bypass older cached copies.
+    // The link still updates automatically on future visits through PINT's update checks.
+    const version=new URL(document.querySelector('script[src*="app.js?v="]')?.src||location.href).searchParams.get('v')||'4.5';
+    const url='https://akkaguwy.github.io/PINT/?destination='+encodeURIComponent($('#region-filter').value)+'&screen=home&v='+encodeURIComponent(version);
     try{
       if(navigator.share)await navigator.share({title:'PINT — Discover & review pubs',text:'Join me on PINT. Rate the pubs and share your Guinness reviews 🍺',url});
       else{await navigator.clipboard.writeText(url);toast('PINT link copied ✓')}
