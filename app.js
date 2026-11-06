@@ -84,8 +84,23 @@
     'The Pelican in Her Piety|Ogmore-by-Sea|Ogmore-by-Sea, Vale of Glamorgan|Coastal pub for a sea-air stop',
     'The Three Horseshoes|St Athan|St Athan, Vale of Glamorgan|Village pub inland from the coast',
     'The Star Inn|Wick|Wick, Vale of Glamorgan|Village pub near the Heritage Coast',
-    'The Three Golden Cups|Southerndown|Southerndown, Vale of Glamorgan|Pub option close to the coast'
+    'The Three Golden Cups|Southerndown|Southerndown, Vale of Glamorgan|Pub option close to the coast',
+    '1 Town Hall Square|Cowbridge|1 Town Hall Square, Cowbridge CF71 7DD|Small independent freehouse with a courtyard off the High Street',
+    'Horse & Groom|Cowbridge|19 High Street, Cowbridge CF71 7AD|Traditional town pub with drinks, games and occasional live music',
+    'Harry\'s Bar|Cowbridge|2 Westgate, Cowbridge CF71 7AR|Westgate bar and grill serving drinks and food',
+    'Barbacoa Bar & Tapas|Cowbridge|69 High Street, Cowbridge CF71 7AF|Independent tapas and drinks bar on the High Street',
+    'The Hare & Hounds|Aberthin|Aberthin Road, Aberthin CF71 7LG|Temporarily closed after fire damage as of November 2026; check before visiting',
+    'The Barley Mow|Craig Penllyn|Graig Penllyn, Cowbridge CF71 7RT|Traditional country pub with seasonal meals and ales',
+    'The Sycamore Tree|Colwinston|Coed Marsarnen, Colwinston CF71 7NG|Village pub with home-cooked food and a welcoming bar',
+    'The White Lion|Ystradowen|Cowbridge Road, Ystradowen CF71 7SY|Village pub with a bar, dining and accommodation',
+    'The Star Inn|Wick|Ewenny Road, Wick CF71 7QA|Village pub serving food and real ales'
   ];
+  // Cowbridge postal district: group villages without changing pub areas or existing IDs.
+  const COWBRIDGE_GROUP='cowbridge-area';
+  const COWBRIDGE_AREAS=new Set([
+    'Cowbridge','Aberthin','Llanblethian','Penllyn','Craig Penllyn',
+    'Colwinston','Ystradowen','St Hilary','Sigingstone','Wick','Monknash','Llysworney'
+  ]);
   const dublinSuggestions = [
     "The Palace Bar|Temple Bar|21 Fleet Street, Dublin 2|Historic literary pub in the heart of town",
     "Bowe's Lounge Bar|Temple Bar|31 Fleet Street, Dublin 2|Traditional Fleet Street bar near Temple Bar",
@@ -253,12 +268,17 @@
     $('#stat-favourites').textContent=currentPubs.filter(p=>data.favourites.includes(p.id)).length;
     const selectedArea=$('#area-filter').value;
     const selectedRegion=$('#region-filter').value;
-    $('#directory-hint').textContent='Directory: '+pubs.filter(p=>p.region===selectedRegion).length+' '+selectedRegion+' pubs (browse in batches of 12).';
     const areas=[...new Set(pubs.filter(p=>selectedRegion==='all'||p.region===selectedRegion).map(p=>p.area))].sort();
-    $('#area-filter').innerHTML='<option value="all">All areas</option>'+areas.map(a=>`<option value="${safe(a)}">${safe(a)}</option>`).join('');
-    $('#area-filter').value=areas.includes(selectedArea)?selectedArea:'all';
+    const cowbridgeOption=selectedRegion==='Vale'?'<option value="'+COWBRIDGE_GROUP+'">Cowbridge & nearby villages</option>':'';
+    $('#area-filter').innerHTML='<option value="all">All areas</option>'+cowbridgeOption+areas.map(a=>`<option value="${safe(a)}">${safe(a)}</option>`).join('');
+    $('#area-filter').value=areas.includes(selectedArea)||(selectedRegion==='Vale'&&selectedArea===COWBRIDGE_GROUP)?selectedArea:'all';
+    const cowbridgeSelected=selectedRegion==='Vale'&&$('#area-filter').value===COWBRIDGE_GROUP;
+    $('#directory-hint').textContent=cowbridgeSelected
+      ?'Cowbridge & nearby villages · '+pubs.filter(p=>p.region==='Vale'&&COWBRIDGE_AREAS.has(p.area)).length+' pubs and bars listed. Check opening status before visiting.'
+      :'Directory: '+pubs.filter(p=>p.region===selectedRegion).length+' '+selectedRegion+' pubs (browse in batches of 12).';
+    if(cowbridgeSelected)$('#destination-title').textContent='Explore Cowbridge & nearby villages';
     const q=$('#search').value.trim().toLowerCase();
-    let filtered=pubs.filter(p=>(p.name+' '+p.area+' '+p.address+' '+p.description+' '+pubTags(p).join(' ')).toLowerCase().includes(q)&&(selectedRegion==='all'||p.region===selectedRegion)&&($('#area-filter').value==='all'||p.area===$('#area-filter').value)&&(!favouritesOnly||data.favourites.includes(p.id)));
+    let filtered=pubs.filter(p=>(p.name+' '+p.area+' '+p.address+' '+p.description+' '+pubTags(p).join(' ')).toLowerCase().includes(q)&&(selectedRegion==='all'||p.region===selectedRegion)&&($('#area-filter').value==='all'||($('#area-filter').value===COWBRIDGE_GROUP&&COWBRIDGE_AREAS.has(p.area))||p.area===$('#area-filter').value)&&(!favouritesOnly||data.favourites.includes(p.id)));
     const sort=$('#sort-filter').value;
     if(sort==='cheapest')filtered.sort((a,b)=>(latestPrice(a.id)??Infinity)-(latestPrice(b.id)??Infinity)||a.name.localeCompare(b.name));
     else if(sort==='rated')filtered.sort((a,b)=>(averageRating(b.id)??-1)-(averageRating(a.id)??-1)||a.name.localeCompare(b.name));
@@ -373,6 +393,14 @@
     finally{button.disabled=false;button.textContent='Add pub for everyone ↗'}
   });
   const resetDirectory=()=>{directoryLimit=DIRECTORY_PAGE_SIZE;render()};
+  // A single tap opens Cowbridge and all the neighbouring villages from Home.
+  $('#home-cowbridge-link')?.addEventListener('click',()=>{
+    const region=$('#region-filter');
+    if(region.value!=='Vale'){region.value='Vale';region.dispatchEvent(new Event('change',{bubbles:true}));}
+    $('#search').value='';
+    $('#area-filter').value=COWBRIDGE_GROUP;
+    resetDirectory();
+  });
    $('#search').addEventListener('input',resetDirectory);$('#region-filter').addEventListener('change',()=>{
       localStorage.setItem('pint-destination-v1',$('#region-filter').value);
       $('#search').value='';
@@ -432,7 +460,14 @@
   // A destination link takes priority over filters left from another city.
   if(requestedDestination){$('#search').value='';favouritesOnly=false;$('#favourites-filter').setAttribute('aria-pressed','false');$('#area-filter').value='all';}
   $('#sort-filter').insertAdjacentHTML('beforeend','<option value="nearby">Nearest to me</option>');
-  render();syncPubHash();
+  render();
+  // Shareable link: ?destination=Vale&area=cowbridge-area&screen=explore
+  const requestedArea=new URLSearchParams(location.search).get('area');
+  if($('#region-filter').value==='Vale'&&requestedArea===COWBRIDGE_GROUP){
+    $('#area-filter').value=COWBRIDGE_GROUP;
+    resetDirectory();
+  }
+  syncPubHash();
   if(lastSuccessfulSync)setSharedStatus('↻ Loading current reviews · Last synced '+new Date(lastSuccessfulSync).toLocaleString(),'');
   refreshShared();
   // Poll less aggressively for a public-sized audience; manual refresh and tab focus still work.
