@@ -27,7 +27,7 @@ function makeCase(installedVersion,serverVersion){
   const fetch=async(url,options)=>{
     assert.match(url.href,/pint_check=/);
     assert.equal(options.cache,'no-store');
-    return {ok:true,text:async()=>\"const CACHE_NAME='pint-offline-v\"+serverVersion+\"';\"};
+    return {ok:true,text:async()=>"const CACHE_NAME='pint-offline-v"+serverVersion+"';"};
   };
   vm.runInNewContext(source,{
     window,document,location,navigator:{onLine:true},
