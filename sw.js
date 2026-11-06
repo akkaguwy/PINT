@@ -1,4 +1,4 @@
-const CACHE_NAME='pint-offline-v3.6';
+const CACHE_NAME='pint-offline-v3.7';
 const CORE=['./','./index.html','./styles.css','./features.css','./app.js','./dublin_directory.js','./dublin_explore.js','./navigation.js','./shared.js','./pub_golf.js','./photos.js','./pwa.js','./manifest.webmanifest','./icons/pint-180.png','./icons/pint-192.png','./icons/pint-512.png'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting()))
