@@ -136,3 +136,9 @@
   .home-destination-options button{font-size:11px}
 }
 @media(prefers-reduced-motion:reduce){.home-dashboard *{scroll-behavior:auto!important;transition:none!important}}
+
+/* Cowbridge-area shortcut: visible only while browsing The Vale. */
+.home-cowbridge-link{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:13px;padding-top:12px;border-top:1px solid #405142;color:#ddc591;font-size:12px;font-weight:740;text-decoration:none}
+.home-cowbridge-link:hover{color:#f1d8a4}
+.home-cowbridge-link[hidden]{display:none!important}
+.home-cowbridge-link span{font-size:16px}
