@@ -134,3 +134,42 @@ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
 .shared-status.online{border-color:rgba(53,125,75,.25);background:rgba(53,125,75,.08);color:#2e7447}
 .shared-status.offline{border-color:rgba(165,75,50,.28);background:rgba(165,75,50,.08);color:#b34e3d}
 .review-author{font-size:11px;letter-spacing:.04em;text-transform:uppercase;opacity:.7;font-weight:700}
+
+/* Compact mobile-first discovery and shared review visibility */
+.directory-more{display:flex;margin:24px auto 0;min-height:48px;text-align:center}
+.directory-more[hidden]{display:none}
+.community-summary{margin:0 0 8px!important;color:#d6ba84!important;font-size:13px!important}
+.community-refresh{background:transparent;border:1px solid #6d6048;border-radius:8px;color:#f5f0e6;padding:10px 14px;min-height:44px;margin-bottom:16px;text-align:left}
+.community-refresh:disabled{opacity:.55}
+@media(max-width:620px){
+ .hero{min-height:0!important;padding-top:12px!important;padding-bottom:12px!important}
+ .hero-copy{padding:20px 0 15px!important}
+ .hero h1{font-size:clamp(46px,12vw,65px)!important;margin:12px 0!important}
+ .hero-copy>p{font-size:14px!important;line-height:1.5!important}
+ .hero-image{display:none!important}
+ .hero-caption{display:none!important}
+ .hero-actions{gap:8px!important;margin-top:16px!important}
+ .hero-actions .button{padding:12px 13px!important;min-height:44px!important;gap:6px!important}
+ .golf-section{padding:30px 0!important}
+ .explore{padding-top:34px!important}
+ .pub-grid{display:grid!important;grid-template-columns:1fr!important;gap:10px!important}
+ .pub-card{display:grid!important;grid-template-columns:94px minmax(0,1fr)!important;min-height:0!important}
+ .pub-photo{height:100%!important;min-height:155px!important}
+ .photo-label{font-size:8px!important;letter-spacing:0!important;left:7px!important;bottom:8px!important;max-width:82px!important}
+ .pub-body{padding:12px!important;min-width:0!important}
+ .pub-body h3{font-size:19px!important;margin-bottom:3px!important}
+ .pub-area{font-size:10px!important;letter-spacing:0!important}
+ .pub-description,.pub-price{display:none!important}
+ .pub-metrics{margin-top:10px!important;padding:8px 0!important}
+ .pub-metrics strong{font-size:15px!important}
+ .pub-metrics span{font-size:8px!important;letter-spacing:0!important}
+ .pub-actions{gap:7px!important;margin-top:10px!important}
+ .pub-actions button{min-height:42px!important;padding:8px 4px!important}
+ .heart{height:32px!important;width:32px!important;font-size:19px!important;right:6px!important;top:6px!important}
+ .directory-more{width:100%!important}
+ .journal-inner{display:flex!important;flex-direction:column!important;gap:16px!important}
+ .journal-panel{width:100%!important}
+ .recent-entry{align-items:start!important}
+ .recent-entry strong{font-size:16px!important}
+}
+#more-community-reviews{display:block;width:100%;text-align:center;margin-top:16px}#more-community-reviews[hidden]{display:none}

@@ -160,6 +160,9 @@
   function openDialog(id){if(id==='entry-dialog'){$('#entry-form').reset();$('#entry-form [name=reviewerName]').value=localStorage.getItem('pint-reviewer-name')||'';clearPhotoPreview();const today=new Date();$('#entry-date').value=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);updateEntryPubs()}document.getElementById(id).showModal()}
   function updateEntryPubs(){const select=$('#entry-pub');const current=select.value;select.innerHTML=allPubs().map(p=>`<option value="${safe(p.id)}">${safe(p.name)} — ${safe(p.area)}</option>`).join('');if(allPubs().some(p=>p.id===current))select.value=current}
   let favouritesOnly=false;
+  let directoryLimit=12;
+  let reviewFeedLimit=12;
+  const DIRECTORY_PAGE_SIZE=12;
   function render(){
     const pubs=allPubs();
     $('#stat-pubs').textContent=pubs.length;$('#stat-logs').textContent=visibleLogs().length;$('#stat-favourites').textContent=data.favourites.length;
@@ -174,24 +177,32 @@
     if(sort==='cheapest')filtered.sort((a,b)=>(latestPrice(a.id)??Infinity)-(latestPrice(b.id)??Infinity)||a.name.localeCompare(b.name));
     else if(sort==='rated')filtered.sort((a,b)=>(averageRating(b.id)??-1)-(averageRating(a.id)??-1)||a.name.localeCompare(b.name));
     else if(sort==='unvisited')filtered.sort((a,b)=>Number(ratingLogs().some(l=>l.pubId===a.id))-Number(ratingLogs().some(l=>l.pubId===b.id))||a.name.localeCompare(b.name));
+    else if(sort==='activity')filtered.sort((a,b)=>{const last=id=>ratingLogs().filter(l=>l.pubId===id).reduce((m,l)=>Math.max(m,Date.parse(l.createdAt||l.date)||0),0);return last(b.id)-last(a.id)||a.name.localeCompare(b.name)});
     else if(sort==='nearby'&&nearPosition)filtered.sort((a,b)=>(pubDistance(a)??Infinity)-(pubDistance(b)??Infinity)||a.name.localeCompare(b.name));
     else filtered.sort((a,b)=>a.name.localeCompare(b.name));
     lastFiltered=filtered;
+    const moreButton=$('#show-more-pubs');
+    moreButton.hidden=view==='map'||filtered.length<=directoryLimit;
+    moreButton.textContent='Show more pubs ('+Math.min(DIRECTORY_PAGE_SIZE,Math.max(0,filtered.length-directoryLimit))+' of '+(filtered.length-directoryLimit)+' remaining)';
     $('#result-count').textContent=`${filtered.length} ${filtered.length===1?'pub':'pubs'}`;
     $('#empty-state').hidden=filtered.length>0;
-    $('#pub-grid').innerHTML=filtered.map((pub,i)=>{
+    $('#pub-grid').innerHTML=filtered.slice(0,directoryLimit).map((pub,i)=>{
       const price=latestPrice(pub.id),rating=averageRating(pub.id),guinness=averageField(pub.id,'guinness'),fav=data.favourites.includes(pub.id);
       const image=photos[Math.abs([...pub.id].reduce((n,c)=>n+c.charCodeAt(0),0))%photos.length];
       const distance=pubDistance(pub);
       return `<article class="pub-card"><div class="pub-photo" style="background-image:url('${image}')"><span class="photo-label">${safe(pub.region==='Vale'?'THE VALE · '+pub.area.toUpperCase():'CARDIFF · '+pub.area.toUpperCase())}</span><button class="heart ${fav?'active':''}" data-favourite="${safe(pub.id)}" aria-label="${fav?'Remove':'Add'} ${safe(pub.name)} ${fav?'from':'to'} favourites" aria-pressed="${fav}">${fav?'♥':'♡'}</button></div><div class="pub-body"><h3>${safe(pub.name)}</h3><span class="pub-area">⌖ ${safe(pub.address||pub.area)}${distance==null?'':' · ~'+distance.toFixed(1)+' km'}</span><p class="pub-description">${safe(pub.description||'A pub to explore and review yourself.')}</p><div class="pub-metrics"><div><strong>${rating==null?'Not rated':rating.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} OVERALL /5</span></div><div><strong>${guinness==null?'Not rated':guinness.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} GUINNESS /5</span></div></div><div class="pub-price">${price==null?'No pint price logged yet':'Last logged pint: '+money(price)}</div><div class="pub-actions"><button data-details="${safe(pub.id)}">View pub ↗</button><button data-log="${safe(pub.id)}">★ Review</button></div></div></article>`;
     }).join('');
-    $('#entry-count').textContent=`${visibleLogs().length} LOGGED`;
-    const recents=[...visibleLogs()].sort((a,b)=>b.date.localeCompare(a.date)||(b.createdAt||0)-(a.createdAt||0)).slice(0,4);
+    $('#entry-count').textContent=`${sharedLogs.length} SHARED · ${data.logs.length} PRIVATE`;
+    $('#community-summary').textContent=sharedOnline?`${sharedLogs.length} shared reviews from the community · ${sharedPubs.length} community-added pubs`:'Community feed temporarily unavailable — local reviews may still appear below';
+    const recents=[...visibleLogs()].sort((a,b)=>b.date.localeCompare(a.date)||(b.createdAt||0)-(a.createdAt||0)).slice(0,reviewFeedLimit);
+    const reviewMore=$('#more-community-reviews');
+    reviewMore.hidden=visibleLogs().length<=reviewFeedLimit;
+    reviewMore.textContent='Show more reviews ('+(visibleLogs().length-reviewFeedLimit)+' remaining)';
     $('#recent-list').innerHTML=recents.length?recents.map(l=>`<div class="recent-entry"><div><strong>${safe(getPub(l.pubId)?.name||'Unknown pub')}</strong><div class="review-author">${safe(l.shared?l.reviewerName:'Your saved review · not shared')}</div><small>${safe(l.date)}${l.guinness!=null?' · Guinness '+l.guinness+'★':''}${l.price!=null?' · '+money(l.price):''}</small>${l.notes?`<div class="review-notes">${safe(l.notes)}</div>`:''}<div class="review-photos" data-review-photos="${safe(l.id)}"></div></div><b>${Number(l.rating).toFixed(1)} ★</b></div>`).join(''):'<div class="recent-empty">No pub reviews yet.<br/>Your adventures start with the first one.</div>';
     recents.forEach(async log=>{try{const images=await logPhotos(log);const el=[...document.querySelectorAll('[data-review-photos]')].find(x=>x.dataset.reviewPhotos===log.id);if(el)el.innerHTML=images.map((src,i)=>`<button class="photo-thumb" type="button" aria-label="View photo ${i+1}"><img alt="Photo ${i+1} from ${safe(getPub(log.pubId)?.name||'pub')}" src="${src}" /></button>`).join('')}catch{}});
     if(view==='map')renderMap();
   }
-  function showView(next){view=next;$('#pub-grid').hidden=next==='map';$('#map-container').hidden=next!=='map';$('#list-view-button').classList.toggle('active',next==='list');$('#map-view-button').classList.toggle('active',next==='map');$('#list-view-button').setAttribute('aria-pressed',next==='list');$('#map-view-button').setAttribute('aria-pressed',next==='map');if(next==='map')requestAnimationFrame(renderMap)}
+  function showView(next){view=next;$('#show-more-pubs').hidden=next==='map'||lastFiltered.length<=directoryLimit;$('#pub-grid').hidden=next==='map';$('#map-container').hidden=next!=='map';$('#list-view-button').classList.toggle('active',next==='list');$('#map-view-button').classList.toggle('active',next==='map');$('#list-view-button').setAttribute('aria-pressed',next==='list');$('#map-view-button').setAttribute('aria-pressed',next==='map');if(next==='map')requestAnimationFrame(renderMap)}
   function renderMap(){
     if(view!=='map')return;
     if(!window.L){$('#pub-map').textContent='The interactive map needs an internet connection. Switch to List for all pub suggestions.';return}
@@ -223,8 +234,10 @@
       await window.PintShared.addReview({...log,images});
       localStorage.setItem('pint-reviewer-name',log.reviewerName);
       $('#entry-dialog').close();clearPhotoPreview();
-      toast('Review shared with everyone ✓');
+      toast('Review submitted · checking shared feed…');
       await refreshShared();
+      if(sharedLogs.some(r=>r.id===log.id))toast('Review confirmed in the community feed ✓');
+      else toast('Review sent, but not yet confirmed in the community feed');
     }catch(error){toast('Not shared: '+(error.message||'please retry'));}finally{button.disabled=false;button.textContent='Save my review ↗'}
   });
   $('#recent-list').addEventListener('click',event=>{const image=event.target.closest('.photo-thumb img');if(image){$('#photo-full').src=image.src;$('#photo-dialog').showModal()}});
@@ -238,7 +251,11 @@
     catch(error){toast('Not shared: '+(error.message||'please retry'));}
     finally{button.disabled=false;button.textContent='Add pub for everyone ↗'}
   });
-  $('#search').addEventListener('input',render);$('#region-filter').addEventListener('change',render);$('#area-filter').addEventListener('change',render);$('#sort-filter').addEventListener('change',render);
+  const resetDirectory=()=>{directoryLimit=DIRECTORY_PAGE_SIZE;render()};
+   $('#search').addEventListener('input',resetDirectory);$('#region-filter').addEventListener('change',resetDirectory);$('#area-filter').addEventListener('change',resetDirectory);$('#sort-filter').addEventListener('change',resetDirectory);
+   $('#show-more-pubs').addEventListener('click',()=>{directoryLimit+=DIRECTORY_PAGE_SIZE;render()});
+   $('#refresh-community').addEventListener('click',async()=>{const btn=$('#refresh-community');btn.disabled=true;try{await refreshShared()}finally{btn.disabled=false}});
+   $('#more-community-reviews').addEventListener('click',()=>{reviewFeedLimit+=12;render()});
   $('#list-view-button').addEventListener('click',()=>showView('list'));
   $('#map-view-button').addEventListener('click',()=>showView('map'));
   $('#nearby-button').addEventListener('click',()=>{
