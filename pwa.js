@@ -30,6 +30,31 @@
     notice.hidden = false;
   }
 
+  // Fetch the CURRENT published release directly, not the version of this installed app.
+  async function fetchPublishedVersion() {
+    if (!navigator.onLine) return null;
+    try {
+      const url = new URL('./sw.js', document.baseURI);
+      url.searchParams.set('pint_check', String(Date.now()));
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) return null;
+      const source = await res.text();
+      const found = source.match(/CACHE_NAME\s*=\s*['"]pint-offline-v(\d+(?:\.\d+)*)['"]/);
+      return found?.[1] || null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // Also used by the Share button. An offline sender falls back to their local version.
+  window.PintUpdates = {
+    getPublishedVersion: async () => {
+      const published = await fetchPublishedVersion();
+      if (published && isNewer(published, localVersion)) showUpdate(published);
+      return published || localVersion;
+    }
+  };
+
   async function checkLatest(force = false) {
     if (!navigator.onLine) return;
     if (!force && Date.now() - lastCheck < 120000) return;
@@ -37,16 +62,8 @@
     lastCheck = Date.now();
     pendingCheck = (async () => {
       try {
-        // A unique query parameter bypasses any old installed HTML or asset URL.
-        const url = new URL('./sw.js', document.baseURI);
-        url.searchParams.set('pint_check', String(Date.now()));
-        const res = await fetch(url, { cache: 'no-store' });
-        if (!res.ok) return;
-        const text = await res.text();
-        const found = text.match(/CACHE_NAME\s*=\s*['"]pint-offline-v(\d+(?:\.\d+)*)['"]/);
-        if (found) showUpdate(found[1]);
-      } catch (_) {
-        // Offline and intermittent mobile connections should not interrupt PINT.
+        const published = await fetchPublishedVersion();
+        if (published) showUpdate(published);
       } finally {
         pendingCheck = null;
       }
