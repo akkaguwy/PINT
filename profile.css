@@ -1,0 +1,47 @@
+/* PINT v4.0 — Community and device Profile */
+.profile-section{padding-top:60px;padding-bottom:100px;max-width:1000px}
+.profile-intro{margin-bottom:24px}
+.profile-intro h2{font-size:clamp(30px,4vw,44px);font-weight:750;letter-spacing:-.045em;margin:9px 0}
+.profile-intro p{color:#b3c0b4;font-size:14px;line-height:1.55}
+.profile-panel,.profile-history{border:1px solid #3d4b3e;border-radius:16px;background:#1c251e;padding:25px;margin-bottom:18px}
+.profile-header{display:flex;align-items:center;gap:17px}
+.profile-avatar{display:flex;flex:none;align-items:center;justify-content:center;width:66px;height:66px;border-radius:18px;color:#1a251b;background:#c8b081;font-size:24px;font-weight:800;letter-spacing:-.03em}
+.profile-header h3{font-size:23px;line-height:1.2;letter-spacing:-.03em;margin:0 0 6px}
+.profile-header p,.profile-privacy{color:#aeb9ad;font-size:12px;line-height:1.65;margin:0}
+.profile-form{margin-top:28px}
+.profile-form label{font-weight:700;font-size:12px;color:#dce4d8;display:block;margin-bottom:9px}
+.profile-edit-row{display:flex;gap:10px;align-items:stretch}
+.profile-edit-row input{flex:1;min-width:0;min-height:48px;border:1px solid #465749;border-radius:9px;color:#f4f4ee;background:#131a15;padding:11px 13px;font-size:16px}
+.profile-edit-row .button{min-width:95px}
+#profile-message{color:#e0cfac;font-size:12px;min-height:16px;margin-top:8px}
+.profile-privacy{margin-top:16px;padding-top:15px;border-top:1px solid #38463b}
+.profile-privacy strong{color:#e2d4b6}
+.profile-history-heading{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:14px}
+.profile-history-heading h3{font-size:20px;margin:0;font-weight:750;letter-spacing:-.03em}
+.profile-history-heading span{font-size:12px;color:#a9b9ac}
+.profile-review{padding:18px 0;border-top:1px solid #39483c}
+.profile-review-top{display:flex;justify-content:space-between;gap:14px}
+.profile-review-top strong{font-size:16px}
+.profile-review-top b{white-space:nowrap;color:#d9c190}
+.profile-review-meta{font-size:12px;color:#a9b8aa;margin-top:6px}
+.profile-review p{font-size:13px;line-height:1.55;color:#d2ddd0;white-space:pre-wrap;margin:11px 0}
+.profile-review small{font-size:11px;color:#aebcae}
+.profile-empty{border-top:1px solid #39483c;padding:30px 0;color:#adbaac;font-size:13px;line-height:1.6}
+#profile-review-button{margin-top:16px}
+.review-author{display:flex;align-items:center;gap:7px}
+.review-user-avatar{display:grid;place-items:center;width:25px;height:25px;background:#344538;border:1px solid #506451;border-radius:50%;font-size:9px;font-weight:800;color:#e7dfc6}
+.review-user-name{font-weight:700;font-size:12px;color:#cbd8c8}
+@media(max-width:620px){
+ body.pint-mobile-screens #home>.profile-section{display:none!important}
+ body.pint-mobile-screens[data-screen="profile"] #home>.profile-section{display:block!important}
+ .mobile-nav{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+ .mobile-nav a{min-width:0;padding-left:0;padding-right:0}
+ .mobile-nav a span{font-size:21px}
+ .mobile-nav a small{font-size:9px}
+ .profile-section{padding-top:25px;padding-bottom:50px}
+ .profile-panel,.profile-history{padding:18px}
+ .profile-intro h2{font-size:31px}
+ .profile-avatar{width:55px;height:55px;border-radius:13px;font-size:21px}
+ .profile-header h3{font-size:20px}
+ .profile-edit-row .button{min-width:75px;padding-left:13px;padding-right:13px}
+}
