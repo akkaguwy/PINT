@@ -114,7 +114,12 @@
     "John Kavanagh's (The Gravediggers)|Glasnevin|1 Prospect Square, Glasnevin, Dublin 9|Traditional pub by Glasnevin Cemetery"
   ];
   const parseSuggestions = (rows,region) => rows.map((row,index)=>{const [name,area,address,description]=row.split('|');return {id:`suggestion-${region.toLowerCase()}-${index}`,name,area,address,description,region}});
-  const starterPubs=[...parseSuggestions(cardiffSuggestions,'Cardiff'),...parseSuggestions(valeSuggestions,'Vale'),...parseSuggestions(dublinSuggestions,'Dublin')];
+  const extraDublin=(Array.isArray(window.PintDublinExtra)?window.PintDublinExtra:[]).filter(p=>p&&typeof p.name==='string'&&typeof p.area==='string');
+  const knownDublinNames=new Set(dublinSuggestions.map(s=>s.split('|')[0].toLowerCase()));
+  const dublinExtra=extraDublin.filter(p=>!knownDublinNames.has(p.name.toLowerCase())).map((p,i)=>({
+    id:'dublin-directory-'+i,name:p.name,region:'Dublin',area:p.area,address:p.address||'Dublin, Ireland',description:p.description||'Dublin pub suggestion'
+  }));
+  const starterPubs=[...parseSuggestions(cardiffSuggestions,'Cardiff'),...parseSuggestions(valeSuggestions,'Vale'),...parseSuggestions(dublinSuggestions,'Dublin'),...dublinExtra];
   ['city-arms','old-arcade','queens-vaults','cambrian-tap','tiny-rebel','head-of-steam'].forEach((id,index)=>starterPubs[index].id=id);
   const $ = (selector) => document.querySelector(selector);
   const safe = (value) => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -139,7 +144,11 @@
     }
   }catch{}
   let requestSerial=0;
-  const allPubs = () => [...starterPubs,...sharedPubs,...data.pubs.filter(p=>!sharedPubs.some(s=>s.id===p.id))];
+  const allPubs = () => {
+    const pubs=[...starterPubs,...sharedPubs,...data.pubs];
+    const seen=new Set();
+    return pubs.filter(p=>{if(!p||!p.name)return false;const key=(p.region+'|'+p.name+'|'+p.area).toLowerCase();if(seen.has(key))return false;seen.add(key);return true});
+  };
   const getPub = id => allPubs().find(pub=>pub.id===id);
   const visibleLogs=()=>[...sharedLogs,...data.logs.filter(l=>!sharedLogs.some(s=>s.id===l.id))];
   const ratingLogs=()=>sharedLogs.length?sharedLogs:data.logs;
@@ -217,6 +226,7 @@
     $('#stat-pubs').textContent=pubs.length;$('#stat-logs').textContent=visibleLogs().length;$('#stat-favourites').textContent=data.favourites.length;
     const selectedArea=$('#area-filter').value;
     const selectedRegion=$('#region-filter').value;
+    $('#directory-hint').textContent='Showing '+selectedRegion+' pubs. Search or filter by neighbourhood to explore.';
     const areas=[...new Set(pubs.filter(p=>selectedRegion==='all'||p.region===selectedRegion).map(p=>p.area))].sort();
     $('#area-filter').innerHTML='<option value="all">All areas</option>'+areas.map(a=>`<option value="${safe(a)}">${safe(a)}</option>`).join('');
     $('#area-filter').value=areas.includes(selectedArea)?selectedArea:'all';
@@ -235,6 +245,7 @@
     moreButton.textContent='Show more pubs ('+Math.min(DIRECTORY_PAGE_SIZE,Math.max(0,filtered.length-directoryLimit))+' of '+(filtered.length-directoryLimit)+' remaining)';
     $('#result-count').textContent=`${filtered.length} ${filtered.length===1?'pub':'pubs'}`;
     $('#empty-state').hidden=filtered.length>0;
+    if(filtered.length===0&&pubs.some(p=>p.region===selectedRegion))$('#empty-state').textContent='No pubs match your filters. Clear the search or tap Favourites to see all pubs.';
     $('#pub-grid').innerHTML=filtered.slice(0,directoryLimit).map((pub,i)=>{
       const price=latestPrice(pub.id),rating=averageRating(pub.id),guinness=averageField(pub.id,'guinness'),fav=data.favourites.includes(pub.id);
       const image=photos[Math.abs([...pub.id].reduce((n,c)=>n+c.charCodeAt(0),0))%photos.length];
@@ -311,7 +322,16 @@
     finally{button.disabled=false;button.textContent='Add pub for everyone ↗'}
   });
   const resetDirectory=()=>{directoryLimit=DIRECTORY_PAGE_SIZE;render()};
-   $('#search').addEventListener('input',resetDirectory);$('#region-filter').addEventListener('change',()=>{localStorage.setItem('pint-destination-v1',$('#region-filter').value);$('#area-filter').value='all';resetDirectory();if(view==='map')renderMap()});$('#area-filter').addEventListener('change',resetDirectory);$('#sort-filter').addEventListener('change',resetDirectory);
+   $('#search').addEventListener('input',resetDirectory);$('#region-filter').addEventListener('change',()=>{
+      localStorage.setItem('pint-destination-v1',$('#region-filter').value);
+      $('#search').value='';
+      $('#area-filter').value='all';
+      favouritesOnly=false;
+      $('#favourites-filter').setAttribute('aria-pressed','false');
+      $('#sort-filter').value='name';
+      $('#directory-hint').textContent='Showing all pubs for '+$('#region-filter').selectedOptions[0].textContent+'. Use search or neighbourhood filters to narrow down.';
+      resetDirectory();
+    });$('#area-filter').addEventListener('change',resetDirectory);$('#sort-filter').addEventListener('change',resetDirectory);
    $('#show-more-pubs').addEventListener('click',()=>{directoryLimit+=DIRECTORY_PAGE_SIZE;render()});
    $('#refresh-community').addEventListener('click',async()=>{const btn=$('#refresh-community');btn.disabled=true;try{await refreshShared()}finally{btn.disabled=false}});
    $('#more-community-reviews').addEventListener('click',()=>{reviewFeedLimit+=12;render()});
@@ -351,6 +371,8 @@
   const savedDestination=localStorage.getItem('pint-destination-v1');
   const startDestination=['Cardiff','Vale','Dublin'].includes(requestedDestination)?requestedDestination:savedDestination;
   if(['Cardiff','Vale','Dublin'].includes(startDestination))$('#region-filter').value=startDestination;
+  // A destination link takes priority over filters left from another city.
+  if(requestedDestination){$('#search').value='';favouritesOnly=false;$('#favourites-filter').setAttribute('aria-pressed','false');$('#area-filter').value='all';}
   $('#sort-filter').insertAdjacentHTML('beforeend','<option value="nearby">Nearest to me</option>');
   render();syncPubHash();
   if(lastSuccessfulSync)setSharedStatus('↻ Loading current reviews · Last synced '+new Date(lastSuccessfulSync).toLocaleString(),'');

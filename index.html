@@ -74,7 +74,7 @@
         <button class="filter-button" id="favourites-filter" aria-pressed="false">♡ Favourites</button>
         <button class="filter-button" id="nearby-button" aria-pressed="false">⌖ Near me</button>
       </div>
-      <div class="view-bar"><div class="view-switch" role="group" aria-label="Directory view"><button id="list-view-button" class="active" aria-pressed="true">☷ List</button><button id="map-view-button" aria-pressed="false">⌖ Map</button></div><span id="location-note" aria-live="polite"></span></div>
+      <p id="directory-hint" class="directory-hint" aria-live="polite"></p><div class="view-bar"><div class="view-switch" role="group" aria-label="Directory view"><button id="list-view-button" class="active" aria-pressed="true">☷ List</button><button id="map-view-button" aria-pressed="false">⌖ Map</button></div><span id="location-note" aria-live="polite"></span></div>
       <div class="directory-note"><span id="result-count">0 pubs</span><span>Suggestions only. Check opening times and availability; Guinness isn't guaranteed. Images are illustrative.</span></div>
       <div id="map-container" class="map-container" hidden><div id="pub-map" aria-label="Map of approximate pub neighbourhoods"></div><p class="map-disclaimer">Pins mark approximate neighbourhood centres, not exact pub entrances. Tap a cluster to explore its pubs; use Directions on a pub for a location search.</p></div>
       <div class="pub-grid" id="pub-grid"></div><button id="show-more-pubs" class="button button-outline directory-more" type="button" hidden>Show more pubs</button>
@@ -107,6 +107,7 @@
   <script src="photos.js" defer></script>
   <script src="shared.js" defer></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
+  <script src="dublin_directory.js" defer></script>
   <script src="app.js" defer></script>
   <script src="pub_golf.js" defer></script>
   <script src="pwa.js" defer></script>

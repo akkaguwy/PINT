@@ -180,3 +180,5 @@ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
 .destination-picker h3{font:700 clamp(26px,4vw,39px)/1.1 'Playfair Display',Georgia,serif;margin:10px 0}
 .destination-picker p{font-size:13px;color:#c0b6a5;margin:0}
 @media(max-width:620px){.destination-picker{padding:16px;margin-bottom:12px}.destination-picker h3{font-size:26px}.toolbar #region-filter{grid-column:1/-1;min-height:54px;background:#302b1e;border-color:#b28f50;font-weight:750;font-size:16px}}
+
+.directory-hint{color:#baa77d;font-size:12px;margin:8px 0 12px}
