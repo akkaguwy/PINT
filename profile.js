@@ -58,8 +58,22 @@
       const pub=getPub(review.pubId);
       const name=pub?.name||'Unknown pub',where=pub?.region||'';
       const score=Number(review.rating);
-      return '<article class="profile-review"><div class="profile-review-top"><strong>'+safe(name)+'</strong><b>'+ (Number.isFinite(score)?score.toFixed(1)+' ★':'—')+'</b></div><div class="profile-review-meta">'+safe(where)+(where?' · ':'')+safe(review.date||'')+'</div>'+(review.notes?'<p>'+safe(review.notes)+'</p>':'')+'<small>'+(review.shared?'Shared review':'Saved on this device')+'</small></article>';
+      return '<article class="profile-review"><div class="profile-review-top"><strong>'+safe(name)+'</strong><b>'+ (Number.isFinite(score)?score.toFixed(1)+' ★':'—')+'</b></div><div class="profile-review-meta">'+safe(where)+(where?' · ':'')+safe(review.date||'')+'</div>'+(review.notes?'<p>'+safe(review.notes)+'</p>':'')+'<div class="profile-review-photos" data-own-review="'+safe(review.id)+'"></div><small>'+(review.shared?'Shared review':'Saved on this device')+'</small></article>';
     }).join(''):'<div class="profile-empty">Your reviews will appear here after you post them from this device. Older reviews cannot be claimed by matching a display name.</div>';
+    own.forEach(async review=>{
+      const element=[...container.querySelectorAll('[data-own-review]')].find(node=>node.dataset.ownReview===review.id);
+      if(!element)return;
+      try{
+        const urls=review.shared?window.PintShared.photoUrls(review):await window.PintPhotos.read(review.id);
+        if(!element.isConnected)return;
+        urls.slice(0,3).forEach((src,index)=>{
+          const img=document.createElement('img');
+          img.src=src;img.loading='lazy';
+          img.alt='Your review photo '+(index+1);
+          element.appendChild(img);
+        });
+      }catch{}
+    });
   }
   document.getElementById('profile-form')?.addEventListener('submit',event=>{
     event.preventDefault();
