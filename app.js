@@ -95,6 +95,18 @@
     'The White Lion|Ystradowen|Cowbridge Road, Ystradowen CF71 7SY|Village pub with a bar, dining and accommodation'
   ];
   // Cowbridge postal district: group villages without changing pub areas or existing IDs.
+  // Methven / Mt Hutt Village — verified licensed pubs, bars and après-ski venues.
+  // Keep IDs stable: old destination starter catalogues are untouched.
+  const methvenSuggestions = [
+    'The Blue Pub|Methven|1 Barkers Road, Methven 7730, New Zealand|Iconic blue pub with live music, pub meals and accommodation',
+    'The Brown Pub|Methven|Corner of Main Street and Forest Drive, Methven 7730, New Zealand|Traditional Kiwi local with sports screens, a beer garden and hearty food',
+    'The Dubliner|Methven|116 Main Street, Methven 7730, New Zealand|Irish gastro pub in the former post office with stout and hearty meals',
+    'The Green Parrot Bar & Grill|Methven|36 Forest Drive, Methven 7730, New Zealand|Relaxed local bar and grill popular after a day in the mountains',
+    'Amara Bar & Snackery|Methven|129 Main Street, Methven 7730, New Zealand|Cocktail bar offering New Zealand wines and small plates',
+    'Craft @ Arabica|Methven|36 McMillan Street, Methven 7730, New Zealand|Licensed cafe and eatery serving craft beers and gourmet burgers',
+    'Ski Time Restaurant & Bar|Methven|43 Racecourse Avenue, Methven 7730, New Zealand|Lodge-style bar and restaurant with Mt Hutt views and a warm fire',
+    "Shackleton's @ Brinkley|Methven|43 Barkers Road, Methven 7730, New Zealand|Seasonal winter-only restaurant and licensed bar; check opening before visiting"
+  ];
   const COWBRIDGE_GROUP='cowbridge-area';
   const COWBRIDGE_AREAS=new Set([
     'Cowbridge','Aberthin','Llanblethian','Penllyn','Craig Penllyn',
@@ -125,14 +137,14 @@
   const dublinExtra=extraDublin.filter(p=>!knownDublinNames.has(p.name.toLowerCase())).map((p,i)=>({
     id:'dublin-directory-'+i,name:p.name,region:'Dublin',area:p.area,address:p.address||'Dublin, Ireland',description:p.description||'Dublin pub suggestion'
   }));
-  const starterPubs=[...parseSuggestions(cardiffSuggestions,'Cardiff'),...parseSuggestions(valeSuggestions,'Vale'),...parseSuggestions(dublinSuggestions,'Dublin'),...dublinExtra];
+  const starterPubs=[...parseSuggestions(cardiffSuggestions,'Cardiff'),...parseSuggestions(valeSuggestions,'Vale'),...parseSuggestions(dublinSuggestions,'Dublin'),...dublinExtra,...parseSuggestions(methvenSuggestions,'Methven')];
   ['city-arms','old-arcade','queens-vaults','cambrian-tap','tiny-rebel','head-of-steam'].forEach((id,index)=>starterPubs[index].id=id);
   const $ = (selector) => document.querySelector(selector);
   const safe = (value) => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const emptyData = () => ({pubs:[],logs:[],favourites:[]});
   function validateData(data){
     if (!data || !Array.isArray(data.pubs) || !Array.isArray(data.logs) || !Array.isArray(data.favourites)) throw Error('Not a PINT backup');
-    const pubs = data.pubs.slice(0,500).filter(p=>p && typeof p.id==='string' && typeof p.name==='string' && typeof p.area==='string').map(p=>({id:p.id.slice(0,100),name:p.name.slice(0,90),area:p.area.slice(0,50),address:String(p.address||'').slice(0,150),description:String(p.description||'').slice(0,180),region:['Vale','Cardiff','Dublin'].includes(p.region)?p.region:'Cardiff'}));
+    const pubs = data.pubs.slice(0,500).filter(p=>p && typeof p.id==='string' && typeof p.name==='string' && typeof p.area==='string').map(p=>({id:p.id.slice(0,100),name:p.name.slice(0,90),area:p.area.slice(0,50),address:String(p.address||'').slice(0,150),description:String(p.description||'').slice(0,180),region:['Vale','Cardiff','Dublin','Methven'].includes(p.region)?p.region:'Cardiff'}));
     const score = v => v==null||v===''?null:(Number(v)>=1&&Number(v)<=5?Number(v):null);
     const logs = data.logs.slice(0,5000).filter(l=>l && typeof l.pubId==='string' && Number(l.rating)>=1 && Number(l.rating)<=10 && (l.price==null||l.price===''||(Number(l.price)>0&&Number(l.price)<=100))).map(l=>({id:String(l.id||crypto.randomUUID()).slice(0,100),pubId:l.pubId,drink:String(l.drink||'').slice(0,60),price:l.price==null||l.price===''?null:Number(l.price),rating:l.guinness===undefined&&l.atmosphere===undefined&&l.setting===undefined?Number(l.rating)/2:Number(l.rating),guinness:score(l.guinness),atmosphere:score(l.atmosphere),setting:score(l.setting),date:String(l.date||'').slice(0,10),notes:String(l.notes||'').slice(0,300)}));
     return {pubs,logs,favourites:data.favourites.filter(id=>typeof id==='string').slice(0,500)};
@@ -227,7 +239,7 @@
       return false;
     }
   }
-  const money = (value,pubId) => (getPub(pubId)?.region==='Dublin'?'€':'£')+Number(value).toFixed(2);
+  const money = (value,pubId) => (getPub(pubId)?.region==='Dublin'?'€':getPub(pubId)?.region==='Methven'?'NZ$':'£')+Number(value).toFixed(2);
   // Approximate neighbourhood centres for discovery; never used as exact pub coordinates.
   const centres={
     'City Centre':[51.4801,-3.1791],Pontcanna:[51.4875,-3.2040],Canton:[51.4819,-3.2124],Roath:[51.4924,-3.1616],Cathays:[51.4905,-3.1767],
@@ -237,6 +249,7 @@
     'St Hilary':[51.4510,-3.4220],Sigingstone:[51.4280,-3.4200],Monknash:[51.4230,-3.5590],Aberthaw:[51.3920,-3.3870],
     'Llantwit Major':[51.4083,-3.4850],Llanmaes:[51.4170,-3.4730],Boverton:[51.4060,-3.4630],Penarth:[51.4388,-3.1737],
     Barry:[51.4069,-3.2694],Rhoose:[51.3890,-3.3520],'Ogmore-by-Sea':[51.4640,-3.6310],'St Athan':[51.4030,-3.4140],Wick:[51.4390,-3.5490],Southerndown:[51.4470,-3.6060],
+    'Methven|Methven':[-43.6324,171.6473],
     'Dublin|Temple Bar':[53.3455,-6.2635],'Dublin|City Centre South':[53.3428,-6.2640],'Dublin|Grafton Street':[53.3422,-6.2600],
     'Dublin|Trinity':[53.3462,-6.2516],'Dublin|Merrion Row':[53.3385,-6.2516],'Dublin|Baggot Street':[53.3375,-6.2470],
     'Dublin|Smithfield':[53.3496,-6.2786],'Dublin|The Liberties':[53.3445,-6.2766],'Dublin|Glasnevin':[53.3698,-6.2716]
@@ -244,7 +257,7 @@
   const distanceKm=(a,b)=>{const rad=Math.PI/180,dLat=(b[0]-a[0])*rad,dLon=(b[1]-a[1])*rad,x=Math.sin(dLat/2)**2+Math.cos(a[0]*rad)*Math.cos(b[0]*rad)*Math.sin(dLon/2)**2;return 6371*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))};
   const pubCentre=pub=>(Number.isFinite(pub.lat)&&Number.isFinite(pub.lon)?[pub.lat,pub.lon]:(centres[pub.region+'|'+pub.area]||centres[pub.area]));
   const pubDistance=pub=>nearPosition&&pubCentre(pub)?distanceKm(nearPosition,pubCentre(pub)):null;
-  const mapSearch=pub=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(pub.name+', '+(pub.address||pub.area)+(pub.region==='Dublin'?', Ireland':', Wales'));
+  const mapSearch=pub=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(pub.name+', '+(pub.address||pub.area)+(pub.region==='Dublin'?', Ireland':pub.region==='Methven'?', New Zealand':', Wales'));
   let nearPosition=null,view='list',pubMap=null,mapMarkers=null,lastFiltered=[];
   function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
   let toastTimer;
@@ -260,8 +273,10 @@
   function render(){
     const pubs=allPubs();
     const destination=$('#region-filter').value;
+    const priceLabel=$('#entry-price-label');
+    if(priceLabel)priceLabel.textContent='Price of pint ('+(destination==='Methven'?'NZ$':destination==='Dublin'?'€':'£')+') · optional';
     $('#discover-dublin').hidden=destination!=='Dublin';
-    $('#destination-title').textContent=destination==='Dublin'?'Explore Dublin pubs':destination==='Vale'?'Explore Vale of Glamorgan pubs':'Explore Cardiff pubs';
+    $('#destination-title').textContent=destination==='Dublin'?'Explore Dublin pubs':destination==='Vale'?'Explore Vale of Glamorgan pubs':destination==='Methven'?'Explore Methven pubs & bars':'Explore Cardiff pubs';
     const currentPubs=pubs.filter(p=>p.region===destination);
     $('#stat-pubs').textContent=currentPubs.length;
     $('#stat-logs').textContent=visibleLogs().filter(l=>getPub(l.pubId)?.region===destination).length;
@@ -296,7 +311,7 @@
     $('#pub-grid').innerHTML=filtered.slice(0,directoryLimit).map((pub,i)=>{
       const price=latestPrice(pub.id),rating=averageRating(pub.id),guinness=averageField(pub.id,'guinness'),fav=data.favourites.includes(pub.id);
       const distance=pubDistance(pub);
-      return `<article class="pub-card"><div class="pub-photo" data-pub-cover="${safe(pub.id)}"><span class="pub-photo-placeholder" aria-hidden="true">P<span>.</span><small>No photo yet</small></span><button class="heart ${fav?'active':''}" data-favourite="${safe(pub.id)}" aria-label="${fav?'Remove':'Add'} ${safe(pub.name)} ${fav?'from':'to'} favourites" aria-pressed="${fav}">${fav?'♥':'♡'}</button></div><div class="pub-body"><h3>${safe(pub.name)}</h3>${/Temporarily closed/i.test(pub.description||'')?'<span class="pint-temporary-closed">Temporarily closed</span>':''}${tagsMarkup(pub)}<span class="pub-area">⌖ ${safe(pub.address||pub.area)}${distance==null?'':' · ~'+distance.toFixed(1)+' km'}</span><p class="pub-description">${safe(pub.description||'A pub to explore and review yourself.')}</p><div class="pub-metrics"><div><strong>${rating==null?'Not rated':rating.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} OVERALL /5</span></div><div><strong>${guinness==null?'Not rated':guinness.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} GUINNESS /5</span></div></div><div class="pub-price">${price==null?'No pint price logged yet':'Last logged pint: '+money(price,pub.id)}</div><div class="pub-actions"><button data-details="${safe(pub.id)}">View pub ↗</button><button data-log="${safe(pub.id)}">★ Review</button></div></div></article>`;
+      return `<article class="pub-card"><div class="pub-photo" data-pub-cover="${safe(pub.id)}"><span class="pub-photo-placeholder" aria-hidden="true">P<span>.</span><small>No photo yet</small></span><button class="heart ${fav?'active':''}" data-favourite="${safe(pub.id)}" aria-label="${fav?'Remove':'Add'} ${safe(pub.name)} ${fav?'from':'to'} favourites" aria-pressed="${fav}">${fav?'♥':'♡'}</button></div><div class="pub-body"><h3>${safe(pub.name)}</h3>${/Temporarily closed/i.test(pub.description||'')?'<span class="pint-temporary-closed">Temporarily closed</span>':/winter-only/i.test(pub.description||'')?'<span class="pint-seasonal-status">Winter seasonal</span>':''}${tagsMarkup(pub)}<span class="pub-area">⌖ ${safe(pub.address||pub.area)}${distance==null?'':' · ~'+distance.toFixed(1)+' km'}</span><p class="pub-description">${safe(pub.description||'A pub to explore and review yourself.')}</p><div class="pub-metrics"><div><strong>${rating==null?'Not rated':rating.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} OVERALL /5</span></div><div><strong>${guinness==null?'Not rated':guinness.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} GUINNESS /5</span></div></div><div class="pub-price">${price==null?'No pint price logged yet':'Last logged pint: '+money(price,pub.id)}</div><div class="pub-actions"><button data-details="${safe(pub.id)}">View pub ↗</button><button data-log="${safe(pub.id)}">★ Review</button></div></div></article>`;
     }).join('');
     hydratePubCovers($('#pub-grid'));
     const destinationReviews=visibleLogs().filter(l=>getPub(l.pubId)?.region===$('#region-filter').value);
@@ -385,7 +400,7 @@
   $('#pub-form').addEventListener('submit',async event=>{
     event.preventDefault();
     const button=event.target.querySelector('[type=submit]'),f=new FormData(event.target);
-    const pub={id:crypto.randomUUID(),name:String(f.get('name')).trim(),area:String(f.get('area')).trim(),region:['Cardiff','Vale','Dublin'].includes(f.get('region'))?f.get('region'):'Cardiff',address:String(f.get('address')).trim(),description:String(f.get('description')).trim(),pubType:String(f.get('pubType')||'Pub')};
+    const pub={id:crypto.randomUUID(),name:String(f.get('name')).trim(),area:String(f.get('area')).trim(),region:['Cardiff','Vale','Dublin','Methven'].includes(f.get('region'))?f.get('region'):'Cardiff',address:String(f.get('address')).trim(),description:String(f.get('description')).trim(),pubType:String(f.get('pubType')||'Pub')};
     if(!pub.name||!pub.area)return;
     button.disabled=true;button.textContent='Sharing pub…';
     try{await window.PintShared.addPub(pub);window.PintIdentity?.rememberType(pub,pub.pubType);$('#pub-dialog').close();event.target.reset();toast('Pub added for everyone ✓');await refreshShared();}
@@ -455,8 +470,8 @@
   $('#year').textContent=new Date().getFullYear();
   const requestedDestination=new URLSearchParams(location.search).get('destination');
   const savedDestination=localStorage.getItem('pint-destination-v1');
-  const startDestination=['Cardiff','Vale','Dublin'].includes(requestedDestination)?requestedDestination:savedDestination;
-  if(['Cardiff','Vale','Dublin'].includes(startDestination))$('#region-filter').value=startDestination;
+  const startDestination=['Cardiff','Vale','Dublin','Methven'].includes(requestedDestination)?requestedDestination:savedDestination;
+  if(['Cardiff','Vale','Dublin','Methven'].includes(startDestination))$('#region-filter').value=startDestination;
   // A destination link takes priority over filters left from another city.
   if(requestedDestination){$('#search').value='';favouritesOnly=false;$('#favourites-filter').setAttribute('aria-pressed','false');$('#area-filter').value='all';}
   $('#sort-filter').insertAdjacentHTML('beforeend','<option value="nearby">Nearest to me</option>');

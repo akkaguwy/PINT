@@ -2,6 +2,14 @@
 (() => {
   'use strict';
   const known = {
+    "the blue pub":["Traditional","Live music","Food"],
+    "the brown pub":["Traditional","Sports","Beer garden"],
+    "the dubliner":["Traditional","Food"],
+    "the green parrot bar & grill":["Food"],
+    "amara bar & snackery":["Cocktails","Food"],
+    "craft @ arabica":["Craft beer","Food"],
+    "ski time restaurant & bar":["Food","Scenic"],
+    "shackleton's @ brinkley":["Food"],
     "the palace bar":["Traditional","Historic"],
     "bowe's lounge bar":["Traditional","Guinness"],
     "the temple bar pub":["Traditional","Live music","Tourist favourite"],
