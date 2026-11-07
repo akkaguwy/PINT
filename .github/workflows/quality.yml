@@ -22,6 +22,8 @@ jobs:
         run: node tests/update.cjs
       - name: Cowbridge venue coverage and stable IDs
         run: node tests/cowbridge.cjs
+      - name: Methven NZ destination and venue coverage
+        run: node tests/methven.cjs
       - name: Required app assets and Dublin entries
         run: |
           python3 - <<'PY'
