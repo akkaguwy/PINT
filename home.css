@@ -145,3 +145,9 @@
 
 /* Venue opening status: never present a temporarily closed pub as open. */
 .pint-temporary-closed{display:inline-flex;align-items:center;align-self:flex-start;border:1px solid #9f6959;border-radius:5px;padding:5px 8px;margin:0 0 9px;background:#392a25;color:#f0b5a1;font-size:10px;font-weight:750;letter-spacing:.015em}
+
+/* Four destinations remain thumb-friendly: two columns on phones, four on wide screens. */
+.home-destination-options{grid-template-columns:repeat(4,minmax(0,1fr))}
+.home-destination-options button{overflow-wrap:normal;line-height:1.25;min-width:0}
+.pint-seasonal-status{display:inline-flex;align-items:center;align-self:flex-start;border:1px solid #716b4c;border-radius:5px;padding:5px 8px;margin:0 0 9px;background:#2b3026;color:#e7d0a0;font-size:10px;font-weight:750;letter-spacing:.015em}
+@media(max-width:620px){.home-destination-options{grid-template-columns:repeat(2,minmax(0,1fr))}.home-destination-options button{min-height:43px;font-size:12px}}
