@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=4.5" />
-  <link rel="stylesheet" href="features.css?v=4.15" />
+  <link rel="stylesheet" href="features.css?v=4.16" />
   <link rel="stylesheet" href="polish.css?v=4.5" />
   <link rel="stylesheet" href="pub_identity.css?v=4.5" />
   <link rel="stylesheet" href="profile.css?v=4.5" />
@@ -302,7 +302,11 @@
 
   <dialog id="entry-dialog" class="modal"><form id="entry-form" class="modal-body"><button type="button" class="close" data-close="entry-dialog" aria-label="Close">×</button><span class="overline">REVIEWS</span><h2>Review a visit</h2><label>Pub<select name="pubId" id="entry-pub" required></select></label><label>Overall experience (out of 5 stars)<select name="rating" required><option value="">Choose stars</option><option value="1">★☆☆☆☆ — 1</option><option value="2">★★☆☆☆ — 2</option><option value="3">★★★☆☆ — 3</option><option value="4">★★★★☆ — 4</option><option value="5">★★★★★ — 5</option></select></label><div class="form-row"><label>Guinness quality<select name="guinness"><option value="">Didn't try / not sure</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label><label>Atmosphere<select name="atmosphere"><option value="">Not rated</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label></div><div class="form-row"><label>Area / setting<select name="setting"><option value="">Not rated</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label><label><span id="entry-price-label">Price of pint (local currency: £ / € / NZ$) · optional</span><input name="price" type="number" min="0.01" max="100" step="0.01" placeholder="5.50" /></label></div><label>Date<input name="date" type="date" id="entry-date" required /></label><label>Your verdict<textarea name="notes" rows="3" maxlength="300" placeholder="Great Guinness, friendly bar, nice beer garden..."></textarea></label><label>Photos (up to three) <span class="photo-help">Take a photo or choose from your camera roll</span><input id="review-photos" name="photos" type="file" accept="image/*" multiple /></label><p class="photo-usage-note">Photos you share with a review may be displayed on the pub card as a real customer photo. Only upload photos you have permission to share.</p><label class="cover-photo-choice"><input type="checkbox" name="coverPhoto" value="yes" /> Prioritise my first photo as this pub’s cover</label><div class="photo-preview" id="photo-preview" aria-live="polite"></div><button class="button button-gold full" type="submit">Save my review ↗</button></form></dialog>
 
-  <dialog id="photo-dialog" class="photo-dialog"><button type="button" class="close" data-close="photo-dialog" aria-label="Close photo">×</button><img id="photo-full" alt="Pub review photo" /><div id="photo-gallery-caption" class="photo-gallery-caption" hidden><p id="photo-gallery-credit"></p><button type="button" id="photo-gallery-pub" class="button button-outline">View pub ↗</button></div></dialog>
+  <dialog id="photo-dialog" class="photo-dialog"><button type="button" class="close" data-close="photo-dialog" aria-label="Close photo">×</button><img id="photo-full" alt="Pub review photo" /><div id="photo-gallery-caption" class="photo-gallery-caption" hidden><div class="gallery-photo-controls" aria-label="Browse gallery photos">
+      <button type="button" id="gallery-prev" class="button button-outline" aria-label="Previous photo">←</button>
+      <span id="gallery-position" role="status"></span>
+      <button type="button" id="gallery-next" class="button button-outline" aria-label="Next photo">→</button>
+    </div><p id="photo-gallery-credit"></p><button type="button" id="photo-gallery-pub" class="button button-outline">View pub ↗</button></div></dialog>
 
   <dialog id="detail-dialog" class="modal detail-dialog" aria-label="Pub details"><div class="modal-body"><button type="button" class="close" data-close="detail-dialog" aria-label="Close pub details">×</button><div id="detail-content"></div></div></dialog>
 
@@ -326,8 +330,8 @@
   <script type="module" src="firebase_auth.js?v=4.5"></script>
   <script src="home.js?v=4.9" defer></script>
   <script src="custom_golf.js?v=4.14" defer></script>
-  <script src="gallery.js?v=4.15" defer></script>
-  <script src="app.js?v=4.15" defer></script>
+  <script src="gallery.js?v=4.16" defer></script>
+  <script src="app.js?v=4.16" defer></script>
   <script src="pub_golf.js?v=4.11" defer></script>
   <script src="pwa.js?v=4.6" defer></script>
   <script src="navigation.js?v=4.15" defer></script>

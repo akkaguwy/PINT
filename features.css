@@ -318,3 +318,11 @@ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
 }
 
 .gallery-image [hidden]{display:none!important}
+
+.photo-dialog.gallery-viewer{width:min(92vw,760px)}
+.gallery-viewer #photo-full{width:100%;height:min(62vh,570px);max-width:100%;object-fit:contain;touch-action:pan-y pinch-zoom}
+.gallery-viewer .photo-gallery-caption{max-width:none}
+.gallery-photo-controls{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;text-align:center;gap:10px;margin-bottom:8px}
+.gallery-photo-controls .button{min-height:44px;padding:5px;font-size:19px}
+.gallery-photo-controls .button[aria-disabled="true"]{opacity:.45;cursor:default}
+#gallery-position{font-size:13px}
