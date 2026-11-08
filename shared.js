@@ -27,6 +27,8 @@
     load: () => call('/api/state'),
     addReview: review => call('/api/reviews', review),
     addPub: pub => call('/api/pubs', pub),
+    customRound: id => call('/api/custom-golf?id=' + encodeURIComponent(id)),
+    publishCustomRound: payload => call('/api/custom-golf', payload),
     golfRound: id => call('/api/golf?round=' + encodeURIComponent(id)),
     golfWrite: payload => call('/api/golf', payload),
   };
