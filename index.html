@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=4.5" />
-  <link rel="stylesheet" href="features.css?v=4.13" />
+  <link rel="stylesheet" href="features.css?v=4.14" />
   <link rel="stylesheet" href="polish.css?v=4.5" />
   <link rel="stylesheet" href="pub_identity.css?v=4.5" />
   <link rel="stylesheet" href="profile.css?v=4.5" />
@@ -148,6 +148,13 @@
           </div>
           <form id="golf-custom-form" hidden>
             <label>Course name <input name="courseName" maxlength="60" required placeholder="e.g. Cowbridge Friday round" /></label>
+            <div class="golf-custom-directory">
+              <label>Find a pub in PINT <input id="golf-custom-pub-search" type="search" autocomplete="off" placeholder="Search pub name or town" /></label>
+              <div class="golf-custom-actions">
+                <label>Matching pubs <select id="golf-custom-pub-choice"></select></label>
+                <button id="golf-custom-pub-add" type="button" class="button button-outline">Add selected pub</button>
+              </div>
+            </div>
             <div id="golf-custom-stops"></div>
             <div class="golf-custom-actions">
               <button id="golf-custom-add-stop" type="button" class="button button-outline">Add a pub stop</button>
@@ -155,6 +162,7 @@
               <button id="golf-custom-cancel" type="button" class="button button-outline">Cancel</button>
             </div>
           </form>
+          <div id="golf-custom-walk" class="golf-custom-actions" hidden></div>
           <div id="golf-custom-scorecard" hidden>
             <form id="golf-custom-team-form" class="golf-custom-actions">
               <label>Team name <input name="teamName" maxlength="40" required placeholder="e.g. Team A" /></label>
@@ -198,9 +206,14 @@
         <label class="search-box"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search pubs or areas..." autocomplete="off" /><kbd>⌕</kbd></label>
         <select id="region-filter" aria-label="Choose destination"><option value="Cardiff">Cardiff, Wales</option><option value="Vale">Vale of Glamorgan, Wales</option><option value="Dublin">Dublin, Ireland</option><option value="Methven">Methven, New Zealand</option></select>
         <select id="area-filter" aria-label="Filter by area"><option value="all">All areas</option></select>
-        <select id="sort-filter" aria-label="Sort pubs"><option value="name">Name A–Z</option><option value="unvisited">Not yet reviewed</option><option value="rated">Highest community rating</option><option value="activity">Recently reviewed</option><option value="cheapest">Cheapest logged pint</option></select>
+        <select id="sort-filter" aria-label="Sort pubs"><option value="name">Name A–Z</option><option value="unvisited">Not yet reviewed</option><option value="rated">Highest community rating</option><option value="guinness">Highest Guinness rating</option><option value="recent-guinness">Latest Guinness review</option><option value="activity">Recently reviewed</option><option value="cheapest">Cheapest logged pint</option></select>
         <button class="filter-button" id="favourites-filter" aria-pressed="false">♡ Favourites</button>
         <button class="filter-button" id="nearby-button" aria-pressed="false">⌖ Near me</button>
+      </div>
+      <div class="toolbar guinness-filters">
+        <select id="guinness-filter" aria-label="Minimum Guinness rating"><option value="0">Any Guinness rating</option><option value="1">Has a Guinness rating</option><option value="4">Guinness 4★ and up</option><option value="4.5">Guinness 4.5★ and up</option></select>
+        <select id="guinness-count" aria-label="Minimum number of Guinness ratings"><option value="0">Any rating count</option><option value="2">2+ Guinness ratings</option><option value="3">3+ Guinness ratings</option></select>
+        <select id="nearby-radius" aria-label="Distance from your location" hidden><option value="0">Any distance</option><option value="2">Within roughly 2 km</option><option value="5">Within roughly 5 km</option><option value="10">Within roughly 10 km</option></select>
       </div>
       <p id="directory-hint" class="directory-hint" aria-live="polite"></p><div class="discover-row"><button id="discover-dublin" class="button button-outline" type="button" hidden>Find more Dublin pubs</button><span id="osm-credit">Mapped pubs © OpenStreetMap contributors. Listings may be incomplete.</span></div><div class="view-bar"><div class="view-switch" role="group" aria-label="Directory view"><button id="list-view-button" class="active" aria-pressed="true">☷ List</button><button id="map-view-button" aria-pressed="false">⌖ Map</button></div><span id="location-note" aria-live="polite"></span></div>
       <div class="directory-note"><span id="result-count">0 pubs</span><span>Listings may be incomplete. Check opening times before visiting. Photos, where available, are contributed by reviewers.</span></div>
@@ -300,8 +313,8 @@
   <script src="profile.js?v=4.11" defer></script>
   <script type="module" src="firebase_auth.js?v=4.5"></script>
   <script src="home.js?v=4.9" defer></script>
-  <script src="custom_golf.js?v=4.13" defer></script>
-  <script src="app.js?v=4.13" defer></script>
+  <script src="custom_golf.js?v=4.14" defer></script>
+  <script src="app.js?v=4.14" defer></script>
   <script src="pub_golf.js?v=4.11" defer></script>
   <script src="pwa.js?v=4.6" defer></script>
   <script src="navigation.js?v=4.5" defer></script>

@@ -11,7 +11,7 @@
   const distinct=items=>new Set(items.map(item=>item.id)).size===items.length;
   function validSnapshot(round){
     if(!round||!validName(round.name,60)||!list(round.stops,limit.stops)||!round.stops.length||!list(round.teams,limit.teams))return false;
-    if(!round.stops.every(stop=>stop&&validId(stop.id)&&validName(stop.name,90))||!distinct(round.stops))return false;
+    if(!round.stops.every(stop=>stop&&validId(stop.id)&&validName(stop.name,90)&&(stop.address===undefined||typeof stop.address==='string'&&stop.address.length<=180))||!distinct(round.stops))return false;
     const stopIds=new Set(round.stops.map(stop=>stop.id));
     return round.teams.every(team=>team&&validId(team.id)&&validName(team.name,40)&&
       team.scores&&typeof team.scores==='object'&&!Array.isArray(team.scores)&&
@@ -148,6 +148,64 @@
     }).join(''):'';
     if(current)showTotals();
   }
+  function walkingLinks(stops){
+    const places=stops.map(({name,address})=>{
+      const label=[name,address].filter(Boolean).join(', ').replace(/\|/g,' ');
+      return new URLSearchParams({q:label}).toString().length<=850?label:name.replace(/\|/g,' ');
+    });
+    function directions(part){
+      const url=new URL('https://www.google.com/maps/dir/');
+      url.search=new URLSearchParams({api:'1',travelmode:'walking',origin:part[0],destination:part.at(-1)});
+      if(part.length>2)url.searchParams.set('waypoints',part.slice(1,-1).join('|'));
+      return url.href;
+    }
+    const links=[];
+    for(let start=0;start<places.length-1;){
+      let end=Math.min(start+4,places.length-1);
+      while(end>start+1&&directions(places.slice(start,end+1)).length>2048)end--;
+      links.push({href:directions(places.slice(start,end+1)),label:'Walk pubs '+(start+1)+'–'+(end+1)+' in Maps ↗'});
+      start=end;
+    }
+    return links;
+  }
+  function showWalk(){
+    const stops=course()?.stops||[];
+    const links=walkingLinks(stops);
+    $('walk').hidden=!links.length;
+    $('walk').innerHTML=links.map(({href,label})=>
+      `<a class="button button-outline" href="${safe(href)}" target="_blank" rel="noopener noreferrer">${label}</a>`
+    ).join('');
+  }
+  let directoryMatches=[];
+  function showDirectory(){
+    const query=$('pub-search').value.trim().toLowerCase();
+    const destination=document.getElementById('region-filter').value;
+    directoryMatches=(window.PintDirectory?.pubs()||[]).filter(pub=>query
+      ?[pub.name,pub.area,pub.address,pub.region].join(' ').toLowerCase().includes(query)
+      :pub.region===destination);
+    directoryMatches.sort((a,b)=>a.name.localeCompare(b.name));
+    const matches=directoryMatches.slice(0,40);
+    $('pub-choice').innerHTML='<option value="">'+(matches.length?'Choose a pub':'No matching pubs')+'</option>'+
+      matches.map((pub,i)=>`<option value="${i}">${safe(pub.name)} · ${safe(pub.area)} (${safe(pub.region)})</option>`).join('');
+    $('pub-add').disabled=true;
+  }
+  $('pub-search').addEventListener('input',showDirectory);
+  $('pub-choice').addEventListener('change',()=>{$('pub-add').disabled=$('pub-choice').value===''});
+  $('pub-add').addEventListener('click',()=>{
+    const value=$('pub-choice').value;
+    if(value==='')return;
+    const pub=directoryMatches[Number(value)];
+    if(!pub)return;
+    captureStops();
+    const stop={id:crypto.randomUUID(),name:pub.name.slice(0,90),address:String(pub.address||pub.area||'').slice(0,180)};
+    const empty=draft.findIndex(item=>!item.name.trim());
+    if(empty>=0)draft[empty]={...stop,id:draft[empty].id};
+    else if(draft.length<limit.stops)draft.push(stop);
+    else{status.textContent='This course already has 30 pub stops.';return}
+    renderStops();
+    $('pub-choice').value='';
+    $('pub-add').disabled=true;
+  });
   function render(){
     $('picker').hidden=!courses.length;
     $('course').innerHTML=courses.map(item=>`<option value="${item.id}">${safe(item.name)}</option>`).join('');
@@ -159,10 +217,14 @@
     showScores();
     shareControls();
     showHistory();
+    showWalk();
   }
   function renderStops(){
     $('stops').innerHTML=draft.map((stop,i)=>`<div class="golf-custom-stop">
-      <label>Pub ${i+1} <input data-stop-name maxlength="90" required value="${safe(stop.name)}" /></label>
+      <div class="golf-custom-stop-fields">
+        <label>Pub ${i+1} <input data-stop-name maxlength="90" required value="${safe(stop.name)}" /></label>
+        <label>Address or town <input data-stop-address aria-label="Address or town for pub ${i+1}" maxlength="180" value="${safe(stop.address||'')}" /></label>
+      </div>
       <div class="golf-custom-stop-buttons">
         <button type="button" data-index="${i}" data-action="up" aria-label="Move pub ${i+1} up" ${i===0?'disabled':''}>↑</button>
         <button type="button" data-index="${i}" data-action="down" aria-label="Move pub ${i+1} down" ${i===draft.length-1?'disabled':''}>↓</button>
@@ -173,12 +235,15 @@
   }
   function captureStops(){
     $('stops').querySelectorAll('[data-stop-name]').forEach((input,i)=>{draft[i].name=input.value});
+    $('stops').querySelectorAll('[data-stop-address]').forEach((input,i)=>{draft[i].address=input.value});
   }
   function openEditor(current){
     editing=current?.id;
     form.elements.courseName.value=current?.name||'';
     draft=current?current.stops.map(stop=>({...stop})):[{id:crypto.randomUUID(),name:''}];
     renderStops();
+    $('pub-search').value='';
+    showDirectory();
     form.hidden=false;
     form.elements.courseName.focus();
     status.textContent='';
@@ -209,7 +274,7 @@
     event.preventDefault();
     captureStops();
     const name=form.elements.courseName.value.trim();
-    const stops=draft.map(stop=>({...stop,name:stop.name.trim()}));
+    const stops=draft.map(stop=>({...stop,name:stop.name.trim(),address:(stop.address||'').trim()}));
     if(!name||stops.some(stop=>!stop.name)){status.textContent='Enter a course name and a name for each pub.';return}
     const existing=courses.find(item=>item.id===editing);
     const ids=new Set(stops.map(stop=>stop.id));
