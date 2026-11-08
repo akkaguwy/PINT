@@ -44,5 +44,108 @@
   $('#golf-routes').addEventListener('click',e=>{const button=e.target.closest('[data-route]');if(!button)return;selected=button.dataset.route;routeCards();detail()});
   $('#golf-detail').addEventListener('change',e=>{const visit=e.target.closest('[data-visited]'),points=e.target.closest('[data-points]');if(!visit&&!points)return;const state=stateFor(selected);if(visit)state[Number(visit.dataset.visited)].visited=visit.checked;if(points)state[Number(points.dataset.points)].points=points.value===''?null:Number(points.value);persist(selected,state);routeCards();detail()});
   $('#golf-detail').addEventListener('click',e=>{const reset=e.target.closest('[data-reset-route]');if(!reset)return;if(confirm('Clear your progress and points for this course?')){delete progress[selected];localStorage.setItem(KEY,JSON.stringify(progress));routeCards();detail()}});
+  const liveStart=$('#golf-live-start'),liveJoin=$('#golf-live-join'),liveCard=$('#golf-live-card');
+  const liveStatus=$('#golf-live-status');
+  const roundPattern=/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
+  let roundId=new URLSearchParams(location.search).get('round')||'';
+  if(!roundPattern.test(roundId))roundId='';
+  let room,me,busy=false,pendingRefresh,createAttempt;
+  const total=card=>card.reduce((sum,hole)=>sum+(hole.points??0),0);
+  const identityKey=()=> 'pint-golf-player:'+roundId;
+  const invite=()=>{
+    const url=new URL(location.pathname,location.origin);
+    url.searchParams.set('screen','pub-golf');
+    url.searchParams.set('round',roundId);
+    return url.href;
+  };
+  function showLiveCard(player,route){
+    liveCard.innerHTML=player?'<h4>Your scorecard</h4>'+route.stops.map(([name],i)=>{
+      const hole=player.card[i];
+      return `<div class="golf-live-hole" data-live-hole="${i}"><strong>${i+1}. ${safe(name)}</strong>
+        <label><input type="checkbox" ${hole.visited?'checked':''}/> Visited</label>
+        <label>Points <select aria-label="Live challenge points at ${safe(name)}"><option value="">—</option>
+        ${[0,1,2,3,4,5].map(n=>`<option value="${n}" ${hole.points===n?'selected':''}>${n}</option>`).join('')}</select></label></div>`;
+    }).join(''):'';
+  }
+  function refreshLive(force=false){
+    if(!roundId)return;
+    if(pendingRefresh)return pendingRefresh;
+    pendingRefresh=(async()=>{
+      try{
+        const next=await window.PintShared.golfRound(roundId);
+        const route=ROUTES.find(item=>item.id===next.round.course);
+        if(!route)throw Error('This course is unavailable.');
+        room=next;
+        const player=room.players.find(item=>item.id===me?.player);
+        $('#golf-live-round').hidden=false;
+        liveStart.hidden=true;
+        $('#golf-live-course').textContent=route.name;
+        $('#golf-live-link').value=invite();
+        liveJoin.hidden=!!player;
+        const leaderboard=[...room.players].sort((a,b)=>total(b.card)-total(a.card)||a.name.localeCompare(b.name));
+        $('#golf-live-board').innerHTML=leaderboard.length
+          ?leaderboard.map(p=>`<li><strong>${safe(p.name)}</strong> · ${total(p.card)} points · ${p.card.filter(hole=>hole.visited).length}/5 visited</li>`).join('')
+          :'<li>Waiting for players</li>';
+        if(force||player&&!liveCard.firstElementChild)showLiveCard(player,route);
+        liveStatus.textContent='';
+      }catch(error){liveStatus.textContent=error.message||'Could not load the round. Retrying while this page is open.'}
+      finally{pendingRefresh=null}
+    })();
+    return pendingRefresh;
+  }
+  async function writeLive(button,task){
+    if(busy)return;
+    busy=true;
+    button.disabled=true;
+    try{await pendingRefresh;await task()}
+    catch(error){liveStatus.textContent=error.message||'Could not save. Try again.'}
+    finally{busy=false;button.disabled=false}
+  }
+  liveStart.addEventListener('click',()=>writeLive(liveStart,async()=>{
+    if(createAttempt?.course!==selected)createAttempt={round:crypto.randomUUID(),course:selected};
+    await window.PintShared.golfWrite({action:'create',...createAttempt});
+    roundId=createAttempt.round;
+    history.replaceState(history.state,'',invite());
+    await refreshLive(true);
+  }));
+  liveJoin.addEventListener('submit',event=>{
+    event.preventDefault();
+    writeLive(liveJoin.querySelector('button'),async()=>{
+      me??={player:crypto.randomUUID(),secret:crypto.randomUUID()};
+      localStorage.setItem(identityKey(),JSON.stringify(me));
+      await window.PintShared.golfWrite({action:'join',round:roundId,...me,name:liveJoin.elements.playerName.value});
+      await refreshLive(true);
+    });
+  });
+  liveCard.addEventListener('change',event=>{
+    const row=event.target.closest('[data-live-hole]');
+    if(!row||!me)return;
+    const hole=Number(row.dataset.liveHole),visit=row.querySelector('input'),points=row.querySelector('select');
+    const previous=room.players.find(item=>item.id===me.player)?.card[hole];
+    if(!previous)return;
+    if(busy){visit.checked=previous.visited;points.value=previous.points??'';return}
+    const next={visited:visit.checked,points:points.value===''?null:Number(points.value)};
+    const controls=[...liveCard.querySelectorAll('input,select')];
+    controls.forEach(control=>control.disabled=true);
+    writeLive(event.target,async()=>{
+      try{
+        await window.PintShared.golfWrite({action:'score',round:roundId,...me,hole,...next});
+        Object.assign(previous,next);
+        await refreshLive(true);
+      }catch(error){visit.checked=previous.visited;points.value=previous.points??'';throw error}
+      finally{controls.forEach(control=>control.disabled=false)}
+    });
+  });
+  $('#golf-live-copy').addEventListener('click',async()=>{
+    try{await navigator.clipboard.writeText(invite());liveStatus.textContent='Link copied.'}
+    catch{$('#golf-live-link').select();liveStatus.textContent='Copy the selected invite link.'}
+  });
+  if(roundId){
+    liveStart.hidden=true;
+    try{me=JSON.parse(localStorage.getItem(identityKey())||'null')}catch{}
+    requestAnimationFrame(()=>$('#golf-live-title').scrollIntoView());
+    refreshLive(true);
+  }
+  setInterval(()=>{if(!document.hidden&&!busy)refreshLive()},5000);
   routeCards();detail();
 })();

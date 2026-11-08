@@ -253,6 +253,14 @@
   const distanceKm=(a,b)=>{const rad=Math.PI/180,dLat=(b[0]-a[0])*rad,dLon=(b[1]-a[1])*rad,x=Math.sin(dLat/2)**2+Math.cos(a[0]*rad)*Math.cos(b[0]*rad)*Math.sin(dLon/2)**2;return 6371*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))};
   const pubCentre=pub=>(Number.isFinite(pub.lat)&&Number.isFinite(pub.lon)?[pub.lat,pub.lon]:(centres[pub.region+'|'+pub.area]||centres[pub.area]));
   const pubDistance=pub=>nearPosition&&pubCentre(pub)?distanceKm(nearPosition,pubCentre(pub)):null;
+  function pubMapsUrl(value){
+    try{
+      const url=new URL(value);
+      const direct=['www.google.com','google.com','www.google.co.uk','google.co.uk'].includes(url.hostname)&&/^\/maps(?:\/|$)/.test(url.pathname);
+      const short=url.hostname==='maps.app.goo.gl'||url.hostname==='goo.gl'&&url.pathname.startsWith('/maps/');
+      return url.protocol==='https:'&&!url.username&&!url.password&&!url.port&&url.href.length<=1200&&(direct||short)?url.href:null;
+    }catch{return null}
+  }
   const mapDirections=pub=>'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(pub.name+', '+(pub.address||pub.area)+(pub.region==='Dublin'?', Ireland':pub.region==='Methven'?', New Zealand':', Wales'));
   let nearPosition=null,view='list',pubMap=null,mapMarkers=null,lastFiltered=[];
   function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
@@ -448,7 +456,7 @@
     <div class="detail-summary"><strong>${rating==null?'Not rated yet':rating.toFixed(1)+' / 5 ★'}</strong><span>${ratingLabel}</span></div>
     <div class="detail-actions">
       <button class="button button-gold" type="button" data-detail-review="${safe(pub.id)}">★ Rate a pint</button>
-      <a class="button button-outline" href="${mapDirections(pub)}" target="_blank" rel="noopener noreferrer">Directions ↗</a>
+      <a class="button button-outline" href="${safe(pubMapsUrl(pub.mapsUrl)||mapDirections(pub))}" target="_blank" rel="noopener noreferrer">Directions ↗</a>
     </div>
     ${tagsMarkup(pub)}
     <p class="detail-address">⌖ ${safe(pub.address||pub.area)}</p>
@@ -527,12 +535,13 @@
     const key=pubNameKey(form.elements.name.value);
     const area=pubNameKey(form.elements.area.value);
     const region=form.elements.region.value;
+    const mapsUrl=pubMapsUrl(form.elements.mapsUrl.value);
     const root=$('#pub-duplicates');
     const matches=key.length<3?[]:allPubs().filter(pub=>{
       const existing=pubNameKey(pub.name);
-      return pub.region===region&&(existing===key||(area&&pubNameKey(pub.area)===area&&(existing.includes(key)||key.includes(existing))));
+      return pub.region===region&&(mapsUrl&&mapsUrl===pub.mapsUrl||existing===key||(area&&pubNameKey(pub.area)===area&&(existing.includes(key)||key.includes(existing))));
     });
-    const duplicate=matches.find(pub=>pubNameKey(pub.name)===key&&pubNameKey(pub.area)===area);
+    const duplicate=matches.find(pub=>mapsUrl&&mapsUrl===pub.mapsUrl||pubNameKey(pub.name)===key&&pubNameKey(pub.area)===area);
     root.hidden=!matches.length;
     root.textContent=duplicate?'This pub is already listed:':'Check these existing listings:';
     for(const pub of matches.slice(0,5)){
@@ -547,11 +556,14 @@
     event.preventDefault();
     const button=event.target.querySelector('[type=submit]'),f=new FormData(event.target);
     const pub={id:crypto.randomUUID(),name:String(f.get('name')).trim(),area:String(f.get('area')).trim(),region:['Cardiff','Vale','Dublin','Methven'].includes(f.get('region'))?f.get('region'):'Cardiff',address:String(f.get('address')).trim(),description:String(f.get('description')).trim(),pubType:String(f.get('pubType')||'Pub')};
+    const mapsInput=String(f.get('mapsUrl')).trim();
+    if(mapsInput&&!pubMapsUrl(mapsInput)){toast('Paste a Google Maps place link');return}
+    pub.mapsUrl=pubMapsUrl(mapsInput);
     if(!pub.name||!pub.area||showPubMatches())return;
     button.disabled=true;button.textContent='Sharing pub…';
     try{
       if(!await refreshShared())throw Error('Could not check the latest pub listings. Try again.');
-      if(['name','area','region','address','description','pubType'].some(key=>event.target.elements[key].value.trim()!==pub[key]))throw Error('The listing changed. Check the details and submit again.');
+      if(['name','area','region','address','description','pubType'].some(key=>event.target.elements[key].value.trim()!==pub[key])||event.target.elements.mapsUrl.value.trim()!==mapsInput)throw Error('The listing changed. Check the details and submit again.');
       if(showPubMatches())return;
       await window.PintShared.addPub(pub);window.PintIdentity?.rememberType(pub,pub.pubType);$('#pub-dialog').close();event.target.reset();toast('Pub added for everyone ✓');await refreshShared();}
     catch(error){toast('Not shared: '+(error.message||'please retry'));}

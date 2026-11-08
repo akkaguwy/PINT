@@ -236,3 +236,14 @@ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
 #pub-duplicates[hidden]{display:none}
 
 .home-feature-map{display:inline-block;margin:8px 0 0 12px;color:var(--gold);font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+
+.golf-live{margin-top:24px;padding:24px;border:1px solid #57503f;background:#1c1d19;scroll-margin-top:75px}
+.golf-live h3,.golf-live h4{margin:0 0 8px;color:var(--gold)}
+.golf-live p{margin:10px 0;color:#c4c0b4;font-size:13px;line-height:1.6}
+.golf-live input:not([type=checkbox]),.golf-live select{min-width:0;padding:8px;color:var(--cream);background:#272921;border:1px solid #706249;border-radius:5px}
+#golf-live-link{width:min(100%,330px)}
+#golf-live-join,#golf-live-course,#golf-live-round h4{margin-top:18px}
+#golf-live-board{padding-left:25px}
+#golf-live-board li{padding:5px 0}
+.golf-live-hole{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-top:1px solid #4f4a3c}
+.golf-live-hole input{accent-color:var(--gold)}
