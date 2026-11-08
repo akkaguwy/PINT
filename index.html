@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=4.5" />
-  <link rel="stylesheet" href="features.css?v=4.9" />
+  <link rel="stylesheet" href="features.css?v=4.10" />
   <link rel="stylesheet" href="polish.css?v=4.5" />
   <link rel="stylesheet" href="pub_identity.css?v=4.5" />
   <link rel="stylesheet" href="profile.css?v=4.5" />
@@ -81,6 +81,7 @@
           <a href="#explore" class="home-feature-button" id="home-browse-link">Browse pubs
             <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </a>
+          <a href="#explore" class="home-feature-map" id="home-map-link">Open map ↗</a>
         </div>
         <div class="home-feature-art" aria-hidden="true">
           <div class="home-feature-ring"><span>P<span>.</span></span></div>
@@ -149,7 +150,15 @@
       </div>
       <p id="directory-hint" class="directory-hint" aria-live="polite"></p><div class="discover-row"><button id="discover-dublin" class="button button-outline" type="button" hidden>Find more Dublin pubs</button><span id="osm-credit">Mapped pubs © OpenStreetMap contributors. Listings may be incomplete.</span></div><div class="view-bar"><div class="view-switch" role="group" aria-label="Directory view"><button id="list-view-button" class="active" aria-pressed="true">☷ List</button><button id="map-view-button" aria-pressed="false">⌖ Map</button></div><span id="location-note" aria-live="polite"></span></div>
       <div class="directory-note"><span id="result-count">0 pubs</span><span>Listings may be incomplete. Check opening times before visiting. Photos, where available, are contributed by reviewers.</span></div>
-      <div id="map-container" class="map-container" hidden><div id="pub-map" aria-label="Map of approximate pub neighbourhoods"></div><p class="map-disclaimer">Pins mark approximate neighbourhood centres, not exact pub entrances. Tap a cluster to explore its pubs; use Directions on a pub for a location search.</p></div>
+      <div id="map-container" class="map-container" hidden>
+        <div class="map-filters"><label for="map-filter">Show on map</label>
+          <select id="map-filter"><option value="all">All pubs</option><option value="visited">I’ve reviewed</option><option value="rated">Community favourites (4+ ★)</option><option value="saved">Saved pubs</option></select>
+        </div>
+        <div id="pub-map" aria-label="Map of pub locations and approximate neighbourhoods"></div>
+        <p id="map-status" class="map-disclaimer" role="status"></p>
+        <p class="map-disclaimer">Tap a pin to open a pub or browse its neighbourhood. Neighbourhood pins show approximate locations.</p>
+        <details id="map-unpinned" class="map-unpinned" hidden><summary></summary><div id="map-unpinned-list"></div></details>
+      </div>
       <div class="pub-grid" id="pub-grid"></div><button id="show-more-pubs" class="button button-outline directory-more" type="button" hidden>Show more pubs</button>
       <p class="empty-state" id="empty-state" hidden>No pubs match that search. Try another area or add a new pub.</p>
     </section>
@@ -218,7 +227,7 @@
 
   <dialog id="detail-dialog" class="modal detail-dialog" aria-label="Pub details"><div class="modal-body"><button type="button" class="close" data-close="detail-dialog" aria-label="Close pub details">×</button><div id="detail-content"></div></div></dialog>
 
-  <dialog id="pub-dialog" class="modal"><form id="pub-form" class="modal-body"><button type="button" class="close" data-close="pub-dialog" aria-label="Close">×</button><span class="overline">PUB DIRECTORY</span><h2>Add a pub</h2><label>Pub name<input name="name" maxlength="90" placeholder="Pub name" required /></label><label>Region<select name="region" required><option value="Cardiff">Cardiff</option><option value="Vale">Vale of Glamorgan</option><option value="Dublin">Dublin, Ireland</option><option value="Methven">Methven, New Zealand</option></select></label><label>Type of pub<select name="pubType"><option value="Pub">General pub</option><option value="Traditional">Traditional</option><option value="Cocktails">Cocktails</option><option value="Sports">Sports bar</option><option value="Live music">Live music</option><option value="Craft beer">Craft beer</option><option value="Late bar">Late bar</option><option value="Food">Food pub</option></select></label><label>Area<input name="area" maxlength="50" placeholder="e.g. Cowbridge" required /></label><label>Address (optional)<input name="address" maxlength="150" placeholder="Street and town" /></label><label>What makes it worth a visit?<textarea name="description" rows="3" maxlength="180" placeholder="A little about the pub..."></textarea></label><button type="submit" class="button button-gold full">Add to my pubs ↗</button></form></dialog>
+  <dialog id="pub-dialog" class="modal"><form id="pub-form" class="modal-body"><button type="button" class="close" data-close="pub-dialog" aria-label="Close">×</button><span class="overline">PUB DIRECTORY</span><h2>Add a missing pub</h2><p>New pubs are shared with everyone. Check the existing listings before adding one.</p><label>Pub name<input name="name" maxlength="90" placeholder="Pub name" required /></label><label>Region<select name="region" required><option value="Cardiff">Cardiff</option><option value="Vale">Vale of Glamorgan</option><option value="Dublin">Dublin, Ireland</option><option value="Methven">Methven, New Zealand</option></select></label><label>Type of pub<select name="pubType"><option value="Pub">General pub</option><option value="Traditional">Traditional</option><option value="Cocktails">Cocktails</option><option value="Sports">Sports bar</option><option value="Live music">Live music</option><option value="Craft beer">Craft beer</option><option value="Late bar">Late bar</option><option value="Food">Food pub</option></select></label><label>Area<input name="area" maxlength="50" placeholder="e.g. Cowbridge" required /></label><label>Address (optional)<input name="address" maxlength="150" placeholder="Street and town" /></label><label>What makes it worth a visit?<textarea name="description" rows="3" maxlength="180" placeholder="A little about the pub..."></textarea></label><div id="pub-duplicates" aria-live="polite" hidden></div><button type="submit" class="button button-gold full">Add pub for everyone ↗</button></form></dialog>
 
   <dialog id="data-dialog" class="modal"><div class="modal-body"><button type="button" class="close" data-close="data-dialog" aria-label="Close">×</button><span class="overline">SETTINGS</span><h2>Your data</h2><p>Your pubs, pint logs and favourites currently live only in this browser. Export a backup before switching devices or clearing browser data.</p><button id="export-button" class="button button-gold full">Download JSON backup ↧</button><label class="import-label">Restore from backup<input id="import-input" type="file" accept=".json,application/json" /></label><p class="small-print">Import replaces the current data on this device, after confirmation. No public submissions or shared accounts yet.</p></div></dialog>
   <aside id="pint-update-notice" class="pint-update-notice" aria-label="PINT update available" hidden>
@@ -237,7 +246,7 @@
   <script src="profile.js?v=4.5" defer></script>
   <script type="module" src="firebase_auth.js?v=4.5"></script>
   <script src="home.js?v=4.9" defer></script>
-  <script src="app.js?v=4.9" defer></script>
+  <script src="app.js?v=4.10" defer></script>
   <script src="pub_golf.js?v=4.8" defer></script>
   <script src="pwa.js?v=4.6" defer></script>
   <script src="navigation.js?v=4.5" defer></script>
