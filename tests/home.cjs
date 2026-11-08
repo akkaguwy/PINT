@@ -3,9 +3,9 @@
 const fs=require('node:fs');
 const vm=require('node:vm');
 const assert=require('node:assert/strict');
-const ids=['home-destination-label','home-hero-city','home-hero-count','home-browse-link','home-community-note','home-feed-list','region-filter'];
+const ids=['home-destination-label','home-hero-city','home-hero-count','home-browse-link','home-community-note','home-feed-list','region-filter','home-activity-area','home-resume-round','home-resume-stop'];
 const nodes=Object.fromEntries(ids.map(id=>[id,{
-  id,textContent:'',innerHTML:'',value:'Cardiff',attrs:{},listeners:{},
+  id,textContent:'',innerHTML:'',value:'Cardiff',attrs:{},listeners:{},options:[{}],
   setAttribute(key,value){this.attrs[key]=value;},
   addEventListener(event,fn){this.listeners[event]=fn;},
   dispatchEvent(event){this.emitted=event.type;}
@@ -16,10 +16,11 @@ const buttons=['Cardiff','Vale','Dublin'].map(value=>({
   setAttribute(key,val){this.attrs[key]=val;},
   addEventListener(key,fn){this.listeners[key]=fn;}
 }));
+const listeners={};
 const document={
   getElementById:id=>nodes[id]||null,
   querySelectorAll:()=>buttons,
-  addEventListener(){}
+  addEventListener(event,fn){listeners[event]=fn;}
 };
 const window={PintShared:{photoUrls:review=>review.photoCount?['/test-photo']:[]}};
 const location={hash:''};
@@ -48,12 +49,25 @@ window.PintHome.render({destination:'Dublin',pubs:[pub],reviews:[{...review,revi
 assert.doesNotMatch(nodes['home-feed-list'].innerHTML,/<img src=x/);
 assert.match(nodes['home-feed-list'].innerHTML,/&lt;img/);
 const club={id:'club',name:'Cowbridge Athletic Club',region:'Vale',area:'Cowbridge',createdAt:Date.parse('2026-11-06')};
-window.PintHome.render({destination:'Cardiff',pubs:[pub,club],addedPubs:[club],reviews:[review,{...review,pubId:club.id,photoCount:1,createdAt:Date.parse('2026-11-07')}]});
+window.PintHome.render({destination:'Vale',connected:true,pubs:[pub,club],addedPubs:[club],reviews:[review,{...review,pubId:club.id,photoCount:1,createdAt:Date.parse('2026-11-07')}]});
 const feed=nodes['home-feed-list'];
+assert.match(feed.innerHTML,/Cowbridge Athletic Club/);
+assert.doesNotMatch(feed.innerHTML,/The Long Hall/);
+assert.equal(nodes['home-activity-area'].options[0].textContent,'the Vale');
+nodes['home-activity-area'].value='all';
+nodes['home-activity-area'].listeners.change();
 assert.match(feed.innerHTML,/rated and shared photos/);
 assert.match(feed.innerHTML,/src="\/test-photo"/);
 assert.ok(feed.innerHTML.indexOf('rated and shared photos')<feed.innerHTML.indexOf('New pub added'));
 assert.ok(feed.innerHTML.indexOf('New pub added')<feed.innerHTML.indexOf('The Long Hall'));
 feed.listeners.click({target:{closest:()=>({dataset:{homeReviewPub:club.id}})}});
 assert.equal(location.hash,'pub=club');
+let resumed=false;
+window.PintGolf={resumable:()=>[{time:2,hole:3,pub:'The Cross Inn',open:()=>{resumed=true;}}]};
+window.PintCustomGolf={resume:()=>({time:1,hole:2,pub:'The Bear Hotel'})};
+listeners['pint:golf-progress']();
+assert.equal(nodes['home-resume-round'].hidden,false);
+assert.equal(nodes['home-resume-stop'].textContent,'Hole 3 · The Cross Inn');
+nodes['home-resume-round'].listeners.click();
+assert.equal(resumed,true);
 console.log('PINT home dashboard regression tests passed');

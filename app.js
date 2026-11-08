@@ -174,7 +174,8 @@
   const getPub = id => allPubs().find(pub=>pub.id===id);
   const visibleLogs=()=>[...sharedLogs,...data.logs.filter(l=>!sharedLogs.some(s=>s.id===l.id))];
   const ratingLogs=()=>sharedLogs.length?sharedLogs:data.logs;
-  const latestPrice = id => [...ratingLogs()].filter(log=>log.pubId===id && log.price!=null).sort((a,b)=>b.date.localeCompare(a.date))[0]?.price;
+  const latestPriceLog = id => ratingLogs().filter(log=>log.pubId===id && log.price!=null).sort((a,b)=>b.date.localeCompare(a.date)||activityTime(b)-activityTime(a))[0];
+  const latestPrice = id => latestPriceLog(id)?.price;
   const averageRating = id => {const logs=ratingLogs().filter(log=>log.pubId===id);return logs.length?logs.reduce((s,l)=>s+l.rating,0)/logs.length:null};
   const averageField = (id,field) => {const logs=ratingLogs().filter(l=>l.pubId===id&&l[field]!=null);return logs.length?logs.reduce((sum,l)=>sum+l[field],0)/logs.length:null};
   const activityTime=log=>Number(log.createdAt)||Date.parse(log.createdAt||log.date)||0;
@@ -290,21 +291,65 @@
   function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
   let toastTimer;
   function toast(message){const el=$('#toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3000)}
-  let photoPreviewUrls=[];
-  function clearPhotoPreview(){photoPreviewUrls.forEach(url=>URL.revokeObjectURL(url));photoPreviewUrls=[];$('#photo-preview').innerHTML=''}
+  const reviewForm=$('#entry-form'), draftKey='pint-review-draft-v1';
+  let draftImages=[], draftId, photoTask=null, submittingReview=false;
+  function draftStatus(message){
+    const status=$('#review-draft-status');
+    status.textContent=message;
+    status.hidden=!message;
+  }
+  function saveReviewDraft(){
+    const fields=Object.fromEntries(new FormData(reviewForm));
+    delete fields.photos;
+    try{
+      localStorage.setItem(draftKey,JSON.stringify({id:draftId,fields,images:draftImages,details:$('#review-details').open}));
+    }catch{
+      draftStatus('Browser storage is full or unavailable. Keep this form open to retain your changes.');
+      return;
+    }
+    draftStatus('Draft saved on this device');
+  }
+  function renderDraftPhotos(){
+    const preview=$('#photo-preview');
+    preview.replaceChildren(...draftImages.map(src=>{
+      const image=document.createElement('img');
+      image.src=src;
+      image.alt='Selected review photo';
+      return image;
+    }));
+    $('#clear-review-photos').hidden=!draftImages.length;
+  }
+  function readReviewDraft(){
+    try{return JSON.parse(localStorage.getItem(draftKey)||'null')}catch{return null}
+  }
   function openDialog(id,pubId){
     if(id==='pub-dialog'){
       $('#pub-form [name=region]').value=$('#region-filter').value;
       showPubMatches();
     }
     if(id==='entry-dialog'){
-      $('#entry-form').reset();
+      if(submittingReview||photoTask)return;
+      reviewForm.reset();
+      const draft=readReviewDraft();
+      const restore=draft?.fields&&getPub(draft.fields.pubId)&&(!pubId||pubId===draft.fields.pubId);
+      draftId=restore?draft.id:crypto.randomUUID();
+      draftImages=restore&&Array.isArray(draft.images)?draft.images:[];
+      $('#review-details').open=Boolean(restore&&draft.details);
+      draftStatus(restore?'Draft restored':'');
       $('#review-form-error').hidden=true;
       $('#entry-form [name=reviewerName]').value=window.PintProfile?.load()?.name||localStorage.getItem('pint-reviewer-name')||'';
-      clearPhotoPreview();
+      renderDraftPhotos();
       const today=new Date();
       $('#entry-date').value=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);
-      updateEntryPubs(pubId);
+      updateEntryPubs(restore?draft.fields.pubId:pubId);
+      if(restore){
+        for(const [name,value] of Object.entries(draft.fields)){
+          const field=reviewForm.elements.namedItem(name);
+          if(!field||field.type==='file')continue;
+          if(field.type==='checkbox')field.checked=Boolean(value);
+          else field.value=value;
+        }
+      }
     }
     document.getElementById(id).showModal();
   }
@@ -490,16 +535,21 @@
     const ratingLabel=rated.length===1?'1 rating':rated.length+' ratings';
     const latest=logs.find(log=>log.shared);
     const remaining=logs.filter(log=>log!==latest);
-    const price=latestPrice(pub.id);
-    const scores=[['Guinness','guinness'],['Atmosphere','atmosphere'],['Setting','setting']];
+    const price=latestPriceLog(pub.id);
+    const guinness=guinnessStats().get(pub.id);
+    const scores=[['Atmosphere','atmosphere'],['Setting','setting']];
     return `<div class="detail-cover" data-pub-cover="${safe(pub.id)}">
       <span class="pub-photo-placeholder" aria-hidden="true">P<span>.</span><small>No photo yet</small></span>
       <span>${safe(pub.region==='Vale'?'VALE OF GLAMORGAN':pub.region.toUpperCase())} · ${safe(pub.area)}</span>
     </div>
     <h2>${safe(pub.name)}</h2>
-    <div class="detail-summary"><strong>${rating==null?'Not rated yet':rating.toFixed(1)+' / 5 ★'}</strong><span>${ratingLabel}</span></div>
+    <div class="detail-facts">
+      <div><small>Guinness</small><strong>${guinness?guinnessAverage(guinness).toFixed(1)+' / 5 ★':'Not rated'}</strong><span>${guinness?.count||0} ${guinness?.count===1?'rating':'ratings'}</span></div>
+      <div><small>Overall</small><strong>${rating==null?'Not rated':rating.toFixed(1)+' / 5 ★'}</strong><span>${ratingLabel}</span></div>
+      <div><small>Last pint price</small><strong>${price?money(price.price,pub.id):'No price yet'}</strong><span>${price?.date?'Logged '+safe(price.date):''}</span></div>
+    </div>
     <div class="detail-actions">
-      <button class="button button-gold" type="button" data-detail-review="${safe(pub.id)}">★ Rate a pint</button>
+      <button class="button button-gold" type="button" data-detail-review="${safe(pub.id)}">Write a review</button>
       <a class="button button-outline" href="${safe(pubMapsUrl(pub.mapsUrl)||mapDirections(pub))}" target="_blank" rel="noopener noreferrer">Directions ↗</a>
     </div>
     ${tagsMarkup(pub)}
@@ -510,8 +560,6 @@
       const value=averageField(pub.id,field);
       return `<div><small>${label}</small><strong>${value==null?'—':value.toFixed(1)+' ★'}</strong></div>`;
     }).join('')}</div>
-    ${guinnessEvidence(guinnessStats().get(pub.id))}
-    <p class="detail-price">${price==null?'No pint price recorded yet':'Last logged pint: '+money(price,pub.id)}</p>
     ${remaining.length?`<h3>${latest?'More reviews':'Reviews'} (${remaining.length})</h3><div class="detail-reviews">${remaining.map(detailReviewMarkup).join('')}</div>`:''}
     ${logs.length?'':'<p>No reviews yet. Be the first to add one.</p>'}
     <p class="small-print">Check opening times before travelling. Photos are contributed by reviewers and may show a drink or the pub.</p>`;
@@ -539,29 +587,67 @@
     }catch(error){toast('Pub search unavailable: '+(error.message||'try again later'))}
     finally{button.disabled=false;button.textContent='Find more Dublin pubs'}
   });
-  $('#pub-grid').addEventListener('click',async event=>{const heart=event.target.closest('[data-favourite]');if(heart){const id=heart.dataset.favourite;data.favourites=data.favourites.includes(id)?data.favourites.filter(x=>x!==id):[...data.favourites,id];save();toast('Favourites updated');return}const details=event.target.closest('[data-details]');if(details){location.hash='pub='+encodeURIComponent(details.dataset.details);return}const log=event.target.closest('[data-log]');if(log){if(!await ensureSharedPub(log.dataset.log))return;openDialog('entry-dialog',log.dataset.log)}});
-  $('#detail-content').addEventListener('click',async event=>{const review=event.target.closest('[data-detail-review]');if(review){if(!await ensureSharedPub(review.dataset.detailReview))return;$('#detail-dialog').close();openDialog('entry-dialog',review.dataset.detailReview);return}const image=event.target.closest('.photo-thumb img');if(image){$('#photo-full').src=image.src;$('#photo-dialog').showModal()}});
+  $('#pub-grid').addEventListener('click',async event=>{const heart=event.target.closest('[data-favourite]');if(heart){const id=heart.dataset.favourite;data.favourites=data.favourites.includes(id)?data.favourites.filter(x=>x!==id):[...data.favourites,id];save();toast('Favourites updated');return}const details=event.target.closest('[data-details]');if(details){location.hash='pub='+encodeURIComponent(details.dataset.details);return}const log=event.target.closest('[data-log]');if(log){openDialog('entry-dialog',log.dataset.log)}});
+  $('#detail-content').addEventListener('click',async event=>{const review=event.target.closest('[data-detail-review]');if(review){$('#detail-dialog').close();openDialog('entry-dialog',review.dataset.detailReview);return}const image=event.target.closest('.photo-thumb img');if(image){$('#photo-full').src=image.src;$('#photo-dialog').showModal()}});
   $('#detail-dialog').addEventListener('close',()=>{if(location.hash.startsWith('#pub=')){const url=new URL(location.href);url.hash='';history.replaceState(history.state,'',url)}});
   window.addEventListener('hashchange',syncPubHash);
-  $('#review-photos').addEventListener('change',event=>{clearPhotoPreview();const files=[...event.target.files];if(files.length>3){toast('Only the first three photos will be saved')}files.slice(0,3).forEach(file=>{const url=URL.createObjectURL(file);photoPreviewUrls.push(url);const image=document.createElement('img');image.src=url;image.alt='Selected review photo';$('#photo-preview').appendChild(image)});if(files.length)$('#photo-preview').insertAdjacentHTML('beforeend',`<span class="photo-count">${Math.min(3,files.length)} selected</span>`)});
-  $('#entry-form').addEventListener('submit',async event=>{
+  reviewForm.addEventListener('input',event=>{
+    if(event.target.type!=='file')saveReviewDraft();
+  });
+  $('#entry-pub').addEventListener('change',event=>updateEntryPubs(event.target.value));
+  reviewForm.addEventListener('invalid',event=>{
+    if(event.target.closest('#review-details'))$('#review-details').open=true;
+  },true);
+  $('#review-photos').addEventListener('change',async event=>{
+    const input=event.target;
+    const files=[...input.files].slice(0,3);
+    if(!files.length)return;
+    input.disabled=true;
+    photoTask=Promise.all(files.map(window.PintPhotos.resize));
+    draftStatus('Preparing photos…');
+    try{
+      draftImages=await photoTask;
+      renderDraftPhotos();
+      saveReviewDraft();
+    }catch(error){draftStatus(error.message)}
+    finally{photoTask=null;input.disabled=false;input.value=''}
+  });
+  $('#clear-review-photos').addEventListener('click',()=>{
+    if(photoTask)return;
+    draftImages=[];
+    renderDraftPhotos();
+    saveReviewDraft();
+  });
+  reviewForm.addEventListener('submit',async event=>{
     event.preventDefault();
-    const button=event.target.querySelector('[type=submit]');button.disabled=true;
+    if(submittingReview)return;
+    submittingReview=true;
+    const button=event.target.querySelector('[type=submit]');
+    button.disabled=true;
+    reviewForm.inert=true;
     const status=$('#review-form-error');
     status.hidden=true;
     const showError=message=>{status.hidden=false;status.textContent=message};
     const f=new FormData(event.target),optionalScore=name=>f.get(name)===''?null:Number(f.get(name));
     const price=f.get('price')===''?null:Number(f.get('price'));
-    const log={id:crypto.randomUUID(),pubId:String(f.get('pubId')),reviewerName:String(f.get('reviewerName')).trim(),price,rating:Number(f.get('rating')),guinness:optionalScore('guinness'),atmosphere:optionalScore('atmosphere'),setting:optionalScore('setting'),date:String(f.get('date')),notes:String(f.get('notes')).trim(),coverPhoto:Boolean(f.get('coverPhoto'))};
+    const log={id:draftId,pubId:String(f.get('pubId')),reviewerName:String(f.get('reviewerName')).trim(),price,rating:Number(f.get('rating')),guinness:optionalScore('guinness'),atmosphere:optionalScore('atmosphere'),setting:optionalScore('setting'),date:String(f.get('date')),notes:String(f.get('notes')).trim(),coverPhoto:Boolean(f.get('coverPhoto'))};
     try{
       if(!getPub(log.pubId)||!log.reviewerName||(price!=null&&(price<=0||price>100))||log.rating<1||log.rating>5){showError('Check your review details and try again.');return}
       button.textContent='Sharing review…';
-      const images=await Promise.all([...$('#review-photos').files].slice(0,3).map(window.PintPhotos.resize));
+      if(photoTask)await photoTask;
+      saveReviewDraft();
+      if(!await ensureSharedPub(log.pubId))throw Error('Pub unavailable');
+      const images=draftImages;
       log.coverPhoto=log.coverPhoto&&images.length>0;
       await window.PintShared.addReview({...log,images});
       window.PintProfile?.record(log.id);
-      localStorage.setItem('pint-reviewer-name',log.reviewerName);
-      $('#entry-dialog').close();clearPhotoPreview();
+      try{
+        localStorage.setItem('pint-reviewer-name',log.reviewerName);
+        if(readReviewDraft()?.id===log.id)localStorage.removeItem(draftKey);
+      }catch{}
+      $('#entry-dialog').close();
+      draftImages=[];
+      renderDraftPhotos();
       toast('Review submitted · checking shared feed…');
       const synced=await refreshShared();
       if(synced&&sharedLogs.some(r=>r.id===log.id))toast('Review confirmed in the community feed ✓');
@@ -573,7 +659,7 @@
           else toast('Review received, but not confirmed in shared feed. Check again later.');
         },4000);
       }
-    }catch{showError('We couldn’t confirm your review was shared. Your details are still here. Check your connection and try again.');}finally{button.disabled=false;button.textContent='Save my review ↗'}
+    }catch{showError('We couldn’t confirm your review was shared. Your details are still here. Check your connection and try again.');}finally{submittingReview=false;reviewForm.inert=false;button.disabled=false;button.textContent='Save my review ↗'}
   });
   $('#recent-list').addEventListener('click',event=>{const image=event.target.closest('.photo-thumb img');if(image){$('#photo-full').src=image.src;$('#photo-dialog').showModal()}});
   const pubNameKey=value=>value.normalize('NFKD').toLowerCase().replace(/\p{M}/gu,'')
@@ -652,8 +738,13 @@
   });
   $('#favourites-filter').addEventListener('click',()=>{favouritesOnly=!favouritesOnly;$('#favourites-filter').setAttribute('aria-pressed',String(favouritesOnly));render()});
   $('#add-pub-button').addEventListener('click',()=>openDialog('pub-dialog'));$('#log-first-button').addEventListener('click',()=>openDialog('entry-dialog'));$('#journal-log-button').addEventListener('click',()=>openDialog('entry-dialog'));$('#open-data-button').addEventListener('click',()=>openDialog('data-dialog'));
-  document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>document.getElementById(b.dataset.close).close()));
-  document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',event=>{if(event.target===d)d.close()}));
+  document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.close!=='entry-dialog'||!submittingReview&&!photoTask)document.getElementById(b.dataset.close).close()}));
+  $('#entry-dialog').addEventListener('cancel',event=>{
+    if(submittingReview||photoTask)event.preventDefault();
+  });
+  document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',event=>{
+    if(event.target===d&&(d.id!=='entry-dialog'||!submittingReview&&!photoTask))d.close();
+  }));
   $('#export-button').addEventListener('click',async()=>{try{const photoBackup=await window.PintPhotos.exportAll(),golf=JSON.parse(localStorage.getItem('pint-golf-scores-v1')||'{}');const blob=new Blob([JSON.stringify({app:'PINT',version:3,exportedAt:new Date().toISOString(),...data,photos:photoBackup,golf,customGolf:window.PintCustomGolf.backup()},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='pint-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Backup downloaded, including photos')}catch(error){toast('Backup could not be made: '+error.message)}});
   $('#import-input').addEventListener('change',async event=>{const file=event.target.files?.[0];if(!file)return;try{if(file.size>80_000_000)throw Error('File too large');const raw=JSON.parse(await file.text());if(raw.app!=='PINT')throw Error('Not a PINT backup');const imported=validateData(raw);const customGolf=raw.customGolf===undefined?undefined:window.PintCustomGolf.validate(raw.customGolf);if(confirm('Replace your current PINT reviews, photos and scorecards with this backup?')){if(raw.photos)await window.PintPhotos.importAll(raw.photos);if(raw.golf&&typeof raw.golf==='object')localStorage.setItem('pint-golf-scores-v1',JSON.stringify(raw.golf));if(customGolf!==undefined)window.PintCustomGolf.restore(customGolf);data=imported;save();$('#data-dialog').close();toast('Backup restored — refresh for scorecards')}}catch(error){toast('Import failed: '+error.message)}event.target.value=''});
   const authorLabel=document.createElement('label');
