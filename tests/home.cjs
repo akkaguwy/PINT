@@ -21,9 +21,10 @@ const document={
   querySelectorAll:()=>buttons,
   addEventListener(){}
 };
-const window={PintProfile:{load:()=>({name:'Morgan Smith'})}};
+const window={PintProfile:{load:()=>({name:'Morgan Smith'})},PintShared:{photoUrls:review=>review.photoCount?['/test-photo']:[]}};
+const location={hash:''};
 class FakeEvent{constructor(type){this.type=type;}}
-vm.runInNewContext(fs.readFileSync('home.js','utf8'),{document,window,location:{hash:''},Event:FakeEvent,Intl,Date});
+vm.runInNewContext(fs.readFileSync('home.js','utf8'),{document,window,location,Event:FakeEvent,Intl,Date});
 const pub={id:'test-pub',region:'Dublin',name:'The Long Hall'};
 const review={id:'test-review',pubId:pub.id,reviewerName:'Erin',rating:4,date:'2026-11-05'};
 window.PintHome.render({destination:'Dublin',pubs:[pub],reviews:[review],connected:true});
@@ -42,4 +43,13 @@ assert.match(nodes['home-feed-list'].innerHTML,/No reviews here yet/);
 window.PintHome.render({destination:'Dublin',pubs:[pub],reviews:[{...review,reviewerName:'<img src=x onerror=alert(1)>'}],connected:true});
 assert.doesNotMatch(nodes['home-feed-list'].innerHTML,/<img src=x/);
 assert.match(nodes['home-feed-list'].innerHTML,/&lt;img/);
+const club={id:'club',name:'Cowbridge Athletic Club',region:'Vale',area:'Cowbridge',createdAt:Date.parse('2026-11-06')};
+window.PintHome.render({destination:'Cardiff',pubs:[pub,club],addedPubs:[club],reviews:[review,{...review,pubId:club.id,photoCount:1,createdAt:Date.parse('2026-11-07')}]});
+const feed=nodes['home-feed-list'];
+assert.match(feed.innerHTML,/rated and shared photos/);
+assert.match(feed.innerHTML,/src="\/test-photo"/);
+assert.ok(feed.innerHTML.indexOf('rated and shared photos')<feed.innerHTML.indexOf('New pub added'));
+assert.ok(feed.innerHTML.indexOf('New pub added')<feed.innerHTML.indexOf('The Long Hall'));
+feed.listeners.click({target:{closest:()=>({dataset:{homeReviewPub:club.id}})}});
+assert.equal(location.hash,'pub=club');
 console.log('PINT home dashboard regression tests passed');

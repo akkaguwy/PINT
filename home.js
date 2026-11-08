@@ -6,8 +6,8 @@
   const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   let activeDestination='Cardiff';
   const compactDate=value=>{
-    if(!/^\d{4}-\d{2}-\d{2}$/.test(String(value||'')))return '';
-    const date=new Date(value+'T12:00:00');
+    if(!value)return '';
+    const date=new Date(value);
     return Number.isFinite(date.getTime())?new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short'}).format(date):'';
   };
   function personalise(){
@@ -37,7 +37,10 @@
     if(!button)return;
     location.hash='pub='+encodeURIComponent(button.dataset.homeReviewPub);
   });
-  function render({destination='Cardiff',pubs=[],reviews=[],connected=false,favourites=[]}={}){
+  $('home-feed-list')?.addEventListener('error',event=>{
+    if(event.target.matches('.home-activity-avatar img'))event.target.remove();
+  },true);
+  function render({destination='Cardiff',pubs=[],reviews=[],connected=false,addedPubs=[]}={}){
     activeDestination=names[destination]?destination:'Cardiff';
     const chosen=names[activeDestination];
     const inArea=pubs.filter(p=>p.region===activeDestination);
@@ -56,23 +59,29 @@
       button.classList.toggle('selected',selected);
     });
     const subtitle=$('home-community-note');
-    if(subtitle)subtitle.textContent=connected?'Latest shared reviews in '+chosen:'Latest available reviews in '+chosen+' · Cached feed';
+    if(subtitle)subtitle.textContent=connected?'Latest reviews, photos and pubs from the PINT community':'Saved community activity · updates when connected';
     const root=$('home-feed-list');
     if(root){
-      const lookup=new Map(pubs.map(p=>[p.id,p]));
-      const recent=reviews.filter(r=>lookup.has(r.pubId)&&Number.isFinite(Number(r.rating)))
-        .sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||String(b.createdAt||'').localeCompare(String(a.createdAt||''))).slice(0,3);
-      root.innerHTML=recent.length?recent.map(review=>{
-        const pub=lookup.get(review.pubId);
-        const author=String(review.reviewerName||'PINT member').trim();
-        const stars=Math.min(5,Math.max(1,Number(review.rating)));
-        return '<button class="home-activity" type="button" data-home-review-pub="'+escapeHtml(pub.id)+'" aria-label="View '+escapeHtml(pub.name)+'">'
-          +'<span class="home-activity-avatar" aria-hidden="true">'+escapeHtml(author[0]?.toUpperCase()||'P')+'</span>'
-          +'<span class="home-activity-copy"><strong>'+escapeHtml(pub.name)+'</strong>'
-          +'<span>'+escapeHtml(author)+' <span class="home-activity-sep">·</span> '+escapeHtml(compactDate(review.date))+'</span></span>'
-          +'<span class="home-activity-rating">'+stars.toFixed(1)+' <span aria-hidden="true">★</span></span>'
-          +'</button>';
-      }).join(''):'<div class="home-empty-feed"><strong>No reviews here yet</strong><span>Be the first to share a visit in '+escapeHtml(chosen)+'.</span><a href="#my-pints">Open community <span aria-hidden="true">↗</span></a></div>';
+      const lookup=new Map(pubs.map(pub=>[pub.id,pub]));
+      const events=[
+        ...reviews.filter(review=>lookup.has(review.pubId)&&Number(review.rating)>=1&&Number(review.rating)<=5)
+          .map(review=>({pub:lookup.get(review.pubId),review,date:review.createdAt||review.date})),
+        ...addedPubs.filter(pub=>lookup.has(pub.id)&&pub.createdAt).map(pub=>({pub,date:pub.createdAt}))
+      ];
+      const time=value=>Number(value)||Date.parse(value)||0;
+      const recent=events.sort((a,b)=>time(b.date)-time(a.date)).slice(0,5);
+      root.innerHTML=recent.length?recent.map(({pub,review,date})=>{
+        const author=String(review?.reviewerName||'').trim()||'PINT member';
+        const photo=review&&window.PintShared?.photoUrls(review)[0];
+        const action=review?author+(photo?' rated and shared photos':' rated a pint'):'New pub added';
+        const rating=review?'<span class="home-activity-rating">'+Number(review.rating).toFixed(1)+' <span aria-hidden="true">★</span></span>':'';
+        const image=photo?'<img src="'+escapeHtml(photo)+'" alt="" loading="lazy" />':'';
+        const info=[action,pub.area,compactDate(time(date))].filter(Boolean).join(' · ');
+        return '<button class="home-activity" type="button" data-home-review-pub="'+escapeHtml(pub.id)+'">'
+          +'<span class="home-activity-avatar" aria-hidden="true">'+escapeHtml(review?author[0].toUpperCase():'+')+image+'</span>'
+          +'<span class="home-activity-copy"><strong>'+escapeHtml(pub.name)+'</strong><span>'+escapeHtml(info)+'</span></span>'
+          +rating+'</button>';
+      }).join(''):'<div class="home-empty-feed"><strong>No reviews here yet</strong><span>Be the first to share a visit.</span><a href="#my-pints">Open community <span aria-hidden="true">↗</span></a></div>';
     }
     personalise();
   }
