@@ -176,6 +176,7 @@
   const latestPrice = id => [...ratingLogs()].filter(log=>log.pubId===id && log.price!=null).sort((a,b)=>b.date.localeCompare(a.date))[0]?.price;
   const averageRating = id => {const logs=ratingLogs().filter(log=>log.pubId===id);return logs.length?logs.reduce((s,l)=>s+l.rating,0)/logs.length:null};
   const averageField = (id,field) => {const logs=ratingLogs().filter(l=>l.pubId===id&&l[field]!=null);return logs.length?logs.reduce((sum,l)=>sum+l[field],0)/logs.length:null};
+  const activityTime=log=>Number(log.createdAt)||Date.parse(log.createdAt||log.date)||0;
   const logPhotos=log=>log.shared?Promise.resolve(window.PintShared.photoUrls(log)):window.PintPhotos.read(log.id);
   const pubTags=pub=>window.PintIdentity?.tags(pub)||['Pub'];
   const tagsMarkup=pub=>'<div class="pub-tags" aria-label="Pub types">'+pubTags(pub).map(tag=>'<span class="pub-tag">'+safe(tag)+'</span>').join('')+'</div>';
@@ -223,12 +224,7 @@
       try{localStorage.setItem('pint-community-snapshot-v1',JSON.stringify({pubs:sharedPubs,reviews:sharedLogs,syncedAt:lastSuccessfulSync}))}catch{}
       setSharedStatus('● Connected · '+sharedLogs.length+' shared reviews · Synced '+new Date(lastSuccessfulSync).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),'online');
       render();
-      const detail=$('#detail-dialog');
-      if(detail.open&&location.hash.startsWith('#pub=')){
-        const id=decodeURIComponent(location.hash.slice(5));
-        const pub=getPub(id);
-        if(pub){$('#detail-content').innerHTML=detailMarkup(pub);hydratePubCovers($('#detail-content'));renderDetailPhotos(pub.id)}
-      }
+      if(location.hash.startsWith('#pub='))syncPubHash();
       return true;
     }catch(error){
       if(serial!==requestSerial)return false;
@@ -257,15 +253,33 @@
   const distanceKm=(a,b)=>{const rad=Math.PI/180,dLat=(b[0]-a[0])*rad,dLon=(b[1]-a[1])*rad,x=Math.sin(dLat/2)**2+Math.cos(a[0]*rad)*Math.cos(b[0]*rad)*Math.sin(dLon/2)**2;return 6371*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))};
   const pubCentre=pub=>(Number.isFinite(pub.lat)&&Number.isFinite(pub.lon)?[pub.lat,pub.lon]:(centres[pub.region+'|'+pub.area]||centres[pub.area]));
   const pubDistance=pub=>nearPosition&&pubCentre(pub)?distanceKm(nearPosition,pubCentre(pub)):null;
-  const mapSearch=pub=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(pub.name+', '+(pub.address||pub.area)+(pub.region==='Dublin'?', Ireland':pub.region==='Methven'?', New Zealand':', Wales'));
+  const mapDirections=pub=>'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(pub.name+', '+(pub.address||pub.area)+(pub.region==='Dublin'?', Ireland':pub.region==='Methven'?', New Zealand':', Wales'));
   let nearPosition=null,view='list',pubMap=null,mapMarkers=null,lastFiltered=[];
   function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
   let toastTimer;
   function toast(message){const el=$('#toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3000)}
   let photoPreviewUrls=[];
   function clearPhotoPreview(){photoPreviewUrls.forEach(url=>URL.revokeObjectURL(url));photoPreviewUrls=[];$('#photo-preview').innerHTML=''}
-  function openDialog(id){if(id==='pub-dialog'){$('#pub-form [name=region]').value=$('#region-filter').value}if(id==='entry-dialog'){$('#entry-form').reset();$('#entry-form [name=reviewerName]').value=window.PintProfile?.load()?.name||localStorage.getItem('pint-reviewer-name')||'';clearPhotoPreview();const today=new Date();$('#entry-date').value=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);updateEntryPubs()}document.getElementById(id).showModal()}
-  function updateEntryPubs(){const select=$('#entry-pub');const current=select.value;const selected=$('#region-filter').value;select.innerHTML=allPubs().filter(p=>p.region===selected).map(p=>`<option value="${safe(p.id)}">${safe(p.name)} — ${safe(p.area)}</option>`).join('');if(allPubs().some(p=>p.id===current&&p.region===selected))select.value=current}
+  function openDialog(id,pubId){
+    if(id==='pub-dialog')$('#pub-form [name=region]').value=$('#region-filter').value;
+    if(id==='entry-dialog'){
+      $('#entry-form').reset();
+      $('#entry-form [name=reviewerName]').value=window.PintProfile?.load()?.name||localStorage.getItem('pint-reviewer-name')||'';
+      clearPhotoPreview();
+      const today=new Date();
+      $('#entry-date').value=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);
+      updateEntryPubs(pubId);
+    }
+    document.getElementById(id).showModal();
+  }
+  function updateEntryPubs(pubId){
+    const select=$('#entry-pub');
+    const region=getPub(pubId)?.region||$('#region-filter').value;
+    select.innerHTML=allPubs().filter(p=>p.region===region).map(p=>`<option value="${safe(p.id)}">${safe(p.name)} — ${safe(p.area)}</option>`).join('');
+    if(getPub(pubId))select.value=pubId;
+    const currency=money(0,select.value).replace('0.00','');
+    $('#entry-price-label').textContent='Price of pint ('+currency+') · optional';
+  }
   let favouritesOnly=false;
   let directoryLimit=12;
   let reviewFeedLimit=12;
@@ -273,8 +287,6 @@
   function render(){
     const pubs=allPubs();
     const destination=$('#region-filter').value;
-    const priceLabel=$('#entry-price-label');
-    if(priceLabel)priceLabel.textContent='Price of pint ('+(destination==='Methven'?'NZ$':destination==='Dublin'?'€':'£')+') · optional';
     $('#discover-dublin').hidden=destination!=='Dublin';
     $('#destination-title').textContent=destination==='Dublin'?'Explore Dublin pubs':destination==='Vale'?'Explore Vale of Glamorgan pubs':destination==='Methven'?'Explore Methven pubs & bars':'Explore Cardiff pubs';
     const currentPubs=pubs.filter(p=>p.region===destination);
@@ -327,7 +339,7 @@
     recents.forEach(async log=>{try{const images=await logPhotos(log);const el=[...document.querySelectorAll('[data-review-photos]')].find(x=>x.dataset.reviewPhotos===log.id);if(el)el.innerHTML=images.map((src,i)=>`<button class="photo-thumb" type="button" aria-label="View photo ${i+1}"><img alt="Photo ${i+1} from ${safe(getPub(log.pubId)?.name||'pub')}" src="${src}" /></button>`).join('')}catch{}});
     if(view==='map')renderMap();
     window.PintProfile?.render(visibleLogs(),getPub);
-    window.PintHome?.render({destination,pubs,reviews:sharedLogs.filter(l=>getPub(l.pubId)?.region===destination),connected:sharedOnline,favourites:data.favourites});
+    window.PintHome?.render({destination,pubs,reviews:sharedLogs,addedPubs:sharedPubs,connected:sharedOnline});
   }
   function showView(next){view=next;$('#show-more-pubs').hidden=next==='map'||lastFiltered.length<=directoryLimit;$('#pub-grid').hidden=next==='map';$('#map-container').hidden=next!=='map';$('#list-view-button').classList.toggle('active',next==='list');$('#map-view-button').classList.toggle('active',next==='map');$('#list-view-button').setAttribute('aria-pressed',next==='list');$('#map-view-button').setAttribute('aria-pressed',next==='map');if(next==='map')requestAnimationFrame(renderMap)}
   function renderMap(){
@@ -339,7 +351,49 @@
     if(nearPosition){const you=L.circleMarker(nearPosition,{radius:8,color:'#f6e7c7',fillColor:'#c9a35b',fillOpacity:1}).addTo(mapMarkers);you.bindPopup('Your approximate location');bounds.push(nearPosition)}
     pubMap.invalidateSize();if(bounds.length)pubMap.fitBounds(bounds,{padding:[25,25],maxZoom:13});
   }
-  function detailMarkup(pub){const rating=averageRating(pub.id),guinness=averageField(pub.id,'guinness'),atmosphere=averageField(pub.id,'atmosphere'),setting=averageField(pub.id,'setting'),price=latestPrice(pub.id),logs=[...visibleLogs()].filter(l=>l.pubId===pub.id).sort((a,b)=>b.date.localeCompare(a.date));return `<div class="detail-cover" data-pub-cover="${safe(pub.id)}"><span class="pub-photo-placeholder" aria-hidden="true">P<span>.</span><small>No photo yet</small></span><span>${safe(pub.region==='Vale'?'VALE OF GLAMORGAN':pub.region.toUpperCase())} · ${safe(pub.area)}</span></div><span class="overline">THE PINT COMMUNITY</span><h2>${safe(pub.name)}</h2>${tagsMarkup(pub)}<p class="detail-address">⌖ ${safe(pub.address||pub.area)}</p><p>${safe(pub.description||'A pub to visit and discover for yourself.')}</p><div class="detail-scores">${[['Overall',rating],['Guinness',guinness],['Atmosphere',atmosphere],['Setting',setting]].map(([label,value])=>`<div><small>${label}</small><strong>${value==null?'—':value.toFixed(1)+' ★'}</strong></div>`).join('')}</div><p class="detail-price">${price==null?'No pint price recorded yet':'Last logged pint: '+money(price,pub.id)}</p><div class="detail-actions"><button class="button button-gold" data-detail-review="${safe(pub.id)}">★ Review this pub</button><a class="button button-outline" href="${mapSearch(pub)}" target="_blank" rel="noopener noreferrer">Directions ↗</a></div><h3>Reviews (${logs.length})</h3><div class="detail-reviews">${logs.length?logs.map(l=>`<div class="detail-review"><strong>${Number(l.rating).toFixed(1)} ★</strong><div class="review-author">${l.shared?(window.PintProfile?.author(l.reviewerName)||safe(l.reviewerName)):'Your saved review · not shared'}</div><small>${safe(l.date)}${l.guinness!=null?' · Guinness '+l.guinness+'★':''}</small>${l.notes?`<p>${safe(l.notes)}</p>`:''}<div class="review-photos" data-detail-photos="${safe(l.id)}"></div></div>`).join(''):'<p>No reviews yet. Be the first to add one.</p>'}</div><p class="small-print">Check opening times, availability and Guinness before travelling. Photos are contributed by reviewers and may show a drink or the pub.</p>`}
+  function detailReviewMarkup(log){
+    const author=log.shared
+      ?window.PintProfile?.author(log.reviewerName)||safe(log.reviewerName||'PINT member')
+      :'Your saved review · not shared';
+    return `<article class="detail-review">
+      <div class="detail-review-heading"><div class="review-author">${author}</div><strong>${Number(log.rating).toFixed(1)} ★</strong></div>
+      <small>${safe(log.date)}${log.guinness!=null?' · Guinness '+safe(log.guinness)+'★':''}</small>
+      ${log.notes?`<p>${safe(log.notes)}</p>`:''}
+      <div class="review-photos" data-detail-photos="${safe(log.id)}"></div>
+    </article>`;
+  }
+  function detailMarkup(pub){
+    const logs=visibleLogs().filter(log=>log.pubId===pub.id).sort((a,b)=>activityTime(b)-activityTime(a));
+    const rated=ratingLogs().filter(log=>log.pubId===pub.id);
+    const rating=averageRating(pub.id);
+    const ratingLabel=rated.length===1?'1 rating':rated.length+' ratings';
+    const latest=logs.find(log=>log.shared);
+    const remaining=logs.filter(log=>log!==latest);
+    const price=latestPrice(pub.id);
+    const scores=[['Guinness','guinness'],['Atmosphere','atmosphere'],['Setting','setting']];
+    return `<div class="detail-cover" data-pub-cover="${safe(pub.id)}">
+      <span class="pub-photo-placeholder" aria-hidden="true">P<span>.</span><small>No photo yet</small></span>
+      <span>${safe(pub.region==='Vale'?'VALE OF GLAMORGAN':pub.region.toUpperCase())} · ${safe(pub.area)}</span>
+    </div>
+    <h2>${safe(pub.name)}</h2>
+    <div class="detail-summary"><strong>${rating==null?'Not rated yet':rating.toFixed(1)+' / 5 ★'}</strong><span>${ratingLabel}</span></div>
+    <div class="detail-actions">
+      <button class="button button-gold" type="button" data-detail-review="${safe(pub.id)}">★ Rate a pint</button>
+      <a class="button button-outline" href="${mapDirections(pub)}" target="_blank" rel="noopener noreferrer">Directions ↗</a>
+    </div>
+    ${tagsMarkup(pub)}
+    <p class="detail-address">⌖ ${safe(pub.address||pub.area)}</p>
+    <p>${safe(pub.description||'A pub to visit and discover for yourself.')}</p>
+    ${latest?`<section class="detail-latest"><h3>Latest shared review</h3>${detailReviewMarkup(latest)}</section>`:''}
+    <div class="detail-scores">${scores.map(([label,field])=>{
+      const value=averageField(pub.id,field);
+      return `<div><small>${label}</small><strong>${value==null?'—':value.toFixed(1)+' ★'}</strong></div>`;
+    }).join('')}</div>
+    <p class="detail-price">${price==null?'No pint price recorded yet':'Last logged pint: '+money(price,pub.id)}</p>
+    ${remaining.length?`<h3>${latest?'More reviews':'Reviews'} (${remaining.length})</h3><div class="detail-reviews">${remaining.map(detailReviewMarkup).join('')}</div>`:''}
+    ${logs.length?'':'<p>No reviews yet. Be the first to add one.</p>'}
+    <p class="small-print">Check opening times before travelling. Photos are contributed by reviewers and may show a drink or the pub.</p>`;
+  }
   async function renderDetailPhotos(id){const dialog=$('#detail-dialog');const logs=visibleLogs().filter(l=>l.pubId===id);for(const log of logs){try{const images=await logPhotos(log);const el=[...dialog.querySelectorAll('[data-detail-photos]')].find(node=>node.dataset.detailPhotos===log.id);if(el)el.innerHTML=images.map((src,i)=>`<button class="photo-thumb" type="button" aria-label="View visit photo ${i+1}"><img src="${src}" alt="Pub visit photo" /></button>`).join('')}catch{}}}
   async function openPubDetail(id){const pub=getPub(id);if(!pub)return;const dialog=$('#detail-dialog');$('#detail-content').innerHTML=detailMarkup(pub);if(!dialog.open)dialog.showModal();hydratePubCovers($('#detail-content'));await renderDetailPhotos(id)}
   function syncPubHash(){const match=location.hash.match(/^#pub=(.+)$/);if(match){let id;try{id=decodeURIComponent(match[1])}catch{return}openPubDetail(id)}else if($('#detail-dialog').open)$('#detail-dialog').close()}
@@ -363,8 +417,8 @@
     }catch(error){toast('Pub search unavailable: '+(error.message||'try again later'))}
     finally{button.disabled=false;button.textContent='Find more Dublin pubs'}
   });
-  $('#pub-grid').addEventListener('click',async event=>{const heart=event.target.closest('[data-favourite]');if(heart){const id=heart.dataset.favourite;data.favourites=data.favourites.includes(id)?data.favourites.filter(x=>x!==id):[...data.favourites,id];save();toast('Favourites updated');return}const details=event.target.closest('[data-details]');if(details){location.hash='pub='+encodeURIComponent(details.dataset.details);return}const log=event.target.closest('[data-log]');if(log){if(!await ensureSharedPub(log.dataset.log))return;openDialog('entry-dialog');$('#entry-pub').value=log.dataset.log}});
-  $('#detail-content').addEventListener('click',async event=>{const review=event.target.closest('[data-detail-review]');if(review){if(!await ensureSharedPub(review.dataset.detailReview))return;$('#detail-dialog').close();openDialog('entry-dialog');$('#entry-pub').value=review.dataset.detailReview;return}const image=event.target.closest('.photo-thumb img');if(image){$('#photo-full').src=image.src;$('#photo-dialog').showModal()}});
+  $('#pub-grid').addEventListener('click',async event=>{const heart=event.target.closest('[data-favourite]');if(heart){const id=heart.dataset.favourite;data.favourites=data.favourites.includes(id)?data.favourites.filter(x=>x!==id):[...data.favourites,id];save();toast('Favourites updated');return}const details=event.target.closest('[data-details]');if(details){location.hash='pub='+encodeURIComponent(details.dataset.details);return}const log=event.target.closest('[data-log]');if(log){if(!await ensureSharedPub(log.dataset.log))return;openDialog('entry-dialog',log.dataset.log)}});
+  $('#detail-content').addEventListener('click',async event=>{const review=event.target.closest('[data-detail-review]');if(review){if(!await ensureSharedPub(review.dataset.detailReview))return;$('#detail-dialog').close();openDialog('entry-dialog',review.dataset.detailReview);return}const image=event.target.closest('.photo-thumb img');if(image){$('#photo-full').src=image.src;$('#photo-dialog').showModal()}});
   $('#detail-dialog').addEventListener('close',()=>{if(location.hash.startsWith('#pub=')){const url=new URL(location.href);url.hash='';history.replaceState(history.state,'',url)}});
   window.addEventListener('hashchange',syncPubHash);
   $('#review-photos').addEventListener('change',event=>{clearPhotoPreview();const files=[...event.target.files];if(files.length>3){toast('Only the first three photos will be saved')}files.slice(0,3).forEach(file=>{const url=URL.createObjectURL(file);photoPreviewUrls.push(url);const image=document.createElement('img');image.src=url;image.alt='Selected review photo';$('#photo-preview').appendChild(image)});if(files.length)$('#photo-preview').insertAdjacentHTML('beforeend',`<span class="photo-count">${Math.min(3,files.length)} selected</span>`)});

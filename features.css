@@ -213,3 +213,14 @@ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
  body.pint-mobile-screens[data-screen="explore"] .explore{padding-top:25px!important}
  body.pint-mobile-screens .footer{display:none}
 }
+
+.detail-summary{display:flex;align-items:baseline;gap:10px;color:#c4cfc0;font-size:13px}
+.detail-summary strong{color:var(--gold);font-size:20px}
+.detail-dialog .detail-actions{margin:4px 0 10px}
+.detail-latest{padding:14px 16px;border:1px solid #495749;border-radius:10px;background:#26352a}
+.detail-dialog .detail-latest h3{margin:0;font-size:17px}
+.detail-latest .detail-review{border:0;padding-bottom:0}
+.detail-review-heading{display:flex;justify-content:space-between;gap:10px}
+.detail-review-heading strong{margin:0;white-space:nowrap}
+.detail-dialog .detail-scores{grid-template-columns:repeat(3,minmax(0,1fr))}
+.detail-dialog .modal-body > .close{z-index:3}
