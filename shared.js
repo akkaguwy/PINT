@@ -29,6 +29,8 @@
     addPub: pub => call('/api/pubs', pub),
     customRound: id => call('/api/custom-golf?id=' + encodeURIComponent(id)),
     publishCustomRound: payload => call('/api/custom-golf', payload),
+    shortlist: id => call('/api/shortlists?id=' + encodeURIComponent(id)),
+    shortlistWrite: payload => call('/api/shortlists', payload),
     golfRound: id => call('/api/golf?round=' + encodeURIComponent(id)),
     golfWrite: payload => call('/api/golf', payload),
   };
