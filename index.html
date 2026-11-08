@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=4.5" />
-  <link rel="stylesheet" href="features.css?v=4.11" />
+  <link rel="stylesheet" href="features.css?v=4.12" />
   <link rel="stylesheet" href="polish.css?v=4.5" />
   <link rel="stylesheet" href="pub_identity.css?v=4.5" />
   <link rel="stylesheet" href="profile.css?v=4.5" />
@@ -132,7 +132,35 @@
 
     <section class="golf-section" id="pub-golf">
       <div class="shell">
-        <div class="golf-heading"><div><span class="overline">PLAY</span><h2>Pub Golf</h2><p>Choose a course, explore the stops and keep your group's scorecard. Pick your own drinks — alcohol-free rounds count too.</p></div><span class="golf-stamp">⛳ COURSE GUIDE</span></div>
+        <div class="golf-heading"><div><span class="overline">PLAY</span><h2>Pub Golf</h2><p>Choose a course, explore the stops and keep your group's scorecard. Pick your own drinks — alcohol-free rounds count too.</p></div><a href="#golf-custom" class="button button-gold">Build your own course</a></div>
+        <section id="golf-custom" class="golf-live golf-custom" aria-labelledby="golf-custom-title">
+          <h3 id="golf-custom-title">Custom courses &amp; teams</h3>
+          <p>Set your own pub order and keep score for everyone on one device. Courses and scores save on this device.</p>
+          <div class="golf-custom-actions">
+            <label for="golf-custom-course" id="golf-custom-picker" hidden>Saved course <select id="golf-custom-course"></select></label>
+            <button id="golf-custom-new" type="button" class="button button-gold">New course</button>
+            <button id="golf-custom-edit" type="button" class="button button-outline" hidden>Edit course</button>
+          </div>
+          <form id="golf-custom-form" hidden>
+            <label>Course name <input name="courseName" maxlength="60" required placeholder="e.g. Cowbridge Friday round" /></label>
+            <div id="golf-custom-stops"></div>
+            <div class="golf-custom-actions">
+              <button id="golf-custom-add-stop" type="button" class="button button-outline">Add a pub stop</button>
+              <button type="submit" class="button button-gold">Save course</button>
+              <button id="golf-custom-cancel" type="button" class="button button-outline">Cancel</button>
+            </div>
+          </form>
+          <div id="golf-custom-scorecard" hidden>
+            <form id="golf-custom-team-form" class="golf-custom-actions">
+              <label>Team name <input name="teamName" maxlength="40" required placeholder="e.g. Team A" /></label>
+              <button type="submit" class="button button-outline">Add team</button>
+            </form>
+            <div id="golf-custom-totals"></div>
+            <label id="golf-custom-team-picker" hidden>Scorecard for <select id="golf-custom-team"></select></label>
+            <div id="golf-custom-scores"></div>
+          </div>
+          <p id="golf-custom-status" role="status"></p>
+        </section>
         <div id="golf-routes" class="golf-routes" aria-label="Pub golf route selection"></div>
         <div class="golf-detail" id="golf-detail" aria-live="polite"></div>
         <section class="golf-live" aria-labelledby="golf-live-title">
@@ -260,7 +288,8 @@
   <script src="profile.js?v=4.11" defer></script>
   <script type="module" src="firebase_auth.js?v=4.5"></script>
   <script src="home.js?v=4.9" defer></script>
-  <script src="app.js?v=4.11" defer></script>
+  <script src="custom_golf.js?v=4.12" defer></script>
+  <script src="app.js?v=4.12" defer></script>
   <script src="pub_golf.js?v=4.11" defer></script>
   <script src="pwa.js?v=4.6" defer></script>
   <script src="navigation.js?v=4.5" defer></script>
