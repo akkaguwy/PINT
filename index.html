@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=4.5" />
-  <link rel="stylesheet" href="features.css?v=4.10" />
+  <link rel="stylesheet" href="features.css?v=4.11" />
   <link rel="stylesheet" href="polish.css?v=4.5" />
   <link rel="stylesheet" href="pub_identity.css?v=4.5" />
   <link rel="stylesheet" href="profile.css?v=4.5" />
@@ -135,6 +135,20 @@
         <div class="golf-heading"><div><span class="overline">PLAY</span><h2>Pub Golf</h2><p>Choose a course, explore the stops and keep your group's scorecard. Pick your own drinks — alcohol-free rounds count too.</p></div><span class="golf-stamp">⛳ COURSE GUIDE</span></div>
         <div id="golf-routes" class="golf-routes" aria-label="Pub golf route selection"></div>
         <div class="golf-detail" id="golf-detail" aria-live="polite"></div>
+        <section class="golf-live" aria-labelledby="golf-live-title">
+          <h3 id="golf-live-title">Live Pub Golf</h3>
+          <p>Share a round with your mates. Each player scores their own challenges and the leaderboard refreshes every five seconds. Anyone with the link can join for seven days.</p>
+          <button id="golf-live-start" type="button" class="button button-gold">Start a live round</button>
+          <div id="golf-live-round" hidden>
+            <h4 id="golf-live-course"></h4>
+            <label>Invite link <input id="golf-live-link" type="url" readonly /></label>
+            <button id="golf-live-copy" type="button" class="button button-outline">Copy link</button>
+            <form id="golf-live-join"><label>Display name <input name="playerName" maxlength="40" required /></label><button class="button button-gold" type="submit">Join round</button></form>
+            <h4>Leaderboard</h4><ol id="golf-live-board"></ol>
+            <div id="golf-live-card"></div>
+          </div>
+          <p id="golf-live-status" role="status"></p>
+        </section>
       </div>
     </section>
 
@@ -227,7 +241,7 @@
 
   <dialog id="detail-dialog" class="modal detail-dialog" aria-label="Pub details"><div class="modal-body"><button type="button" class="close" data-close="detail-dialog" aria-label="Close pub details">×</button><div id="detail-content"></div></div></dialog>
 
-  <dialog id="pub-dialog" class="modal"><form id="pub-form" class="modal-body"><button type="button" class="close" data-close="pub-dialog" aria-label="Close">×</button><span class="overline">PUB DIRECTORY</span><h2>Add a missing pub</h2><p>New pubs are shared with everyone. Check the existing listings before adding one.</p><label>Pub name<input name="name" maxlength="90" placeholder="Pub name" required /></label><label>Region<select name="region" required><option value="Cardiff">Cardiff</option><option value="Vale">Vale of Glamorgan</option><option value="Dublin">Dublin, Ireland</option><option value="Methven">Methven, New Zealand</option></select></label><label>Type of pub<select name="pubType"><option value="Pub">General pub</option><option value="Traditional">Traditional</option><option value="Cocktails">Cocktails</option><option value="Sports">Sports bar</option><option value="Live music">Live music</option><option value="Craft beer">Craft beer</option><option value="Late bar">Late bar</option><option value="Food">Food pub</option></select></label><label>Area<input name="area" maxlength="50" placeholder="e.g. Cowbridge" required /></label><label>Address (optional)<input name="address" maxlength="150" placeholder="Street and town" /></label><label>What makes it worth a visit?<textarea name="description" rows="3" maxlength="180" placeholder="A little about the pub..."></textarea></label><div id="pub-duplicates" aria-live="polite" hidden></div><button type="submit" class="button button-gold full">Add pub for everyone ↗</button></form></dialog>
+  <dialog id="pub-dialog" class="modal"><form id="pub-form" class="modal-body"><button type="button" class="close" data-close="pub-dialog" aria-label="Close">×</button><span class="overline">PUB DIRECTORY</span><h2>Add a missing pub</h2><p>New pubs are shared with everyone. Check the existing listings before adding one.</p><label>Pub name<input name="name" maxlength="90" placeholder="Pub name" required /></label><label>Region<select name="region" required><option value="Cardiff">Cardiff</option><option value="Vale">Vale of Glamorgan</option><option value="Dublin">Dublin, Ireland</option><option value="Methven">Methven, New Zealand</option></select></label><label>Type of pub<select name="pubType"><option value="Pub">General pub</option><option value="Traditional">Traditional</option><option value="Cocktails">Cocktails</option><option value="Sports">Sports bar</option><option value="Live music">Live music</option><option value="Craft beer">Craft beer</option><option value="Late bar">Late bar</option><option value="Food">Food pub</option></select></label><label>Area<input name="area" maxlength="50" placeholder="e.g. Cowbridge" required /></label><label>Address (optional)<input name="address" maxlength="150" placeholder="Street and town" /></label><label>Google Maps link (optional)<input type="url" name="mapsUrl" maxlength="1200" placeholder="Paste the place’s share link" /></label><label>What makes it worth a visit?<textarea name="description" rows="3" maxlength="180" placeholder="A little about the pub..."></textarea></label><div id="pub-duplicates" aria-live="polite" hidden></div><button type="submit" class="button button-gold full">Add pub for everyone ↗</button></form></dialog>
 
   <dialog id="data-dialog" class="modal"><div class="modal-body"><button type="button" class="close" data-close="data-dialog" aria-label="Close">×</button><span class="overline">SETTINGS</span><h2>Your data</h2><p>Your pubs, pint logs and favourites currently live only in this browser. Export a backup before switching devices or clearing browser data.</p><button id="export-button" class="button button-gold full">Download JSON backup ↧</button><label class="import-label">Restore from backup<input id="import-input" type="file" accept=".json,application/json" /></label><p class="small-print">Import replaces the current data on this device, after confirmation. No public submissions or shared accounts yet.</p></div></dialog>
   <aside id="pint-update-notice" class="pint-update-notice" aria-label="PINT update available" hidden>
@@ -238,16 +252,16 @@
   </aside>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="photos.js" defer></script>
-  <script src="shared.js" defer></script>
+  <script src="shared.js?v=4.11" defer></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
   <script src="dublin_directory.js?v=4.5" defer></script>
   <script src="dublin_explore.js?v=4.5" defer></script>
   <script src="pub_identity.js?v=4.8" defer></script>
-  <script src="profile.js?v=4.5" defer></script>
+  <script src="profile.js?v=4.11" defer></script>
   <script type="module" src="firebase_auth.js?v=4.5"></script>
   <script src="home.js?v=4.9" defer></script>
-  <script src="app.js?v=4.10" defer></script>
-  <script src="pub_golf.js?v=4.8" defer></script>
+  <script src="app.js?v=4.11" defer></script>
+  <script src="pub_golf.js?v=4.11" defer></script>
   <script src="pwa.js?v=4.6" defer></script>
   <script src="navigation.js?v=4.5" defer></script>
 </body>
