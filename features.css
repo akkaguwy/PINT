@@ -247,3 +247,27 @@ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
 #golf-live-board li{padding:5px 0}
 .golf-live-hole{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-top:1px solid #4f4a3c}
 .golf-live-hole input{accent-color:var(--gold)}
+
+.golf-custom{margin:0 0 24px}
+.golf-custom [hidden]{display:none!important}
+.golf-custom-actions{display:flex;flex-wrap:wrap;align-items:end;gap:10px;margin:12px 0}
+.golf-custom label{display:flex;flex-direction:column;gap:5px;font-size:13px}
+#golf-custom-form,#golf-custom-scorecard{margin-top:16px}
+.golf-custom-stop{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:8px;margin:10px 0}
+.golf-custom-stop-buttons{display:flex;gap:4px}
+.golf-custom-stop-buttons button{border:1px solid #706249;background:#272921;color:var(--cream);min-width:34px;min-height:34px;border-radius:5px}
+.golf-custom-stop-buttons button:disabled{opacity:.45}
+.golf-custom-totals{margin:16px 0;padding:12px;background:#272921;border:1px solid #57503f;border-radius:6px}
+.golf-custom-totals h4{margin:0 0 8px}
+.golf-custom-totals dl{margin:0}
+.golf-custom-totals dl>div{display:flex;justify-content:space-between;gap:10px;padding:5px 0}
+.golf-custom-totals dd{margin:0;text-align:right}
+.golf-custom-score{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #4f4a3c}
+.golf-custom-score-controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.golf-custom-score label{flex-direction:row;align-items:center}
+.golf-custom-score input[type=number]{width:76px}
+.golf-custom-score select{width:110px}
+@media(max-width:480px){
+  .golf-custom{padding:15px}
+  .golf-custom-score{grid-template-columns:1fr}
+}
