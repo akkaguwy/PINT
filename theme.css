@@ -1,0 +1,137 @@
+/* PINT's shared palette and component surfaces. */
+:root {
+  --paper: #f6efe2;
+  --surface: #fffbf3;
+  --linen: #ede3d1;
+  --ink: #23372d;
+  --green: #214537;
+  --green-light: #e3ecdf;
+  --quiet: #595f50;
+  --line: #d7cbb6;
+  --brass: #79551f;
+  --black: var(--paper);
+  --panel: var(--surface);
+  --cream: var(--ink);
+  --muted: var(--quiet);
+  --gold: var(--brass);
+  --border: var(--line);
+  accent-color: var(--green);
+}
+body { background: var(--paper); color: var(--ink); }
+:focus-visible { outline: 2px solid #a46d29; outline-offset: 3px; }
+
+.topbar, .home-topline, .stat-band, .pub-metrics, .panel-head,
+.recent-entry, .profile-history-heading, .detail-review { border-color: var(--line); }
+
+.brand-mark, .button-gold, .button-gold:hover, .pub-actions button:last-child,
+.toast, .home-destination-options button[aria-pressed="true"] {
+  background: var(--green); color: var(--surface); border-color: var(--green);
+}
+.brand-dot { color: #e6c88d; }
+.button-outline, .community-refresh, .directory-more,
+.pub-actions button:first-child, .pub-actions a, .gallery-photo-controls button {
+  background: var(--green-light); color: var(--green); border-color: #b9c9b4;
+}
+.button, .pub-actions button, .gallery-filter select { min-height: 44px; }
+.eyebrow, .overline, .home-kicker, .home-overline, .home-heading-mark,
+.home-activity-rating, .recent-entry b { color: var(--brass); }
+
+.home-intro h1 { color: var(--ink); font-family: 'Playfair Display', Georgia, serif; letter-spacing: -.045em; }
+.topbar nav, .brand-name small, .home-greeting, .home-intro p,
+.home-account-link, .home-account-link svg, .home-map-icon, .home-shortcut-arrow,
+.home-section-title p, .home-activity-copy > span, .home-empty-feed span,
+.section-heading p, .directory-hint, .directory-note, .directory-note span:first-child,
+.pub-card .pub-area, .pub-description, .pub-metrics span, .pub-price,
+.guinness-evidence, .journal p, .review-author, .recent-entry small,
+.panel-head span, .gallery-filter, .gallery-card > small, .gallery-image small,
+.profile-intro p, .profile-review-meta, .profile-privacy, .detail-address,
+.detail-price, .detail-summary, .modal label, .modal p, .modal .close,
+.golf-heading p, .golf-note, .golf-route-tag, .footer > span { color: var(--quiet); }
+.community-summary, .photo-usage-note { color: var(--quiet) !important; }
+.home-destination h2, .home-section-title h2, .home-shortcut strong,
+.home-activity-copy strong, .home-empty-feed strong, .panel-head,
+.profile-header h2, .profile-history h3, .profile-review strong,
+.golf-route strong, .hole-info strong { color: var(--ink); }
+
+.home-destination, .home-shortcut, .home-activity-list, .destination-picker,
+.pub-card, .journal-panel, .gallery-card, .profile-panel, .profile-history,
+.profile-review, .auth-panel, .golf-route, .golf-detail, .golf-custom,
+.golf-custom-board, .modal, .install-section {
+  background: var(--surface); border-color: var(--line);
+}
+.home-activity { background: transparent; color: var(--ink); border-color: var(--line); }
+.home-activity:hover, .home-shortcut:hover, .pub-card:hover, .golf-route:hover,
+.golf-route.selected { background: #f2f5e9; border-color: #9fb29a; }
+.home-feature { background: var(--green); border-color: var(--green); }
+.home-feature-button { background: #f3dfb6; color: var(--green); }
+.home-destination-options button, .search-box input, .toolbar select, .filter-button,
+.toolbar #region-filter, .gallery-filter select, .view-switch,
+.modal input, .modal select, .modal textarea, .profile-form input,
+.golf-custom input, .golf-custom select, .hole-inputs input {
+  background: var(--surface); color: var(--ink); border-color: #a99e88;
+}
+input::placeholder, textarea::placeholder { color: var(--quiet); opacity: 1; }
+.home-shortcut-symbol, .home-activity-avatar, .home-account-avatar,
+.home-map-icon, .pub-tag, .view-switch button.active, .filter-button[aria-pressed="true"] {
+  background: var(--green-light); color: var(--green); border-color: #b9c9b4;
+}
+.home-share-shortcut, .home-cowbridge-link, .home-empty-feed a,
+.gallery-community-link, .auth-link, .search-box > span, .view-switch button { color: var(--green); }
+.view-switch button.active { color: var(--green); }
+.journal, .golf-section, .golf-custom-directory, .gallery-image {
+  background: var(--linen); border-color: var(--line);
+}
+.golf-custom-stop, .golf-custom-score, .golf-custom-totals, .golf-live,
+.golf-live-hole, .golf-stops li, .golf-stop, .golf-score, .detail-latest,
+.detail-scores > div, .map-filters, .profile-empty {
+  background: var(--paper); color: var(--ink); border-color: var(--line);
+}
+.golf-progress, .golf-route-icon, .hole-number, .golf-stamp {
+  background: var(--green-light); color: var(--green); border-color: #b9c9b4;
+}
+.pub-grid .pub-card .pub-photo, .detail-dialog .detail-cover {
+  background: var(--green-light) !important; border-color: var(--line);
+}
+.pub-photo-placeholder, .pub-photo-placeholder small { color: var(--quiet); }
+.detail-dialog .detail-cover > span:not(.pub-photo-placeholder) { background: var(--green); color: var(--surface); }
+.pub-grid .pub-card .heart { background: var(--surface); border-color: var(--line); color: var(--green); }
+
+.shared-status, .gallery-status, .home-empty-feed, .empty-state, .recent-empty {
+  color: var(--quiet); background: var(--linen); border: 1px solid var(--line);
+  border-radius: 12px; padding: 14px 16px;
+}
+.gallery-status[data-state="ready"] { background: transparent; border-color: transparent; padding-inline: 0; }
+.home-empty-feed { margin: 8px; text-align: left; }
+.shared-status.online { background: var(--green-light); color: var(--green); border-color: #b9c9b4; }
+.shared-status.offline, [data-state="error"].gallery-status, [data-state="error"].home-empty-feed,
+.review-form-error { background: #faeade; color: #753a28; border-color: #dfb7a5; }
+.review-form-error { padding: 12px; border: 1px solid #dfb7a5; border-radius: 10px; }
+.modal .review-form-error { color: #753a28; margin: 0; }
+.screen-header:not([hidden]) { background: var(--surface); border-color: var(--line); }
+#screen-back { color: var(--green); }
+.photo-dialog { color: var(--surface); }
+.photo-dialog .photo-gallery-caption { color: var(--surface); }
+
+@media (max-width: 620px) {
+  .mobile-nav { background: var(--surface); border-color: var(--line); box-shadow: 0 -4px 20px #28352b15; }
+  .mobile-nav a { color: var(--quiet); gap: 4px; }
+  .mobile-nav a svg { width: 21px; height: 21px; }
+  .mobile-nav a[aria-current="page"] { background: var(--green); color: var(--surface); }
+  .mobile-nav a[aria-current="page"] small { font-weight: 800; }
+  .pub-grid .pub-card:has(.has-real-photo) { grid-template-columns: 1fr !important; }
+  .pub-grid .pub-card .pub-photo.has-real-photo { min-height: 0 !important; aspect-ratio: 16 / 9; }
+}
+
+.home-shortcut span, .home-overview p, .home-stats-grid small,
+.profile-header p, .profile-form label, .profile-privacy strong, .profile-history-heading span,
+.profile-review p, .profile-review small, .review-user-name, .auth-panel .auth-lede,
+.auth-divider, .auth-form > label, .auth-radio label, #auth-email, #auth-status,
+#profile-message, .destination-picker label, .destination-picker p,
+.map-disclaimer, .review-notes, .detail-review p, .detail-review small,
+.golf-custom label, .golf-custom-stop small, .hole-info small {
+  color: var(--quiet);
+}
+.home-shortcut .home-shortcut-symbol { color: var(--green); }
+.auth-form > input { background: var(--surface); color: var(--ink); border-color: #a99e88; }
+#auth-status[data-error="true"] { color: #753a28; }
+.profile-review-top b { color: var(--brass); }

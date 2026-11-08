@@ -40,7 +40,7 @@
   $('home-feed-list')?.addEventListener('error',event=>{
     if(event.target.matches('.home-activity-avatar img'))event.target.remove();
   },true);
-  function render({destination='Cardiff',pubs=[],reviews=[],connected=false,addedPubs=[]}={}){
+  function render({destination='Cardiff',pubs=[],reviews=[],connected=false,addedPubs=[],initial=false}={}){
     activeDestination=names[destination]?destination:'Cardiff';
     const chosen=names[activeDestination];
     const inArea=pubs.filter(p=>p.region===activeDestination);
@@ -59,7 +59,7 @@
       button.classList.toggle('selected',selected);
     });
     const subtitle=$('home-community-note');
-    if(subtitle)subtitle.textContent=connected?'Latest reviews, photos and pubs from the PINT community':'Saved community activity · updates when connected';
+    if(subtitle)subtitle.textContent=connected?'Latest reviews, photos and pubs from the PINT community':initial?'Checking for recent reviews and photos':'Updates when connected';
     const root=$('home-feed-list');
     if(root){
       const lookup=new Map(pubs.map(pub=>[pub.id,pub]));
@@ -81,7 +81,11 @@
           +'<span class="home-activity-avatar" aria-hidden="true">'+escapeHtml(review?author[0].toUpperCase():'+')+image+'</span>'
           +'<span class="home-activity-copy"><strong>'+escapeHtml(pub.name)+'</strong><span>'+escapeHtml(info)+'</span></span>'
           +rating+'</button>';
-      }).join(''):'<div class="home-empty-feed"><strong>No reviews here yet</strong><span>Be the first to share a visit.</span><a href="#my-pints">Open community <span aria-hidden="true">↗</span></a></div>';
+      }).join(''):initial
+        ?'<div class="home-empty-feed" data-state="loading"><strong>Loading recent reviews…</strong></div>'
+        :!connected
+          ?'<div class="home-empty-feed" data-state="error"><strong>Recent reviews are unavailable</strong><span>Open Community to try again.</span><a href="#my-pints">Open community <span aria-hidden="true">↗</span></a></div>'
+          :'<div class="home-empty-feed"><strong>No reviews here yet</strong><span>Be the first to share a visit.</span><a href="#my-pints">Open community <span aria-hidden="true">↗</span></a></div>';
     }
     personalise();
   }
