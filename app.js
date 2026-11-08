@@ -170,6 +170,7 @@
     const seen=new Set();
     return pubs.filter(p=>{if(!p||!p.name)return false;const key=(p.region+'|'+p.name+'|'+p.area).toLowerCase();if(seen.has(key))return false;seen.add(key);return true});
   };
+  window.PintDirectory={pubs:allPubs};
   const getPub = id => allPubs().find(pub=>pub.id===id);
   const visibleLogs=()=>[...sharedLogs,...data.logs.filter(l=>!sharedLogs.some(s=>s.id===l.id))];
   const ratingLogs=()=>sharedLogs.length?sharedLogs:data.logs;
@@ -177,6 +178,27 @@
   const averageRating = id => {const logs=ratingLogs().filter(log=>log.pubId===id);return logs.length?logs.reduce((s,l)=>s+l.rating,0)/logs.length:null};
   const averageField = (id,field) => {const logs=ratingLogs().filter(l=>l.pubId===id&&l[field]!=null);return logs.length?logs.reduce((sum,l)=>sum+l[field],0)/logs.length:null};
   const activityTime=log=>Number(log.createdAt)||Date.parse(log.createdAt||log.date)||0;
+  function guinnessStats(){
+    const stats=new Map();
+    for(const log of ratingLogs()){
+      const rating=Number(log.guinness);
+      if(!Number.isFinite(rating)||rating<1||rating>5)continue;
+      const entry=stats.get(log.pubId)||{sum:0,count:0,last:null};
+      entry.sum+=rating;
+      entry.count++;
+      if(!entry.last||String(log.date||'')>String(entry.last.date||'')||
+        log.date===entry.last.date&&activityTime(log)>activityTime(entry.last))entry.last=log;
+      stats.set(log.pubId,entry);
+    }
+    return stats;
+  }
+  const guinnessAverage=entry=>entry?entry.sum/entry.count:0;
+  function guinnessEvidence(entry){
+    if(!entry)return '';
+    const count=entry.count+' '+(entry.count===1?'Guinness rating':'Guinness ratings');
+    const date=/^\d{4}-\d{2}-\d{2}$/.test(entry.last?.date||'')?entry.last.date:'';
+    return '<p class="guinness-evidence">'+count+(date?' · Latest '+safe(date)+' · '+Number(entry.last.guinness).toFixed(1)+'★':'')+'</p>';
+  }
   const logPhotos=log=>log.shared?Promise.resolve(window.PintShared.photoUrls(log)):window.PintPhotos.read(log.id);
   const pubTags=pub=>window.PintIdentity?.tags(pub)||['Pub'];
   const tagsMarkup=pub=>'<div class="pub-tags" aria-label="Pub types">'+pubTags(pub).map(tag=>'<span class="pub-tag">'+safe(tag)+'</span>').join('')+'</div>';
@@ -317,9 +339,27 @@
     if(cowbridgeSelected)$('#destination-title').textContent='Explore Cowbridge & nearby villages';
     const q=$('#search').value.trim().toLowerCase();
     let filtered=pubs.filter(p=>(p.name+' '+p.area+' '+p.address+' '+p.description+' '+pubTags(p).join(' ')).toLowerCase().includes(q)&&(selectedRegion==='all'||p.region===selectedRegion)&&($('#area-filter').value==='all'||($('#area-filter').value===COWBRIDGE_GROUP&&COWBRIDGE_AREAS.has(p.area))||p.area===$('#area-filter').value)&&(!favouritesOnly||data.favourites.includes(p.id)));
+    const stats=guinnessStats();
+    const minGuinness=Number($('#guinness-filter').value);
+    const minCount=Number($('#guinness-count').value);
+    const radius=Number($('#nearby-radius').value);
+    if(minGuinness||minCount)filtered=filtered.filter(pub=>{
+      const entry=stats.get(pub.id);
+      return entry&&entry.count>=minCount&&guinnessAverage(entry)>=minGuinness;
+    });
+    if(nearPosition&&radius)filtered=filtered.filter(pub=>(pubDistance(pub)??Infinity)<=radius);
     const sort=$('#sort-filter').value;
     if(sort==='cheapest')filtered.sort((a,b)=>(latestPrice(a.id)??Infinity)-(latestPrice(b.id)??Infinity)||a.name.localeCompare(b.name));
     else if(sort==='rated')filtered.sort((a,b)=>(averageRating(b.id)??-1)-(averageRating(a.id)??-1)||a.name.localeCompare(b.name));
+    else if(sort==='guinness')filtered.sort((a,b)=>{
+      const first=stats.get(a.id),second=stats.get(b.id);
+      return guinnessAverage(second)-guinnessAverage(first)||(second?.count||0)-(first?.count||0)||a.name.localeCompare(b.name);
+    });
+    else if(sort==='recent-guinness')filtered.sort((a,b)=>{
+      const first=stats.get(a.id)?.last,second=stats.get(b.id)?.last;
+      return String(second?.date||'').localeCompare(String(first?.date||''))||
+        (second?activityTime(second):0)-(first?activityTime(first):0)||a.name.localeCompare(b.name);
+    });
     else if(sort==='unvisited')filtered.sort((a,b)=>Number(ratingLogs().some(l=>l.pubId===a.id))-Number(ratingLogs().some(l=>l.pubId===b.id))||a.name.localeCompare(b.name));
     else if(sort==='activity')filtered.sort((a,b)=>{const last=id=>ratingLogs().filter(l=>l.pubId===id).reduce((m,l)=>Math.max(m,Date.parse(l.createdAt||l.date)||0),0);return last(b.id)-last(a.id)||a.name.localeCompare(b.name)});
     else if(sort==='nearby'&&nearPosition)filtered.sort((a,b)=>(pubDistance(a)??Infinity)-(pubDistance(b)??Infinity)||a.name.localeCompare(b.name));
@@ -330,11 +370,11 @@
     moreButton.textContent='Show more pubs ('+Math.min(DIRECTORY_PAGE_SIZE,Math.max(0,filtered.length-directoryLimit))+' of '+(filtered.length-directoryLimit)+' remaining)';
     $('#result-count').textContent=`${filtered.length} ${filtered.length===1?'pub':'pubs'}` + (destination==='Dublin'&&discoveredPubs.length?' · with mapped pubs':'');
     $('#empty-state').hidden=filtered.length>0;
-    if(filtered.length===0&&pubs.some(p=>p.region===selectedRegion))$('#empty-state').textContent='No pubs match your filters. Clear the search or tap Favourites to see all pubs.';
+    if(filtered.length===0&&pubs.some(p=>p.region===selectedRegion))$('#empty-state').textContent='No pubs match these filters. Try changing the area, rating, distance or search.';
     $('#pub-grid').innerHTML=filtered.slice(0,directoryLimit).map((pub,i)=>{
-      const price=latestPrice(pub.id),rating=averageRating(pub.id),guinness=averageField(pub.id,'guinness'),fav=data.favourites.includes(pub.id);
+      const price=latestPrice(pub.id),rating=averageRating(pub.id),guinness=guinnessAverage(stats.get(pub.id)),fav=data.favourites.includes(pub.id);
       const distance=pubDistance(pub);
-      return `<article class="pub-card"><div class="pub-photo" data-pub-cover="${safe(pub.id)}"><span class="pub-photo-placeholder" aria-hidden="true">P<span>.</span><small>No photo yet</small></span><button class="heart ${fav?'active':''}" data-favourite="${safe(pub.id)}" aria-label="${fav?'Remove':'Add'} ${safe(pub.name)} ${fav?'from':'to'} favourites" aria-pressed="${fav}">${fav?'♥':'♡'}</button></div><div class="pub-body"><h3>${safe(pub.name)}</h3>${/Temporarily closed/i.test(pub.description||'')?'<span class="pint-temporary-closed">Temporarily closed</span>':/winter-only/i.test(pub.description||'')?'<span class="pint-seasonal-status">Winter seasonal</span>':''}${tagsMarkup(pub)}<span class="pub-area">⌖ ${safe(pub.address||pub.area)}${distance==null?'':' · ~'+distance.toFixed(1)+' km'}</span><p class="pub-description">${safe(pub.description||'A pub to explore and review yourself.')}</p><div class="pub-metrics"><div><strong>${rating==null?'Not rated':rating.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} OVERALL /5</span></div><div><strong>${guinness==null?'Not rated':guinness.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} GUINNESS /5</span></div></div><div class="pub-price">${price==null?'No pint price logged yet':'Last logged pint: '+money(price,pub.id)}</div><div class="pub-actions"><button data-details="${safe(pub.id)}">View pub ↗</button><button data-log="${safe(pub.id)}">★ Review</button></div></div></article>`;
+      return `<article class="pub-card"><div class="pub-photo" data-pub-cover="${safe(pub.id)}"><span class="pub-photo-placeholder" aria-hidden="true">P<span>.</span><small>No photo yet</small></span><button class="heart ${fav?'active':''}" data-favourite="${safe(pub.id)}" aria-label="${fav?'Remove':'Add'} ${safe(pub.name)} ${fav?'from':'to'} favourites" aria-pressed="${fav}">${fav?'♥':'♡'}</button></div><div class="pub-body"><h3>${safe(pub.name)}</h3>${/Temporarily closed/i.test(pub.description||'')?'<span class="pint-temporary-closed">Temporarily closed</span>':/winter-only/i.test(pub.description||'')?'<span class="pint-seasonal-status">Winter seasonal</span>':''}${tagsMarkup(pub)}<span class="pub-area">⌖ ${safe(pub.address||pub.area)}${distance==null?'':' · ~'+distance.toFixed(1)+' km'}</span><p class="pub-description">${safe(pub.description||'A pub to explore and review yourself.')}</p><div class="pub-metrics"><div><strong>${rating==null?'Not rated':rating.toFixed(1)+' ★'}</strong><span>${sharedOnline?'COMMUNITY':'YOUR'} OVERALL /5</span></div><div><strong>${!guinness?'Not rated':guinness.toFixed(1)+' ★'}</strong><span>${sharedOnline||sharedLogs.length?'COMMUNITY':'YOUR'} GUINNESS /5</span></div></div>${guinnessEvidence(stats.get(pub.id))}<div class="pub-price">${price==null?'No pint price logged yet':'Last logged pint: '+money(price,pub.id)}</div><div class="pub-actions"><button data-details="${safe(pub.id)}">View pub ↗</button><button data-log="${safe(pub.id)}">★ Review</button></div></div></article>`;
     }).join('');
     hydratePubCovers($('#pub-grid'));
     const destinationReviews=visibleLogs().filter(l=>getPub(l.pubId)?.region===$('#region-filter').value);
@@ -466,6 +506,7 @@
       const value=averageField(pub.id,field);
       return `<div><small>${label}</small><strong>${value==null?'—':value.toFixed(1)+' ★'}</strong></div>`;
     }).join('')}</div>
+    ${guinnessEvidence(guinnessStats().get(pub.id))}
     <p class="detail-price">${price==null?'No pint price recorded yet':'Last logged pint: '+money(price,pub.id)}</p>
     ${remaining.length?`<h3>${latest?'More reviews':'Reviews'} (${remaining.length})</h3><div class="detail-reviews">${remaining.map(detailReviewMarkup).join('')}</div>`:''}
     ${logs.length?'':'<p>No reviews yet. Be the first to add one.</p>'}
@@ -595,11 +636,12 @@
   $('#map-view-button').addEventListener('click',()=>showView('map'));
   $('#home-map-link').addEventListener('click',()=>showView('map'));
   $('#map-filter').addEventListener('change',renderMap);
+  ['guinness-filter','guinness-count','nearby-radius'].forEach(id=>document.getElementById(id).addEventListener('change',resetDirectory));
   $('#nearby-button').addEventListener('click',()=>{
-    if(nearPosition){nearPosition=null;$('#nearby-button').textContent='⌖ Near me';$('#nearby-button').setAttribute('aria-pressed','false');$('#sort-filter').value='name';$('#location-note').textContent='';render();return}
+    if(nearPosition){nearPosition=null;$('#nearby-radius').hidden=true;$('#nearby-radius').value='0';$('#nearby-button').textContent='⌖ Near me';$('#nearby-button').setAttribute('aria-pressed','false');$('#sort-filter').value='name';$('#location-note').textContent='';render();return}
     if(!navigator.geolocation){toast('Location is not available on this device');return}
     const button=$('#nearby-button');button.disabled=true;button.textContent='Locating…';
-    navigator.geolocation.getCurrentPosition(position=>{nearPosition=[position.coords.latitude,position.coords.longitude];button.disabled=false;button.textContent='⌖ Near me ✓';button.setAttribute('aria-pressed','true');$('#sort-filter').value='nearby';$('#location-note').textContent='Approximate area distances · tap Near me to turn off';render()},()=>{button.disabled=false;button.textContent='⌖ Near me';toast('Could not access location. Check iPhone location permission.')},{enableHighAccuracy:false,timeout:12000,maximumAge:300000});
+    navigator.geolocation.getCurrentPosition(position=>{nearPosition=[position.coords.latitude,position.coords.longitude];button.disabled=false;button.textContent='⌖ Near me ✓';button.setAttribute('aria-pressed','true');$('#nearby-radius').hidden=false;if(!['guinness','recent-guinness'].includes($('#sort-filter').value))$('#sort-filter').value='nearby';$('#location-note').textContent='Approximate area distances · tap Near me to turn off';render()},()=>{button.disabled=false;button.textContent='⌖ Near me';toast('Could not access location. Check iPhone location permission.')},{enableHighAccuracy:false,timeout:12000,maximumAge:300000});
   });
   $('#favourites-filter').addEventListener('click',()=>{favouritesOnly=!favouritesOnly;$('#favourites-filter').setAttribute('aria-pressed',String(favouritesOnly));render()});
   $('#add-pub-button').addEventListener('click',()=>openDialog('pub-dialog'));$('#log-first-button').addEventListener('click',()=>openDialog('entry-dialog'));$('#journal-log-button').addEventListener('click',()=>openDialog('entry-dialog'));$('#open-data-button').addEventListener('click',()=>openDialog('data-dialog'));
