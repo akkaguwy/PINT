@@ -3,7 +3,7 @@
 const fs=require('node:fs');
 const vm=require('node:vm');
 const assert=require('node:assert/strict');
-const ids=['home-greeting','home-avatar','home-account-label','home-destination-label','home-hero-city','home-hero-count','home-browse-link','home-community-note','home-feed-list','region-filter'];
+const ids=['home-destination-label','home-hero-city','home-hero-count','home-browse-link','home-community-note','home-feed-list','region-filter'];
 const nodes=Object.fromEntries(ids.map(id=>[id,{
   id,textContent:'',innerHTML:'',value:'Cardiff',attrs:{},listeners:{},
   setAttribute(key,value){this.attrs[key]=value;},
@@ -21,7 +21,7 @@ const document={
   querySelectorAll:()=>buttons,
   addEventListener(){}
 };
-const window={PintProfile:{load:()=>({name:'Morgan Smith'})},PintShared:{photoUrls:review=>review.photoCount?['/test-photo']:[]}};
+const window={PintShared:{photoUrls:review=>review.photoCount?['/test-photo']:[]}};
 const location={hash:''};
 class FakeEvent{constructor(type){this.type=type;}}
 vm.runInNewContext(fs.readFileSync('home.js','utf8'),{document,window,location,Event:FakeEvent,Intl,Date});
@@ -33,7 +33,7 @@ assert.equal(nodes['home-hero-city'].textContent,'Dublin');
 assert.equal(buttons[2].attrs['aria-pressed'],'true');
 assert.match(nodes['home-feed-list'].innerHTML,/The Long Hall/);
 assert.match(nodes['home-feed-list'].innerHTML,/Erin/);
-assert.equal(nodes['home-greeting'].textContent.includes('Morgan'),true);
+assert.doesNotMatch(fs.readFileSync('index.html','utf8'),/home-greeting|home-account-label/);
 buttons[1].listeners.click();
 assert.equal(nodes['region-filter'].value,'Vale');
 assert.equal(nodes['region-filter'].emitted,'change');
