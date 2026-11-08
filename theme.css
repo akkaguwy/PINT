@@ -20,7 +20,7 @@
 body { background: var(--paper); color: var(--ink); }
 :focus-visible { outline: 2px solid #a46d29; outline-offset: 3px; }
 
-.topbar, .home-topline, .stat-band, .pub-metrics, .panel-head,
+.topbar, .stat-band, .pub-metrics, .panel-head,
 .recent-entry, .profile-history-heading, .detail-review { border-color: var(--line); }
 
 .brand-mark, .button-gold, .button-gold:hover, .pub-actions button:last-child,
@@ -33,12 +33,11 @@ body { background: var(--paper); color: var(--ink); }
   background: var(--green-light); color: var(--green); border-color: #b9c9b4;
 }
 .button, .pub-actions button, .gallery-filter select { min-height: 44px; }
-.eyebrow, .overline, .home-kicker, .home-overline, .home-heading-mark,
+.eyebrow, .overline, .home-overline,
 .home-activity-rating, .recent-entry b { color: var(--brass); }
 
-.home-intro h1 { color: var(--ink); font-family: 'Playfair Display', Georgia, serif; letter-spacing: -.045em; }
-.topbar nav, .brand-name small, .home-greeting, .home-intro p,
-.home-account-link, .home-account-link svg, .home-map-icon, .home-shortcut-arrow,
+.topbar nav, .brand-name small,
+.home-map-icon, .home-shortcut-arrow,
 .home-section-title p, .home-activity-copy > span, .home-empty-feed span,
 .section-heading p, .directory-hint, .directory-note, .directory-note span:first-child,
 .pub-card .pub-area, .pub-description, .pub-metrics span, .pub-price,
@@ -71,7 +70,7 @@ body { background: var(--paper); color: var(--ink); }
   background: var(--surface); color: var(--ink); border-color: #a99e88;
 }
 input::placeholder, textarea::placeholder { color: var(--quiet); opacity: 1; }
-.home-shortcut-symbol, .home-activity-avatar, .home-account-avatar,
+.home-shortcut-symbol, .home-activity-avatar,
 .home-map-icon, .pub-tag, .view-switch button.active, .filter-button[aria-pressed="true"] {
   background: var(--green-light); color: var(--green); border-color: #b9c9b4;
 }

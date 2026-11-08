@@ -1,5 +1,5 @@
-const CACHE_NAME='pint-offline-v4.17';
-const CORE=['./','./index.html','./styles.css?v=4.5','./features.css?v=4.16','./polish.css?v=4.5','./pub_identity.css?v=4.5','./pub_identity.js?v=4.8','./profile.js?v=4.11','./firebase_auth.js?v=4.5','./profile.css?v=4.5','./home.css?v=4.9','./home.js?v=4.17','./update.css?v=4.5','./theme.css?v=4.17','./app.js?v=4.17','./dublin_directory.js?v=4.5','./dublin_explore.js?v=4.5','./navigation.js?v=4.15','./gallery.js?v=4.17','./shared.js?v=4.13','./pub_golf.js?v=4.11','./custom_golf.js?v=4.14','./photos.js','./pwa.js?v=4.6','./manifest.webmanifest','./icons/pint-180.png','./icons/pint-192.png','./icons/pint-512.png'];
+const CACHE_NAME='pint-offline-v4.18';
+const CORE=['./','./index.html','./styles.css?v=4.5','./features.css?v=4.16','./polish.css?v=4.5','./pub_identity.css?v=4.5','./pub_identity.js?v=4.8','./profile.js?v=4.11','./firebase_auth.js?v=4.5','./profile.css?v=4.5','./home.css?v=4.18','./home.js?v=4.18','./update.css?v=4.5','./theme.css?v=4.18','./app.js?v=4.18','./dublin_directory.js?v=4.5','./dublin_explore.js?v=4.5','./navigation.js?v=4.15','./gallery.js?v=4.18','./shared.js?v=4.13','./pub_golf.js?v=4.11','./custom_golf.js?v=4.14','./photos.js','./pwa.js?v=4.6','./manifest.webmanifest','./icons/pint-180.png','./icons/pint-192.png','./icons/pint-512.png'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting()))
 });

@@ -10,19 +10,6 @@
     const date=new Date(value);
     return Number.isFinite(date.getTime())?new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short'}).format(date):'';
   };
-  function personalise(){
-    const user=window.PintAuth?.currentUser;
-    const device=window.PintProfile?.load();
-    const rawName=String(user?.displayName||device?.name||'').trim();
-    const firstName=rawName.split(/\s+/)[0];
-    const hour=new Date().getHours();
-    const greeting=hour<12?'Good morning':hour<17?'Good afternoon':'Good evening';
-    const greet=$('home-greeting');
-    if(greet)greet.textContent=firstName?greeting+', '+firstName:greeting;
-    const avatar=$('home-avatar'),label=$('home-account-label');
-    if(avatar)avatar.textContent=(rawName||'P').slice(0,1).toUpperCase();
-    if(label)label.textContent=user?'My profile':device?'Your profile':'Set up profile';
-  }
   function choose(destination){
     const select=$('region-filter');
     if(!select||!names[destination]||select.value===destination)return;
@@ -87,10 +74,6 @@
           ?'<div class="home-empty-feed" data-state="error"><strong>Recent reviews are unavailable</strong><span>Open Community to try again.</span><a href="#my-pints">Open community <span aria-hidden="true">↗</span></a></div>'
           :'<div class="home-empty-feed"><strong>No reviews here yet</strong><span>Be the first to share a visit.</span><a href="#my-pints">Open community <span aria-hidden="true">↗</span></a></div>';
     }
-    personalise();
   }
-  document.addEventListener('pint:auth-changed',personalise);
-  document.addEventListener('pint:profile-updated',personalise);
-  personalise();
   window.PintHome={render};
 })();
