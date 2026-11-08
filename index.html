@@ -31,6 +31,11 @@
     .pub-metrics span{font-size:8px}
     .modal-body{overflow-y:auto}
     .modal-body label select{min-height:43px}
+    .poll-actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+    #shortlist-picks,#shortlist-votes{list-style:none;padding:0}
+    #shortlist-picks li,#shortlist-votes li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid currentColor}
+    #shortlist-votes a{text-decoration:underline}
+    #shortlist-votes small{display:block}
     @media(max-width:900px){.toolbar select,.filter-button{flex:1 1 150px}}
     @media(max-width:620px){.toolbar select,.filter-button{flex:1 1 43%}.pub-metrics strong{font-size:16px}}
   </style>
@@ -194,6 +199,7 @@
 
     <section class="explore shell" id="explore"><div class="destination-picker"><label for="region-filter">📍 WHERE ARE YOU HEADING?</label><h3 id="destination-title">Explore Cardiff pubs</h3><p>Choose a destination to see its pubs, ratings and reviews.</p></div>
       <div class="section-heading"><div><span class="overline">PUB DIRECTORY</span><h2>Explore pubs</h2><p>Browse places, ratings and reviews in your destination.</p></div><button class="button button-outline" id="open-data-button">↧ Your data</button></div>
+      <div class="poll-actions"><button class="button button-gold" id="open-shortlist" type="button">Create a pub poll</button><button class="button button-outline" id="recent-shortlist" type="button" hidden>Open last poll</button></div>
       <div class="toolbar">
         <label class="search-box"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search pubs or areas..." autocomplete="off" /><kbd>⌕</kbd></label>
         <select id="region-filter" aria-label="Choose destination"><option value="Cardiff">Cardiff, Wales</option><option value="Vale">Vale of Glamorgan, Wales</option><option value="Dublin">Dublin, Ireland</option><option value="Methven">Methven, New Zealand</option></select>
@@ -302,6 +308,31 @@
 
   <dialog id="detail-dialog" class="modal detail-dialog" aria-label="Pub details"><div class="modal-body"><button type="button" class="close" data-close="detail-dialog" aria-label="Close pub details">×</button><div id="detail-content"></div></div></dialog>
 
+  <dialog id="shortlist-dialog" class="modal" aria-labelledby="shortlist-heading">
+    <div class="modal-body">
+      <button type="button" class="close" data-close="shortlist-dialog" aria-label="Close pub poll">×</button>
+      <span class="overline">PUB POLL</span><h2 id="shortlist-heading">Create a pub poll</h2>
+      <form id="shortlist-form">
+        <p>Pick 2 to 6 pubs and share the vote with your mates.</p>
+        <label>Poll name<input name="title" maxlength="70" placeholder="Dublin first stop" required /></label>
+        <label>Find a pub<input id="shortlist-search" type="search" autocomplete="off" placeholder="Search by pub or area" /></label>
+        <label>Matching pubs<select id="shortlist-options"></select></label>
+        <button id="shortlist-add" class="button button-outline" type="button">Add pub</button>
+        <ul id="shortlist-picks" aria-label="Selected pubs"></ul>
+        <button class="button button-gold full" type="submit">Create poll</button>
+      </form>
+      <p id="shortlist-status" role="status"></p>
+      <div id="shortlist-results" hidden>
+        <p class="small-print">One vote per browser. You can change your choice.</p>
+        <ul id="shortlist-votes" aria-label="Pubs and vote totals"></ul>
+        <button id="shortlist-refresh" class="button button-outline" type="button">Refresh votes</button>
+        <button id="shortlist-share" class="button button-gold" type="button">Share poll</button>
+        <label id="shortlist-link-label" hidden>Copy this link<input id="shortlist-link" type="url" readonly /></label>
+      </div>
+      <button id="shortlist-retry" class="button button-outline" type="button" hidden>Try again</button>
+    </div>
+  </dialog>
+
   <dialog id="pub-dialog" class="modal"><form id="pub-form" class="modal-body"><button type="button" class="close" data-close="pub-dialog" aria-label="Close">×</button><span class="overline">PUB DIRECTORY</span><h2>Add a missing pub</h2><p>New pubs are shared with everyone. Check the existing listings before adding one.</p><label>Pub name<input name="name" maxlength="90" placeholder="Pub name" required /></label><label>Region<select name="region" required><option value="Cardiff">Cardiff</option><option value="Vale">Vale of Glamorgan</option><option value="Dublin">Dublin, Ireland</option><option value="Methven">Methven, New Zealand</option></select></label><label>Type of pub<select name="pubType"><option value="Pub">General pub</option><option value="Traditional">Traditional</option><option value="Cocktails">Cocktails</option><option value="Sports">Sports bar</option><option value="Live music">Live music</option><option value="Craft beer">Craft beer</option><option value="Late bar">Late bar</option><option value="Food">Food pub</option></select></label><label>Area<input name="area" maxlength="50" placeholder="e.g. Cowbridge" required /></label><label>Address (optional)<input name="address" maxlength="150" placeholder="Street and town" /></label><label>Google Maps link (optional)<input type="url" name="mapsUrl" maxlength="1200" placeholder="Paste the place’s share link" /></label><label>What makes it worth a visit?<textarea name="description" rows="3" maxlength="180" placeholder="A little about the pub..."></textarea></label><div id="pub-duplicates" aria-live="polite" hidden></div><button type="submit" class="button button-gold full">Add pub for everyone ↗</button></form></dialog>
 
   <dialog id="data-dialog" class="modal"><div class="modal-body"><button type="button" class="close" data-close="data-dialog" aria-label="Close">×</button><span class="overline">SETTINGS</span><h2>Your data</h2><p>Your pubs, pint logs and favourites currently live only in this browser. Export a backup before switching devices or clearing browser data.</p><button id="export-button" class="button button-gold full">Download JSON backup ↧</button><label class="import-label">Restore from backup<input id="import-input" type="file" accept=".json,application/json" /></label><p class="small-print">Import replaces the current data on this device, after confirmation. No public submissions or shared accounts yet.</p></div></dialog>
@@ -313,7 +344,7 @@
   </aside>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="photos.js" defer></script>
-  <script src="shared.js?v=4.13" defer></script>
+  <script src="shared.js?v=4.20" defer></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
   <script src="dublin_directory.js?v=4.5" defer></script>
   <script src="dublin_explore.js?v=4.5" defer></script>
@@ -323,7 +354,8 @@
   <script src="home.js?v=4.19" defer></script>
   <script src="custom_golf.js?v=4.19" defer></script>
   <script src="gallery.js?v=4.19" defer></script>
-  <script src="app.js?v=4.19" defer></script>
+  <script src="app.js?v=4.20" defer></script>
+  <script src="shortlists.js?v=4.20" defer></script>
   <script src="pub_golf.js?v=4.19" defer></script>
   <script src="pwa.js?v=4.6" defer></script>
   <script src="navigation.js?v=4.15" defer></script>

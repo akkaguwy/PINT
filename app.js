@@ -550,6 +550,7 @@
     </div>
     <div class="detail-actions">
       <button class="button button-gold" type="button" data-detail-review="${safe(pub.id)}">Write a review</button>
+      <button class="button button-outline" type="button" data-share-pub="${safe(pub.id)}">Share pub</button>
       <a class="button button-outline" href="${safe(pubMapsUrl(pub.mapsUrl)||mapDirections(pub))}" target="_blank" rel="noopener noreferrer">Directions ↗</a>
     </div>
     ${tagsMarkup(pub)}
