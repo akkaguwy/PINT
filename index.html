@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=4.5" />
-  <link rel="stylesheet" href="features.css?v=4.14" />
+  <link rel="stylesheet" href="features.css?v=4.15" />
   <link rel="stylesheet" href="polish.css?v=4.5" />
   <link rel="stylesheet" href="pub_identity.css?v=4.5" />
   <link rel="stylesheet" href="profile.css?v=4.5" />
@@ -37,7 +37,7 @@
 <body>
   <header class="topbar shell">
     <a class="brand" href="#home" aria-label="PINT home"><span class="brand-mark">P<span class="brand-dot">.</span></span><span class="brand-name">PINT <small>DISCOVER · REVIEW · SHARE</small></span></a>
-    <nav aria-label="Primary navigation"><a href="#explore">Explore</a><a href="#pub-golf">Pub Golf</a><a href="#my-pints">Community</a><a href="#profile">Profile</a></nav>
+    <nav aria-label="Primary navigation"><a href="#explore">Explore</a><a href="#pub-golf">Pub Golf</a><a href="#my-pints">Community</a><a href="#gallery">Gallery</a><a href="#profile">Profile</a></nav>
     <button class="button button-outline small" id="add-pub-button">+ Add a pub</button>
   </header>
 
@@ -230,7 +230,18 @@
       <p class="empty-state" id="empty-state" hidden>No pubs match that search. Try another area or add a new pub.</p>
     </section>
 
-    <section class="journal" id="my-pints"><div class="shell journal-inner"><div><span class="overline">COMMUNITY</span><h2>Community reviews</h2><p>See recent visits and share your own. Reviews are visible to everyone using PINT.</p><button id="journal-log-button" class="button button-gold">Review a pub <span>↗</span></button></div><div class="journal-panel"><p id="community-summary" class="community-summary" aria-live="polite">Loading community activity…</p><button id="refresh-community" type="button" class="community-refresh">↻ Refresh reviews</button><div class="panel-head"><strong>COMMUNITY REVIEWS</strong><span id="entry-count">0 LOGGED</span></div><div id="recent-list" class="recent-list"></div><button id="more-community-reviews" type="button" class="community-refresh" hidden>Show more reviews</button></div></div></section>
+    <section class="gallery-section shell" id="gallery" aria-labelledby="gallery-title">
+      <div class="section-heading">
+        <div><span class="overline">PINT COMMUNITY</span><h2 id="gallery-title">Photo Gallery</h2><p>Photos shared with pub reviews. Tap any photo to see it full size.</p></div>
+        <label class="gallery-filter">Destination
+          <select id="gallery-region"><option value="all">All destinations</option><option value="Cardiff">Cardiff</option><option value="Vale">Vale of Glamorgan</option><option value="Dublin">Dublin</option><option value="Methven">Methven</option></select>
+        </label>
+      </div>
+      <p id="gallery-status" class="gallery-status" role="status">Loading community photos…</p>
+      <div class="gallery-grid" id="gallery-grid"></div>
+      <button type="button" id="gallery-more" class="button button-outline" hidden>Show more photos</button>
+    </section>
+    <section class="journal" id="my-pints"><div class="shell journal-inner"><div><span class="overline">COMMUNITY</span><h2>Community reviews</h2><p>See recent visits and share your own. Reviews are visible to everyone using PINT. <a class="gallery-community-link" href="#gallery">Browse the photo gallery ↗</a></p><button id="journal-log-button" class="button button-gold">Review a pub <span>↗</span></button></div><div class="journal-panel"><p id="community-summary" class="community-summary" aria-live="polite">Loading community activity…</p><button id="refresh-community" type="button" class="community-refresh">↻ Refresh reviews</button><div class="panel-head"><strong>COMMUNITY REVIEWS</strong><span id="entry-count">0 LOGGED</span></div><div id="recent-list" class="recent-list"></div><button id="more-community-reviews" type="button" class="community-refresh" hidden>Show more reviews</button></div></div></section>
 
     <section class="profile-section shell" id="profile" aria-label="My PINT profile">
       <div class="profile-intro"><span class="overline">YOUR PINT</span><h2>Profile</h2><p>Manage your sign-in and review history.</p></div>
@@ -284,13 +295,14 @@
     <a href="#explore" aria-label="Explore pubs"><span aria-hidden="true">⌕</span><small>Explore</small></a>
     <a href="#pub-golf" aria-label="Pub Golf"><span aria-hidden="true">⛳</span><small>Pub Golf</small></a>
     <a href="#my-pints" aria-label="Community reviews"><span aria-hidden="true">★</span><small>Community</small></a>
+    <a href="#gallery" aria-label="Photo Gallery"><span aria-hidden="true">▧</span><small>Gallery</small></a>
     <a href="#profile" aria-label="My profile"><span aria-hidden="true">◉</span><small>Profile</small></a>
   </nav>
   <footer class="shell footer"><div class="footer-brand">PINT<span>.</span></div><p>FIND IT. VISIT IT. RATE IT.</p><span>Cardiff · Vale of Glamorgan · Dublin · Methven NZ · © <span id="year"></span></span></footer>
 
   <dialog id="entry-dialog" class="modal"><form id="entry-form" class="modal-body"><button type="button" class="close" data-close="entry-dialog" aria-label="Close">×</button><span class="overline">REVIEWS</span><h2>Review a visit</h2><label>Pub<select name="pubId" id="entry-pub" required></select></label><label>Overall experience (out of 5 stars)<select name="rating" required><option value="">Choose stars</option><option value="1">★☆☆☆☆ — 1</option><option value="2">★★☆☆☆ — 2</option><option value="3">★★★☆☆ — 3</option><option value="4">★★★★☆ — 4</option><option value="5">★★★★★ — 5</option></select></label><div class="form-row"><label>Guinness quality<select name="guinness"><option value="">Didn't try / not sure</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label><label>Atmosphere<select name="atmosphere"><option value="">Not rated</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label></div><div class="form-row"><label>Area / setting<select name="setting"><option value="">Not rated</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label><label><span id="entry-price-label">Price of pint (local currency: £ / € / NZ$) · optional</span><input name="price" type="number" min="0.01" max="100" step="0.01" placeholder="5.50" /></label></div><label>Date<input name="date" type="date" id="entry-date" required /></label><label>Your verdict<textarea name="notes" rows="3" maxlength="300" placeholder="Great Guinness, friendly bar, nice beer garden..."></textarea></label><label>Photos (up to three) <span class="photo-help">Take a photo or choose from your camera roll</span><input id="review-photos" name="photos" type="file" accept="image/*" multiple /></label><p class="photo-usage-note">Photos you share with a review may be displayed on the pub card as a real customer photo. Only upload photos you have permission to share.</p><label class="cover-photo-choice"><input type="checkbox" name="coverPhoto" value="yes" /> Prioritise my first photo as this pub’s cover</label><div class="photo-preview" id="photo-preview" aria-live="polite"></div><button class="button button-gold full" type="submit">Save my review ↗</button></form></dialog>
 
-  <dialog id="photo-dialog" class="photo-dialog"><button type="button" class="close" data-close="photo-dialog" aria-label="Close photo">×</button><img id="photo-full" alt="Your pub review photo" /></dialog>
+  <dialog id="photo-dialog" class="photo-dialog"><button type="button" class="close" data-close="photo-dialog" aria-label="Close photo">×</button><img id="photo-full" alt="Pub review photo" /><div id="photo-gallery-caption" class="photo-gallery-caption" hidden><p id="photo-gallery-credit"></p><button type="button" id="photo-gallery-pub" class="button button-outline">View pub ↗</button></div></dialog>
 
   <dialog id="detail-dialog" class="modal detail-dialog" aria-label="Pub details"><div class="modal-body"><button type="button" class="close" data-close="detail-dialog" aria-label="Close pub details">×</button><div id="detail-content"></div></div></dialog>
 
@@ -314,9 +326,10 @@
   <script type="module" src="firebase_auth.js?v=4.5"></script>
   <script src="home.js?v=4.9" defer></script>
   <script src="custom_golf.js?v=4.14" defer></script>
-  <script src="app.js?v=4.14" defer></script>
+  <script src="gallery.js?v=4.15" defer></script>
+  <script src="app.js?v=4.15" defer></script>
   <script src="pub_golf.js?v=4.11" defer></script>
   <script src="pwa.js?v=4.6" defer></script>
-  <script src="navigation.js?v=4.5" defer></script>
+  <script src="navigation.js?v=4.15" defer></script>
 </body>
 </html>

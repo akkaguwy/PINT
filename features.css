@@ -290,3 +290,31 @@ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
 .guinness-filters{margin-top:8px}
 .guinness-filters [hidden]{display:none!important}
 .guinness-evidence{margin:8px 0 0;font-size:12px;color:#c1b69e}
+
+.gallery-section{padding-top:56px;padding-bottom:48px;scroll-margin-top:65px}
+.gallery-section .section-heading{align-items:end;gap:16px}
+.gallery-filter{display:grid;gap:6px;font-size:12px;color:#c9c4b9}
+.gallery-filter select{background:#252c25;color:var(--cream);border:1px solid #5d685a;border-radius:7px;padding:9px;font:inherit}
+.gallery-status{font-size:13px;color:#c9c4b9;margin:0 0 14px}
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:14px}
+.gallery-card{display:block;width:100%;min-width:0;padding:0;text-align:left;overflow:hidden;background:#1d281f;color:var(--cream);border:1px solid #435045;border-radius:10px}
+.gallery-card:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.gallery-image{display:grid;place-items:center;aspect-ratio:4/3;background:#25332a;overflow:hidden}
+.gallery-image img{width:100%;height:100%;object-fit:cover;min-height:0}
+.gallery-image small{font-size:12px;color:#c9c4b9}
+.gallery-card strong,.gallery-card>small{display:block;padding:0 10px;overflow-wrap:anywhere}
+.gallery-card strong{font-size:14px;margin-top:9px}
+.gallery-card>small{font-size:11px;color:#c9c4b9;margin:4px 0 10px}
+#gallery-more{margin-top:16px}
+.gallery-community-link{color:var(--gold);text-decoration:underline}
+.photo-gallery-caption{color:var(--cream);padding-top:10px;max-width:min(85vw,620px)}
+.photo-gallery-caption p{margin:0 0 8px;overflow-wrap:anywhere}
+@media(max-width:620px){
+  body.pint-mobile-screens #home>.gallery-section{display:none!important}
+  body.pint-mobile-screens[data-screen="gallery"] #home>.gallery-section{display:block!important;padding-top:25px}
+  body.pint-mobile-screens .mobile-nav{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+  .gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .gallery-section .section-heading{display:flex;flex-wrap:wrap}
+}
+
+.gallery-image [hidden]{display:none!important}
