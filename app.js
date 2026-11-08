@@ -161,7 +161,7 @@
       lastSuccessfulSync=cached.syncedAt||null;
     }
   }catch{}
-  let requestSerial=0;
+  let requestSerial=0, sharedLoaded=false;
   let discoveredPubs=[];
   const cachedDiscover=window.PintDublinExplore?.readCache();
   if(cachedDiscover?.pubs)discoveredPubs=cachedDiscover.pubs;
@@ -242,6 +242,7 @@
         seen.add(l.id);return true;
       }).map(l=>({...l,rating:Number(l.rating),shared:true}));
       sharedOnline=true;
+      sharedLoaded=true;
       lastSuccessfulSync=Date.now();
       try{localStorage.setItem('pint-community-snapshot-v1',JSON.stringify({pubs:sharedPubs,reviews:sharedLogs,syncedAt:lastSuccessfulSync}))}catch{}
       setSharedStatus('● Connected · '+sharedLogs.length+' shared reviews · Synced '+new Date(lastSuccessfulSync).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),'online');
@@ -251,8 +252,9 @@
     }catch(error){
       if(serial!==requestSerial)return false;
       sharedOnline=false;
+      sharedLoaded=true;
       const last=lastSuccessfulSync?(' · Last synced '+new Date(lastSuccessfulSync).toLocaleString()):'';
-      setSharedStatus('⚠ Live connection unavailable'+last+' · Showing cached reviews','offline');
+      setSharedStatus('⚠ Live connection unavailable'+last+(lastSuccessfulSync?' · Showing saved reviews':' · Please try again shortly'),'offline');
       render();
       return false;
     }
@@ -297,6 +299,7 @@
     }
     if(id==='entry-dialog'){
       $('#entry-form').reset();
+      $('#review-form-error').hidden=true;
       $('#entry-form [name=reviewerName]').value=window.PintProfile?.load()?.name||localStorage.getItem('pint-reviewer-name')||'';
       clearPhotoPreview();
       const today=new Date();
@@ -381,17 +384,17 @@
     $('#entry-count').textContent=`${destinationReviews.filter(l=>l.shared).length} SHARED · ${destinationReviews.filter(l=>!l.shared).length} PRIVATE`;
     const destinationName=$('#region-filter').selectedOptions[0]?.textContent||'destination';
     const destinationShared=sharedLogs.filter(l=>getPub(l.pubId)?.region===$('#region-filter').value).length;
-    $('#community-summary').textContent=sharedOnline?`${destinationShared} shared reviews in ${destinationName}`:`Offline snapshot: ${destinationShared} reviews in ${destinationName}. Posting requires an internet connection.`;
+    $('#community-summary').textContent=sharedOnline?`${destinationShared} shared reviews in ${destinationName}`:lastSuccessfulSync?`Showing ${destinationShared} saved reviews in ${destinationName}.`:sharedLoaded?'Reviews couldn’t load. Use Refresh reviews to try again.':'Loading community reviews…';
     const recents=[...destinationReviews].sort((a,b)=>b.date.localeCompare(a.date)||(b.createdAt||0)-(a.createdAt||0)).slice(0,reviewFeedLimit);
     const reviewMore=$('#more-community-reviews');
     reviewMore.hidden=destinationReviews.length<=reviewFeedLimit;
     reviewMore.textContent='Show more reviews ('+(destinationReviews.length-reviewFeedLimit)+' remaining)';
-    $('#recent-list').innerHTML=recents.length?recents.map(l=>`<div class="recent-entry"><div><strong>${safe(getPub(l.pubId)?.name||'Unknown pub')}</strong><div class="review-author">${l.shared?(window.PintProfile?.author(l.reviewerName)||safe(l.reviewerName)):'Your saved review · not shared'}</div><small>${safe(l.date)}${l.guinness!=null?' · Guinness '+l.guinness+'★':''}${l.price!=null?' · '+money(l.price,l.pubId):''}</small>${l.notes?`<div class="review-notes">${safe(l.notes)}</div>`:''}<div class="review-photos" data-review-photos="${safe(l.id)}"></div></div><b>${Number(l.rating).toFixed(1)} ★</b></div>`).join(''):'<div class="recent-empty">No pub reviews yet.<br/>Your adventures start with the first one.</div>';
+    $('#recent-list').innerHTML=recents.length?recents.map(l=>`<div class="recent-entry"><div><strong>${safe(getPub(l.pubId)?.name||'Unknown pub')}</strong><div class="review-author">${l.shared?(window.PintProfile?.author(l.reviewerName)||safe(l.reviewerName)):'Your saved review · not shared'}</div><small>${safe(l.date)}${l.guinness!=null?' · Guinness '+l.guinness+'★':''}${l.price!=null?' · '+money(l.price,l.pubId):''}</small>${l.notes?`<div class="review-notes">${safe(l.notes)}</div>`:''}<div class="review-photos" data-review-photos="${safe(l.id)}"></div></div><b>${Number(l.rating).toFixed(1)} ★</b></div>`).join(''):sharedOnline||lastSuccessfulSync?'<div class="recent-empty">No pub reviews here yet. Be the first to share a visit.</div>':'';
     recents.forEach(async log=>{try{const images=await logPhotos(log);const el=[...document.querySelectorAll('[data-review-photos]')].find(x=>x.dataset.reviewPhotos===log.id);if(el)el.innerHTML=images.map((src,i)=>`<button class="photo-thumb" type="button" aria-label="View photo ${i+1}"><img alt="Photo ${i+1} from ${safe(getPub(log.pubId)?.name||'pub')}" src="${src}" /></button>`).join('')}catch{}});
     if(view==='map')renderMap();
     window.PintProfile?.render(visibleLogs(),getPub);
-    window.PintGallery?.render({pubs,reviews:sharedLogs,connected:sharedOnline,initial:requestSerial===0&&!lastSuccessfulSync});
-    window.PintHome?.render({destination,pubs,reviews:sharedLogs,addedPubs:sharedPubs,connected:sharedOnline});
+    window.PintGallery?.render({pubs,reviews:sharedLogs,connected:sharedOnline,initial:!sharedLoaded&&!lastSuccessfulSync});
+    window.PintHome?.render({destination,pubs,reviews:sharedLogs,addedPubs:sharedPubs,connected:sharedOnline,initial:!sharedLoaded&&!lastSuccessfulSync});
   }
   function showView(next){view=next;$('#show-more-pubs').hidden=next==='map'||lastFiltered.length<=directoryLimit;$('#pub-grid').hidden=next==='map';$('#map-container').hidden=next!=='map';$('#list-view-button').classList.toggle('active',next==='list');$('#map-view-button').classList.toggle('active',next==='map');$('#list-view-button').setAttribute('aria-pressed',next==='list');$('#map-view-button').setAttribute('aria-pressed',next==='map');if(next==='map')requestAnimationFrame(renderMap)}
   function mapPubButton(pub){
@@ -544,11 +547,14 @@
   $('#entry-form').addEventListener('submit',async event=>{
     event.preventDefault();
     const button=event.target.querySelector('[type=submit]');button.disabled=true;
+    const status=$('#review-form-error');
+    status.hidden=true;
+    const showError=message=>{status.hidden=false;status.textContent=message};
     const f=new FormData(event.target),optionalScore=name=>f.get(name)===''?null:Number(f.get(name));
     const price=f.get('price')===''?null:Number(f.get('price'));
     const log={id:crypto.randomUUID(),pubId:String(f.get('pubId')),reviewerName:String(f.get('reviewerName')).trim(),price,rating:Number(f.get('rating')),guinness:optionalScore('guinness'),atmosphere:optionalScore('atmosphere'),setting:optionalScore('setting'),date:String(f.get('date')),notes:String(f.get('notes')).trim(),coverPhoto:Boolean(f.get('coverPhoto'))};
     try{
-      if(!getPub(log.pubId)||!log.reviewerName||(price!=null&&(price<=0||price>100))||log.rating<1||log.rating>5){toast('Check your review details');return}
+      if(!getPub(log.pubId)||!log.reviewerName||(price!=null&&(price<=0||price>100))||log.rating<1||log.rating>5){showError('Check your review details and try again.');return}
       button.textContent='Sharing review…';
       const images=await Promise.all([...$('#review-photos').files].slice(0,3).map(window.PintPhotos.resize));
       log.coverPhoto=log.coverPhoto&&images.length>0;
@@ -567,7 +573,7 @@
           else toast('Review received, but not confirmed in shared feed. Check again later.');
         },4000);
       }
-    }catch(error){toast('Not shared: '+(error.message||'please retry'));}finally{button.disabled=false;button.textContent='Save my review ↗'}
+    }catch{showError('We couldn’t confirm your review was shared. Your details are still here. Check your connection and try again.');}finally{button.disabled=false;button.textContent='Save my review ↗'}
   });
   $('#recent-list').addEventListener('click',event=>{const image=event.target.closest('.photo-thumb img');if(image){$('#photo-full').src=image.src;$('#photo-dialog').showModal()}});
   const pubNameKey=value=>value.normalize('NFKD').toLowerCase().replace(/\p{M}/gu,'')

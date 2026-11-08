@@ -23,7 +23,9 @@
       signature=next;
     }
     more.hidden=shown.length>=filtered.length;
-    $('gallery-status').textContent=filtered.length
+    const status=$('gallery-status');
+    status.dataset.state=filtered.length?'ready':initial?'loading':connected?'empty':'error';
+    status.textContent=filtered.length
       ?filtered.length+' '+(filtered.length===1?'photo':'photos')+(connected?'':' · Saved photo listings')
       :initial?'Loading community photos…':connected?'No shared photos here yet.':'Photo listings are unavailable. Try again when connected.';
   }
