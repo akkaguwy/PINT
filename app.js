@@ -261,7 +261,10 @@
   let photoPreviewUrls=[];
   function clearPhotoPreview(){photoPreviewUrls.forEach(url=>URL.revokeObjectURL(url));photoPreviewUrls=[];$('#photo-preview').innerHTML=''}
   function openDialog(id,pubId){
-    if(id==='pub-dialog')$('#pub-form [name=region]').value=$('#region-filter').value;
+    if(id==='pub-dialog'){
+      $('#pub-form [name=region]').value=$('#region-filter').value;
+      showPubMatches();
+    }
     if(id==='entry-dialog'){
       $('#entry-form').reset();
       $('#entry-form [name=reviewerName]').value=window.PintProfile?.load()?.name||localStorage.getItem('pint-reviewer-name')||'';
@@ -342,14 +345,80 @@
     window.PintHome?.render({destination,pubs,reviews:sharedLogs,addedPubs:sharedPubs,connected:sharedOnline});
   }
   function showView(next){view=next;$('#show-more-pubs').hidden=next==='map'||lastFiltered.length<=directoryLimit;$('#pub-grid').hidden=next==='map';$('#map-container').hidden=next!=='map';$('#list-view-button').classList.toggle('active',next==='list');$('#map-view-button').classList.toggle('active',next==='map');$('#list-view-button').setAttribute('aria-pressed',next==='list');$('#map-view-button').setAttribute('aria-pressed',next==='map');if(next==='map')requestAnimationFrame(renderMap)}
+  function mapPubButton(pub){
+    const button=document.createElement('button');
+    button.type='button';
+    button.className='map-popup-button';
+    button.textContent=pub.name+' ↗';
+    button.addEventListener('click',()=>{location.hash='pub='+encodeURIComponent(pub.id)});
+    return button;
+  }
   function renderMap(){
     if(view!=='map')return;
-    if(!window.L){$('#pub-map').textContent='The interactive map needs an internet connection. Switch to List for all pub suggestions.';return}
-    if(!pubMap){pubMap=L.map('pub-map',{scrollWheelZoom:false}).setView([51.467,-3.29],10);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:18}).addTo(pubMap);mapMarkers=L.layerGroup().addTo(pubMap)}
-    mapMarkers.clearLayers();const grouped=new Map();lastFiltered.forEach(p=>{if(!pubCentre(p))return;const key=p.region+'|'+p.area;if(!grouped.has(key))grouped.set(key,[]);grouped.get(key).push(p)});
-    const bounds=[];grouped.forEach((pubs,key)=>{const area=pubs[0].area,pos=pubCentre(pubs[0]);bounds.push(pos);const marker=L.marker(pos).addTo(mapMarkers);const summary=document.createElement('div');const heading=document.createElement('strong');heading.textContent=area+' · '+pubs.length+' pubs';summary.append(heading,document.createElement('br'));const btn=document.createElement('button');btn.type='button';btn.textContent='Show pubs in this area ↗';btn.className='map-popup-button';btn.addEventListener('click',()=>{$('#region-filter').value=pubs[0].region;render();$('#area-filter').value=area;showView('list');render();$('#explore').scrollIntoView({behavior:'smooth'})});summary.append(btn);marker.bindPopup(summary)});
-    if(nearPosition){const you=L.circleMarker(nearPosition,{radius:8,color:'#f6e7c7',fillColor:'#c9a35b',fillOpacity:1}).addTo(mapMarkers);you.bindPopup('Your approximate location');bounds.push(nearPosition)}
-    pubMap.invalidateSize();if(bounds.length)pubMap.fitBounds(bounds,{padding:[25,25],maxZoom:13});
+    const mode=$('#map-filter').value;
+    const ownReviewIds=new Set(window.PintProfile?.ids()||[]);
+    const visited=new Set(visibleLogs().filter(log=>!log.shared||ownReviewIds.has(log.id)).map(log=>log.pubId));
+    const scores=new Map();
+    for(const log of sharedLogs){
+      const score=scores.get(log.pubId)||{total:0,count:0};
+      score.total+=log.rating;
+      score.count++;
+      scores.set(log.pubId,score);
+    }
+    const pubs=lastFiltered.filter(pub=>{
+      if(mode==='visited')return visited.has(pub.id);
+      if(mode==='saved')return data.favourites.includes(pub.id);
+      if(mode==='rated'){
+        const score=scores.get(pub.id);
+        return score&&score.total/score.count>=4;
+      }
+      return true;
+    });
+    const groups=new Map(),unpinned=[];
+    for(const pub of pubs){
+      const pos=pubCentre(pub);
+      if(!window.L||!pos){unpinned.push(pub);continue}
+      const exact=Number.isFinite(pub.lat)&&Number.isFinite(pub.lon);
+      const key=exact?'point:'+pos.join(','):'area:'+pub.region+'|'+pub.area;
+      if(!groups.has(key))groups.set(key,{pos,exact,pubs:[]});
+      groups.get(key).pubs.push(pub);
+    }
+    const unmapped=$('#map-unpinned');
+    unmapped.hidden=!unpinned.length;
+    unmapped.querySelector('summary').textContent=unpinned.length+' pubs without pins';
+    $('#map-unpinned-list').replaceChildren(...unpinned.map(mapPubButton));
+    $('#map-status').textContent=pubs.length
+      ?(pubs.length-unpinned.length)+' of '+pubs.length+' matching pubs on the map'
+      :'No pubs match these map filters.';
+    if(!window.L){$('#pub-map').textContent='The interactive map needs an internet connection.';return}
+    if(!pubMap){
+      pubMap=L.map('pub-map',{scrollWheelZoom:false}).setView([51.467,-3.29],10);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:18}).addTo(pubMap);
+      mapMarkers=L.layerGroup().addTo(pubMap);
+    }
+    mapMarkers.clearLayers();
+    const bounds=[];
+    for(const {pos,exact,pubs:venues} of groups.values()){
+      bounds.push(pos);
+      const title=exact&&venues.length===1?venues[0].name:venues[0].area+' · '+venues.length+' '+(venues.length===1?'pub':'pubs');
+      const marker=L.marker(pos,{title,alt:title}).addTo(mapMarkers);
+      const popup=document.createElement('div');
+      popup.className='map-popup-pubs';
+      const heading=document.createElement('strong');
+      heading.textContent=title;
+      popup.append(heading,...venues.map(mapPubButton));
+      marker.bindPopup(popup);
+    }
+    if(nearPosition){
+      L.circleMarker(nearPosition,{radius:8,color:'#f6e7c7',fillColor:'#c9a35b',fillOpacity:1}).addTo(mapMarkers).bindPopup('Your approximate location');
+      if(bounds.length&&bounds.some(pos=>distanceKm(pos,nearPosition)<50))bounds.push(nearPosition);
+    }
+    pubMap.invalidateSize();
+    if(bounds.length)pubMap.fitBounds(bounds,{padding:[25,25],maxZoom:14});
+    else {
+      const centres={Cardiff:[51.48,-3.18],Vale:[51.43,-3.42],Dublin:[53.35,-6.26],Methven:[-43.63,171.65]};
+      pubMap.setView(centres[$('#region-filter').value],11);
+    }
   }
   function detailReviewMarkup(log){
     const author=log.shared
@@ -451,13 +520,40 @@
     }catch(error){toast('Not shared: '+(error.message||'please retry'));}finally{button.disabled=false;button.textContent='Save my review ↗'}
   });
   $('#recent-list').addEventListener('click',event=>{const image=event.target.closest('.photo-thumb img');if(image){$('#photo-full').src=image.src;$('#photo-dialog').showModal()}});
+  const pubNameKey=value=>value.normalize('NFKD').toLowerCase().replace(/\p{M}/gu,'')
+    .replace(/['’]/g,'').replace(/[^a-z0-9]+/g,' ').trim().replace(/^the /,'');
+  function showPubMatches(){
+    const form=$('#pub-form');
+    const key=pubNameKey(form.elements.name.value);
+    const area=pubNameKey(form.elements.area.value);
+    const region=form.elements.region.value;
+    const root=$('#pub-duplicates');
+    const matches=key.length<3?[]:allPubs().filter(pub=>{
+      const existing=pubNameKey(pub.name);
+      return pub.region===region&&(existing===key||(area&&pubNameKey(pub.area)===area&&(existing.includes(key)||key.includes(existing))));
+    });
+    const duplicate=matches.find(pub=>pubNameKey(pub.name)===key&&pubNameKey(pub.area)===area);
+    root.hidden=!matches.length;
+    root.textContent=duplicate?'This pub is already listed:':'Check these existing listings:';
+    for(const pub of matches.slice(0,5)){
+      const button=mapPubButton(pub);
+      button.addEventListener('click',()=>$('#pub-dialog').close());
+      root.append(button);
+    }
+    return duplicate;
+  }
+  $('#pub-form').addEventListener('input',showPubMatches);
   $('#pub-form').addEventListener('submit',async event=>{
     event.preventDefault();
     const button=event.target.querySelector('[type=submit]'),f=new FormData(event.target);
     const pub={id:crypto.randomUUID(),name:String(f.get('name')).trim(),area:String(f.get('area')).trim(),region:['Cardiff','Vale','Dublin','Methven'].includes(f.get('region'))?f.get('region'):'Cardiff',address:String(f.get('address')).trim(),description:String(f.get('description')).trim(),pubType:String(f.get('pubType')||'Pub')};
-    if(!pub.name||!pub.area)return;
+    if(!pub.name||!pub.area||showPubMatches())return;
     button.disabled=true;button.textContent='Sharing pub…';
-    try{await window.PintShared.addPub(pub);window.PintIdentity?.rememberType(pub,pub.pubType);$('#pub-dialog').close();event.target.reset();toast('Pub added for everyone ✓');await refreshShared();}
+    try{
+      if(!await refreshShared())throw Error('Could not check the latest pub listings. Try again.');
+      if(['name','area','region','address','description','pubType'].some(key=>event.target.elements[key].value.trim()!==pub[key]))throw Error('The listing changed. Check the details and submit again.');
+      if(showPubMatches())return;
+      await window.PintShared.addPub(pub);window.PintIdentity?.rememberType(pub,pub.pubType);$('#pub-dialog').close();event.target.reset();toast('Pub added for everyone ✓');await refreshShared();}
     catch(error){toast('Not shared: '+(error.message||'please retry'));}
     finally{button.disabled=false;button.textContent='Add pub for everyone ↗'}
   });
@@ -485,6 +581,8 @@
    $('#more-community-reviews').addEventListener('click',()=>{reviewFeedLimit+=12;render()});
   $('#list-view-button').addEventListener('click',()=>showView('list'));
   $('#map-view-button').addEventListener('click',()=>showView('map'));
+  $('#home-map-link').addEventListener('click',()=>showView('map'));
+  $('#map-filter').addEventListener('change',renderMap);
   $('#nearby-button').addEventListener('click',()=>{
     if(nearPosition){nearPosition=null;$('#nearby-button').textContent='⌖ Near me';$('#nearby-button').setAttribute('aria-pressed','false');$('#sort-filter').value='name';$('#location-note').textContent='';render();return}
     if(!navigator.geolocation){toast('Location is not available on this device');return}

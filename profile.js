@@ -84,5 +84,5 @@
   });
   document.getElementById('profile-review-button')?.addEventListener('click',()=>document.getElementById('journal-log-button')?.click());
   renderHeader();
-  window.PintProfile={load,saveName,record,render,author,initials};
+  window.PintProfile={load,saveName,record,render,author,initials,ids};
 })();
