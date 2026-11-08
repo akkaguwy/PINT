@@ -21,9 +21,9 @@
   <link rel="stylesheet" href="polish.css?v=4.5" />
   <link rel="stylesheet" href="pub_identity.css?v=4.5" />
   <link rel="stylesheet" href="profile.css?v=4.5" />
-  <link rel="stylesheet" href="home.css?v=4.18" />
+  <link rel="stylesheet" href="home.css?v=4.19" />
   <link rel="stylesheet" href="update.css?v=4.5" />
-  <link rel="stylesheet" href="theme.css?v=4.18" />
+  <link rel="stylesheet" href="theme.css?v=4.19" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoT6kLFxMAH2U=" crossorigin="" />
   <style>
     .pub-price{font-size:11px;margin-top:12px;min-height:18px}
@@ -77,6 +77,9 @@
 
       <section class="home-shortcuts" aria-labelledby="home-shortcuts-title">
         <div class="home-section-title"><h2 id="home-shortcuts-title">Quick actions</h2></div>
+        <button id="home-resume-round" class="home-shortcut" type="button" hidden>
+          <span><strong>Resume round</strong><small id="home-resume-stop"></small></span><span aria-hidden="true">↗</span>
+        </button>
         <div class="home-shortcut-grid">
           <button type="button" id="log-first-button" class="home-shortcut">
             <span class="home-shortcut-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9Z"/></svg></span>
@@ -110,6 +113,9 @@
           <h2 id="home-community-heading">Recent activity</h2>
           <a href="#my-pints">Community <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
         </div>
+        <label class="home-activity-filter">Show activity
+          <select id="home-activity-area"><option value="local">Selected area</option><option value="all">All areas</option></select>
+        </label>
         <p id="home-community-note">Latest reviews, photos and pubs from the PINT community</p>
         <div class="home-activity-list" id="home-feed-list" aria-live="polite"><div class="home-empty-feed"><strong>Loading recent reviews…</strong></div></div>
       </section>
@@ -286,7 +292,7 @@
   </nav>
   <footer class="shell footer"><div class="footer-brand">PINT<span>.</span></div><p>FIND IT. VISIT IT. RATE IT.</p><span>Cardiff · Vale of Glamorgan · Dublin · Methven NZ · © <span id="year"></span></span></footer>
 
-  <dialog id="entry-dialog" class="modal"><form id="entry-form" class="modal-body"><button type="button" class="close" data-close="entry-dialog" aria-label="Close">×</button><span class="overline">REVIEWS</span><h2>Review a visit</h2><label>Pub<select name="pubId" id="entry-pub" required></select></label><label>Overall experience (out of 5 stars)<select name="rating" required><option value="">Choose stars</option><option value="1">★☆☆☆☆ — 1</option><option value="2">★★☆☆☆ — 2</option><option value="3">★★★☆☆ — 3</option><option value="4">★★★★☆ — 4</option><option value="5">★★★★★ — 5</option></select></label><div class="form-row"><label>Guinness quality<select name="guinness"><option value="">Didn't try / not sure</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label><label>Atmosphere<select name="atmosphere"><option value="">Not rated</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label></div><div class="form-row"><label>Area / setting<select name="setting"><option value="">Not rated</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label><label><span id="entry-price-label">Price of pint (local currency: £ / € / NZ$) · optional</span><input name="price" type="number" min="0.01" max="100" step="0.01" placeholder="5.50" /></label></div><label>Date<input name="date" type="date" id="entry-date" required /></label><label>Your verdict<textarea name="notes" rows="3" maxlength="300" placeholder="Great Guinness, friendly bar, nice beer garden..."></textarea></label><label>Photos (up to three) <span class="photo-help">Take a photo or choose from your camera roll</span><input id="review-photos" name="photos" type="file" accept="image/*" multiple /></label><p class="photo-usage-note">Photos you share with a review may be displayed on the pub card as a real customer photo. Only upload photos you have permission to share.</p><label class="cover-photo-choice"><input type="checkbox" name="coverPhoto" value="yes" /> Prioritise my first photo as this pub’s cover</label><div class="photo-preview" id="photo-preview" aria-live="polite"></div><p id="review-form-error" class="review-form-error" role="alert" hidden></p><button class="button button-gold full" type="submit">Save my review ↗</button></form></dialog>
+  <dialog id="entry-dialog" class="modal"><form id="entry-form" class="modal-body"><button type="button" class="close" data-close="entry-dialog" aria-label="Close">×</button><span class="overline">REVIEWS</span><h2>Review a visit</h2><label>Pub<select name="pubId" id="entry-pub" required></select></label><label>Overall experience (out of 5 stars)<select name="rating" required><option value="">Choose stars</option><option value="1">★☆☆☆☆ — 1</option><option value="2">★★☆☆☆ — 2</option><option value="3">★★★☆☆ — 3</option><option value="4">★★★★☆ — 4</option><option value="5">★★★★★ — 5</option></select></label><label>Guinness quality<select name="guinness"><option value="">Didn't try / not sure</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label><details id="review-details" class="review-details"><summary>Add details</summary><div class="review-detail-fields"><div class="form-row"><label>Atmosphere<select name="atmosphere"><option value="">Not rated</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label><label>Area / setting<select name="setting"><option value="">Not rated</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label></div><div class="form-row"><label><span id="entry-price-label">Price of pint (local currency: £ / € / NZ$) · optional</span><input name="price" type="number" min="0.01" max="100" step="0.01" placeholder="5.50" /></label><label>Date<input name="date" type="date" id="entry-date" required /></label></div><label>Your verdict<textarea name="notes" rows="3" maxlength="300" placeholder="Great Guinness, friendly bar, nice beer garden..."></textarea></label><label>Photos (up to three) <span class="photo-help">Take a photo or choose from your camera roll</span><input id="review-photos" name="photos" type="file" accept="image/*" multiple /></label><p class="photo-usage-note">Photos you share with a review may be displayed on the pub card as a real customer photo. Only upload photos you have permission to share.</p><label class="cover-photo-choice"><input type="checkbox" name="coverPhoto" value="yes" /> Prioritise my first photo as this pub’s cover</label><div class="photo-preview" id="photo-preview" aria-live="polite"></div><button id="clear-review-photos" type="button" class="button button-outline" hidden>Remove photos</button></div></details><p id="review-draft-status" role="status" hidden></p><p id="review-form-error" class="review-form-error" role="alert" hidden></p><button class="button button-gold full" type="submit">Save my review ↗</button></form></dialog>
 
   <dialog id="photo-dialog" class="photo-dialog"><button type="button" class="close" data-close="photo-dialog" aria-label="Close photo">×</button><img id="photo-full" alt="Pub review photo" /><div id="photo-gallery-caption" class="photo-gallery-caption" hidden><div class="gallery-photo-controls" aria-label="Browse gallery photos">
       <button type="button" id="gallery-prev" class="button button-outline" aria-label="Previous photo">←</button>
@@ -314,11 +320,11 @@
   <script src="pub_identity.js?v=4.8" defer></script>
   <script src="profile.js?v=4.11" defer></script>
   <script type="module" src="firebase_auth.js?v=4.5"></script>
-  <script src="home.js?v=4.18" defer></script>
-  <script src="custom_golf.js?v=4.14" defer></script>
-  <script src="gallery.js?v=4.18" defer></script>
-  <script src="app.js?v=4.18" defer></script>
-  <script src="pub_golf.js?v=4.11" defer></script>
+  <script src="home.js?v=4.19" defer></script>
+  <script src="custom_golf.js?v=4.19" defer></script>
+  <script src="gallery.js?v=4.19" defer></script>
+  <script src="app.js?v=4.19" defer></script>
+  <script src="pub_golf.js?v=4.19" defer></script>
   <script src="pwa.js?v=4.6" defer></script>
   <script src="navigation.js?v=4.15" defer></script>
 </body>

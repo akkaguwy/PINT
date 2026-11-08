@@ -4,7 +4,20 @@
   const $=id=>document.getElementById(id);
   const names={Cardiff:'Cardiff',Vale:'the Vale',Dublin:'Dublin',Methven:'Methven'};
   const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-  let activeDestination='Cardiff';
+  let activeDestination='Cardiff', lastState, resume;
+  const areaFilter=$('home-activity-area');
+  areaFilter?.addEventListener('change',()=>render(lastState));
+  const resumeButton=$('home-resume-round');
+  function updateResume(){
+    if(!resumeButton)return;
+    resume=[window.PintCustomGolf?.resume(),...window.PintGolf?.resumable()||[]]
+      .filter(Boolean).sort((a,b)=>b.time-a.time)[0];
+    resumeButton.hidden=!resume;
+    if(resume)$('home-resume-stop').textContent='Hole '+resume.hole+' · '+resume.pub;
+  }
+  resumeButton?.addEventListener('click',()=>resume?.open());
+  document.addEventListener('pint:golf-progress',updateResume);
+
   const compactDate=value=>{
     if(!value)return '';
     const date=new Date(value);
@@ -27,7 +40,10 @@
   $('home-feed-list')?.addEventListener('error',event=>{
     if(event.target.matches('.home-activity-avatar img'))event.target.remove();
   },true);
-  function render({destination='Cardiff',pubs=[],reviews=[],connected=false,addedPubs=[],initial=false}={}){
+  function render(state={}){
+    lastState=state;
+    const {destination='Cardiff',pubs=[],reviews=[],connected=false,addedPubs=[],initial=false}=state;
+    updateResume();
     activeDestination=names[destination]?destination:'Cardiff';
     const chosen=names[activeDestination];
     const inArea=pubs.filter(p=>p.region===activeDestination);
@@ -45,8 +61,10 @@
       button.setAttribute('aria-pressed',String(selected));
       button.classList.toggle('selected',selected);
     });
+    const allAreas=areaFilter?.value==='all';
+    if(areaFilter)areaFilter.options[0].textContent=chosen;
     const subtitle=$('home-community-note');
-    if(subtitle)subtitle.textContent=connected?'Latest reviews, photos and pubs from the PINT community':initial?'Checking for recent reviews and photos':'Updates when connected';
+    if(subtitle)subtitle.textContent=connected?(allAreas?'Latest reviews, photos and pubs across all areas':'Latest reviews, photos and pubs in '+chosen):initial?'Checking for recent reviews and photos':'Updates when connected';
     const root=$('home-feed-list');
     if(root){
       const lookup=new Map(pubs.map(pub=>[pub.id,pub]));
@@ -56,7 +74,7 @@
         ...addedPubs.filter(pub=>lookup.has(pub.id)&&pub.createdAt).map(pub=>({pub,date:pub.createdAt}))
       ];
       const time=value=>Number(value)||Date.parse(value)||0;
-      const recent=events.sort((a,b)=>time(b.date)-time(a.date)).slice(0,5);
+      const recent=events.filter(event=>allAreas||event.pub.region===activeDestination).sort((a,b)=>time(b.date)-time(a.date)).slice(0,5);
       root.innerHTML=recent.length?recent.map(({pub,review,date})=>{
         const author=String(review?.reviewerName||'').trim()||'PINT member';
         const photo=review&&window.PintShared?.photoUrls(review)[0];

@@ -111,6 +111,7 @@
     try{localStorage.setItem(KEY,JSON.stringify(next))}
     catch{status.textContent='Could not save on this device. Free up browser storage and try again.';return false}
     courses=next;
+    document.dispatchEvent(new Event('pint:golf-progress'));
     return true;
   }
   function replaceCourse(updated,autoShare=true){
@@ -317,7 +318,7 @@
     const scores={...team.scores};
     if(select.value==='')delete scores[id];
     else scores[id]=select.value==='unfinished'?'unfinished':sips;
-    if(!replaceCourse({...current,teams:current.teams.map(item=>item.id===team.id?{...item,scores}:item)})){
+    if(!replaceCourse({...current,playedAt:Date.now(),teams:current.teams.map(item=>item.id===team.id?{...item,scores}:item)})){
       showScores();
       return;
     }
@@ -404,6 +405,26 @@
   if(navigator.onLine&&owner(course()?.roundId))sync(course());
   window.PintCustomGolf={
     backup:()=>load(),validate,
+    resume(){
+      const active=courses.filter(item=>item.teams.some(team=>Object.keys(team.scores).length)||item.roundId)
+        .sort((a,b)=>(b.playedAt||0)-(a.playedAt||0))
+        .map(item=>{
+          const hole=item.stops.findIndex(stop=>item.teams.some(team=>team.scores[stop.id]===undefined));
+          return {item,hole};
+        }).find(entry=>entry.hole>=0);
+      if(!active)return null;
+      const {item,hole}=active, stop=item.stops[hole];
+      return {time:Number(item.playedAt)||0,hole:hole+1,pub:stop.name,open(){
+        selectedCourse=item.id;
+        selectedTeam=item.teams.find(team=>team.scores[stop.id]===undefined)?.id;
+        form.hidden=true;
+        render();
+        window.PintNavigate('pub-golf');
+        const row=$('scores').querySelector('[data-stop="'+stop.id+'"]');
+        row?.scrollIntoView({block:'center'});
+        row?.querySelector('select')?.focus({preventScroll:true});
+      }};
+    },
     restore(next){
       if(!persist(validate(next)))throw Error('Could not restore custom Pub Golf scorecards.');
       selectedCourse=courses[0]?.id;
