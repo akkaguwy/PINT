@@ -271,3 +271,13 @@ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
   .golf-custom{padding:15px}
   .golf-custom-score{grid-template-columns:1fr}
 }
+
+.golf-custom-board-scroll{overflow-x:auto}
+.golf-custom-board{width:100%;border-collapse:collapse;font-size:13px;text-align:left}
+.golf-custom-board th,.golf-custom-board td{padding:8px 10px;border-bottom:1px solid #4f4a3c;min-width:85px;vertical-align:top}
+.golf-custom-board tbody th{font-weight:600}
+.golf-custom-board tfoot th,.golf-custom-board tfoot td{color:var(--gold);font-weight:700}
+#golf-custom-history details{padding:10px 0;border-top:1px solid #4f4a3c}
+#golf-custom-history summary{cursor:pointer;font-weight:600}
+#golf-custom-history a{display:inline-block;margin:8px 0;color:var(--gold);text-decoration:underline}
+#golf-custom-link{width:min(100%,440px)}

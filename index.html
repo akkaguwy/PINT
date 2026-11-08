@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=4.5" />
-  <link rel="stylesheet" href="features.css?v=4.12" />
+  <link rel="stylesheet" href="features.css?v=4.13" />
   <link rel="stylesheet" href="polish.css?v=4.5" />
   <link rel="stylesheet" href="pub_identity.css?v=4.5" />
   <link rel="stylesheet" href="profile.css?v=4.5" />
@@ -133,9 +133,14 @@
     <section class="golf-section" id="pub-golf">
       <div class="shell">
         <div class="golf-heading"><div><span class="overline">PLAY</span><h2>Pub Golf</h2><p>Choose a course, explore the stops and keep your group's scorecard. Pick your own drinks — alcohol-free rounds count too.</p></div><a href="#golf-custom" class="button button-gold">Build your own course</a></div>
+        <section id="golf-custom-viewer" class="golf-live golf-custom" hidden aria-labelledby="golf-custom-viewer-title">
+          <h3 id="golf-custom-viewer-title">Round scoreboard</h3>
+          <p id="golf-custom-viewer-status" role="status">Loading scoreboard…</p>
+          <div id="golf-custom-viewer-board"></div>
+        </section>
         <section id="golf-custom" class="golf-live golf-custom" aria-labelledby="golf-custom-title">
           <h3 id="golf-custom-title">Custom courses &amp; teams</h3>
-          <p>Set your own pub order and keep score for everyone on one device. Courses and scores save on this device.</p>
+          <p>Set your own pub order, add teams and keep score. Share a read-only scoreboard with anyone who has the link.</p>
           <div class="golf-custom-actions">
             <label for="golf-custom-course" id="golf-custom-picker" hidden>Saved course <select id="golf-custom-course"></select></label>
             <button id="golf-custom-new" type="button" class="button button-gold">New course</button>
@@ -158,6 +163,13 @@
             <div id="golf-custom-totals"></div>
             <label id="golf-custom-team-picker" hidden>Scorecard for <select id="golf-custom-team"></select></label>
             <div id="golf-custom-scores"></div>
+            <div class="golf-custom-actions">
+              <button id="golf-custom-share" type="button" class="button button-outline">Share scoreboard</button>
+              <button id="golf-custom-next" type="button" class="button button-outline">Save round &amp; start fresh</button>
+            </div>
+            <label id="golf-custom-link-label" hidden>Read-only scoreboard link <input id="golf-custom-link" type="url" readonly /></label>
+            <p id="golf-custom-share-status" role="status"></p>
+            <div id="golf-custom-history"></div>
           </div>
           <p id="golf-custom-status" role="status"></p>
         </section>
@@ -280,7 +292,7 @@
   </aside>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="photos.js" defer></script>
-  <script src="shared.js?v=4.11" defer></script>
+  <script src="shared.js?v=4.13" defer></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
   <script src="dublin_directory.js?v=4.5" defer></script>
   <script src="dublin_explore.js?v=4.5" defer></script>
@@ -288,8 +300,8 @@
   <script src="profile.js?v=4.11" defer></script>
   <script type="module" src="firebase_auth.js?v=4.5"></script>
   <script src="home.js?v=4.9" defer></script>
-  <script src="custom_golf.js?v=4.12" defer></script>
-  <script src="app.js?v=4.12" defer></script>
+  <script src="custom_golf.js?v=4.13" defer></script>
+  <script src="app.js?v=4.13" defer></script>
   <script src="pub_golf.js?v=4.11" defer></script>
   <script src="pwa.js?v=4.6" defer></script>
   <script src="navigation.js?v=4.5" defer></script>
