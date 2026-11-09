@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="polish.css?v=4.5" />
   <link rel="stylesheet" href="pub_identity.css?v=4.5" />
   <link rel="stylesheet" href="profile.css?v=4.5" />
-  <link rel="stylesheet" href="home.css?v=4.22" />
+  <link rel="stylesheet" href="home.css?v=4.23" />
   <link rel="stylesheet" href="update.css?v=4.5" />
   <link rel="stylesheet" href="theme.css?v=4.19" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoT6kLFxMAH2U=" crossorigin="" />
@@ -111,11 +111,22 @@
           <a href="#my-pints" aria-label="View community reviews"><strong id="stat-logs">0</strong><span>REVIEWS</span></a>
           <a href="#explore" id="home-saved-link" aria-label="View saved pubs in the selected destination"><strong id="stat-favourites">0</strong><span>SAVED</span></a>
         </div>
-        <div class="home-map-head">
-          <strong>Pub map</strong>
-          <a href="#explore" id="home-map-explore">Explore pubs ↗</a>
+      </section>
+      <section class="home-map-panel" aria-labelledby="home-map-title">
+        <div class="home-map-panel-head">
+          <div><h2 id="home-map-title">Explore the pub map</h2><p>Find pubs in your selected destination. Tap a marker or choose a pub from the list.</p></div>
+          <a href="#explore">Full pub directory ↗</a>
         </div>
-        <div id="home-pub-map" class="home-pub-map" role="region" aria-label="Interactive map of pubs in the selected destination"></div>
+        <div class="home-map-layout">
+          <div id="home-pub-map" class="home-pub-map" role="region" aria-label="Interactive map of pubs in the selected destination"></div>
+          <aside class="home-map-sidebar" aria-label="Pubs shown on map">
+            <label for="home-map-area">Neighbourhood</label>
+            <select id="home-map-area"><option value="all">All neighbourhoods</option></select>
+            <label for="home-map-search">Find a pub</label>
+            <input id="home-map-search" type="search" placeholder="Search pub names…" autocomplete="off"/>
+            <div class="home-map-venue-list" id="home-map-venues"></div>
+          </aside>
+        </div>
         <p id="home-map-status" class="home-map-status" role="status">Loading pub locations…</p>
       </section>
 
@@ -357,7 +368,7 @@
   <script src="pub_identity.js?v=4.8" defer></script>
   <script src="profile.js?v=4.11" defer></script>
   <script type="module" src="firebase_auth.js?v=4.5"></script>
-  <script src="home.js?v=4.22" defer></script>
+  <script src="home.js?v=4.23" defer></script>
   <script src="custom_golf.js?v=4.19" defer></script>
   <script src="gallery.js?v=4.19" defer></script>
   <script src="app.js?v=4.20" defer></script>
