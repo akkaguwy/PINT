@@ -5,6 +5,16 @@
   const names={Cardiff:'Cardiff',Vale:'the Vale',Dublin:'Dublin',Methven:'Methven'};
   const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   let activeDestination='Cardiff', lastState, resume;
+  // The overview tiles navigate through the existing mobile router.
+  // Saved opens the directory with its existing favourites filter enabled.
+  $('home-saved-link')?.addEventListener('click',()=>{
+    const search=$('search'),area=$('area-filter'),sort=$('sort-filter'),favourites=$('favourites-filter');
+    if(search)search.value='';
+    if(area)area.value='all';
+    if(sort)sort.value='name';
+    if(favourites?.getAttribute('aria-pressed')!=='true')favourites?.click();
+    else sort?.dispatchEvent(new Event('change',{bubbles:true}));
+  });
   const areaFilter=$('home-activity-area');
   areaFilter?.addEventListener('change',()=>render(lastState));
   const resumeButton=$('home-resume-round');
