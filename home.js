@@ -51,39 +51,106 @@
     if(event.target.matches('.home-activity-avatar img'))event.target.remove();
   },true);
 
-  // Reuses the main directory's location logic. Approximate venues share one area pin.
-  let homeMap,homeMarkers,lastMapKey='';
+  // Location discovery uses the SAME neighbourhood/coordinate data as the full directory.
+  // Never imply a neighbourhood centre is an exact pub entrance.
+  let homeMap,homeMarkers,homeGroups=new Map(),homePubs=[],homeDestination='Cardiff',selectedHomeArea='all';
   const mapFallback={Cardiff:[51.48,-3.18],Vale:[51.43,-3.42],Dublin:[53.35,-6.26],Methven:[-43.6324,171.6473]};
+  const mapSearch=$('home-map-search'),mapArea=$('home-map-area');
+  const mapList=$('home-map-venues');
+  const hasCoordinates=pub=>Number.isFinite(pub.lat)&&Number.isFinite(pub.lon);
+  function showPub(pub){
+    location.hash='pub='+encodeURIComponent(pub.id);
+  }
+  function focusPub(pub){
+    const centre=window.PintPubGeo?.centre(pub);
+    if(!homeMap||!centre)return;
+    homeMap.setView(centre,Math.max(homeMap.getZoom(),13),{animate:true});
+    const key=hasCoordinates(pub)?'exact:'+centre.join(','):'area:'+homeDestination+'|'+pub.area;
+    homeGroups.get(key)?.marker?.openPopup();
+  }
+  function renderHomePubList(){
+    if(!mapList)return;
+    const query=(mapSearch?.value||'').trim().toLocaleLowerCase();
+    const filtered=homePubs.filter(pub=>(selectedHomeArea==='all'||pub.area===selectedHomeArea)&&(!query||(pub.name+' '+pub.area).toLocaleLowerCase().includes(query)));
+    mapList.replaceChildren();
+    const info=document.createElement('p');
+    info.className='home-map-list-count';
+    info.textContent=filtered.length+' '+(filtered.length===1?'pub':'pubs')+' found';
+    mapList.append(info);
+    if(!filtered.length){
+      const empty=document.createElement('p');
+      empty.className='home-map-list-empty';
+      empty.textContent='No pubs match. Try another search or neighbourhood.';
+      mapList.append(empty);
+    }
+    for(const pub of filtered.slice(0,90)){
+      const button=document.createElement('button');
+      button.type='button';
+      button.className='home-map-list-item';
+      const name=document.createElement('strong'),area=document.createElement('small');
+      name.textContent=pub.name;
+      area.textContent=pub.area+(window.PintPubGeo?.centre(pub)?' · Show on map':' · No map location');
+      button.append(name,area);
+      button.addEventListener('click',()=>{
+        if(window.PintPubGeo?.centre(pub))focusPub(pub);
+        else showPub(pub);
+      });
+      mapList.append(button);
+    }
+    if(filtered.length>90){
+      const more=document.createElement('p');
+      more.className='home-map-list-empty';
+      more.textContent='Showing the first 90 results. Refine your search for more.';
+      mapList.append(more);
+    }
+  }
+  function updateHomeMapVisibility(){
+    if(!homeMap)return;
+    const root=$('home-pub-map');
+    if(!root||root.getBoundingClientRect().width<10)return;
+    homeMap.invalidateSize();
+  }
   function renderHomeMap(destination,pubs){
     const root=$('home-pub-map'),status=$('home-map-status');
     if(!root||!status)return;
+    const changed=destination!==homeDestination;
+    homeDestination=destination;
+    homePubs=pubs.slice().sort((a,b)=>a.name.localeCompare(b.name));
+    if(changed){
+      selectedHomeArea='all';
+      if(mapSearch)mapSearch.value='';
+    }
+    if(mapArea){
+      const areas=[...new Set(pubs.map(p=>p.area).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+      mapArea.replaceChildren(new Option('All neighbourhoods','all'),...areas.map(area=>new Option(area,area)));
+      if(!areas.includes(selectedHomeArea))selectedHomeArea='all';
+      mapArea.value=selectedHomeArea;
+    }
+    renderHomePubList();
     if(!window.L||!window.PintPubGeo?.centre){
-      status.textContent='Map unavailable. Use Explore pubs to browse the directory.';
+      status.textContent='Map tiles are unavailable. You can still select pubs from the list or open the full directory.';
       return;
     }
-    const groups=new Map();
-    let unmapped=0;
-    for(const pub of pubs){
-      const pos=window.PintPubGeo.centre(pub);
-      if(!pos||!pos.every(Number.isFinite)){unmapped++;continue}
-      const exact=Number.isFinite(pub.lat)&&Number.isFinite(pub.lon);
-      const key=exact?'exact:'+pos.join(','):'area:'+destination+'|'+pub.area;
-      if(!groups.has(key))groups.set(key,{pos,exact,area:pub.area,pubs:[]});
-      groups.get(key).pubs.push(pub);
-    }
-    const key=destination+'|'+[...groups].map(([id,g])=>id+':'+g.pubs.map(p=>p.id).join(',')).join('|')+'|'+unmapped;
-    if(key===lastMapKey&&homeMap){homeMap.invalidateSize();return}
-    lastMapKey=key;
     if(!homeMap){
-      homeMap=L.map(root,{scrollWheelZoom:false,zoomControl:true}).setView(mapFallback[destination]||mapFallback.Cardiff,11);
+      homeMap=L.map(root,{scrollWheelZoom:false,tap:false,zoomControl:true}).setView(mapFallback[destination]||mapFallback.Cardiff,11);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
         attribution:'&copy; OpenStreetMap contributors',maxZoom:18
       }).addTo(homeMap);
       homeMarkers=L.layerGroup().addTo(homeMap);
     }
     homeMarkers.clearLayers();
+    homeGroups=new Map();
+    let unmapped=0;
+    for(const pub of pubs){
+      const pos=window.PintPubGeo.centre(pub);
+      if(!pos||!pos.every(Number.isFinite)){unmapped++;continue}
+      const exact=hasCoordinates(pub);
+      const key=exact?'exact:'+pos.join(','):'area:'+destination+'|'+pub.area;
+      if(!homeGroups.has(key))homeGroups.set(key,{pos,exact,area:pub.area,pubs:[]});
+      homeGroups.get(key).pubs.push(pub);
+    }
     const bounds=[];
-    for(const group of groups.values()){
+    for(const group of homeGroups.values()){
       bounds.push(group.pos);
       const title=group.exact&&group.pubs.length===1?group.pubs[0].name:group.area+' · '+group.pubs.length+' '+(group.pubs.length===1?'pub':'pubs');
       const popup=document.createElement('div');
@@ -91,25 +158,40 @@
       const heading=document.createElement('strong');
       heading.textContent=title;
       popup.append(heading);
+      if(!group.exact){
+        const approx=document.createElement('small');
+        approx.textContent='Approximate neighbourhood location';
+        popup.append(approx);
+      }
       for(const pub of group.pubs){
         const button=document.createElement('button');
         button.type='button';
         button.className='home-map-pub-button';
         button.textContent=pub.name+' ↗';
-        button.addEventListener('click',()=>{
-          homeMap.closePopup();
-          location.hash='pub='+encodeURIComponent(pub.id);
-        });
+        button.addEventListener('click',()=>showPub(pub));
         popup.append(button);
       }
-      L.marker(group.pos,{title,alt:title}).addTo(homeMarkers).bindPopup(popup,{maxHeight:220});
+      const marker=L.marker(group.pos,{title,alt:title}).addTo(homeMarkers).bindPopup(popup,{maxHeight:260,minWidth:175});
+      group.marker=marker;
     }
-    homeMap.invalidateSize();
-    if(bounds.length)homeMap.fitBounds(bounds,{padding:[20,20],maxZoom:13});
+    const visible=root.getBoundingClientRect().width>=10;
+    if(visible)homeMap.invalidateSize();
+    if(bounds.length)homeMap.fitBounds(bounds,{padding:[30,30],maxZoom:13,animate:false});
     else homeMap.setView(mapFallback[destination]||mapFallback.Cardiff,11);
-    const shown=pubs.length-unmapped;
-    status.textContent=shown+' of '+pubs.length+' pubs mapped · Area pins are approximate, not exact addresses'+(unmapped?' · '+unmapped+' without locations':'');
+    status.textContent=(pubs.length-unmapped)+' of '+pubs.length+' pubs mapped · Grouped markers are approximate neighbourhoods'+(unmapped?' · '+unmapped+' pubs without coordinates':'');
   }
+  mapSearch?.addEventListener('input',renderHomePubList);
+  mapArea?.addEventListener('change',()=>{
+    selectedHomeArea=mapArea.value;
+    renderHomePubList();
+    if(!homeMap)return;
+    const positions=homePubs.filter(pub=>selectedHomeArea==='all'||pub.area===selectedHomeArea)
+      .map(pub=>window.PintPubGeo?.centre(pub)).filter(Boolean);
+    if(positions.length)homeMap.fitBounds(positions,{padding:[30,30],maxZoom:14});
+  });
+  window.addEventListener('resize',updateHomeMapVisibility);
+  document.addEventListener('visibilitychange',updateHomeMapVisibility);
+  document.addEventListener('pint:screen-change',updateHomeMapVisibility);
 
   function render(state={}){
     lastState=state;
