@@ -50,6 +50,67 @@
   $('home-feed-list')?.addEventListener('error',event=>{
     if(event.target.matches('.home-activity-avatar img'))event.target.remove();
   },true);
+
+  // Reuses the main directory's location logic. Approximate venues share one area pin.
+  let homeMap,homeMarkers,lastMapKey='';
+  const mapFallback={Cardiff:[51.48,-3.18],Vale:[51.43,-3.42],Dublin:[53.35,-6.26],Methven:[-43.6324,171.6473]};
+  function renderHomeMap(destination,pubs){
+    const root=$('home-pub-map'),status=$('home-map-status');
+    if(!root||!status)return;
+    if(!window.L||!window.PintPubGeo?.centre){
+      status.textContent='Map unavailable. Use Explore pubs to browse the directory.';
+      return;
+    }
+    const groups=new Map();
+    let unmapped=0;
+    for(const pub of pubs){
+      const pos=window.PintPubGeo.centre(pub);
+      if(!pos||!pos.every(Number.isFinite)){unmapped++;continue}
+      const exact=Number.isFinite(pub.lat)&&Number.isFinite(pub.lon);
+      const key=exact?'exact:'+pos.join(','):'area:'+destination+'|'+pub.area;
+      if(!groups.has(key))groups.set(key,{pos,exact,area:pub.area,pubs:[]});
+      groups.get(key).pubs.push(pub);
+    }
+    const key=destination+'|'+[...groups].map(([id,g])=>id+':'+g.pubs.map(p=>p.id).join(',')).join('|')+'|'+unmapped;
+    if(key===lastMapKey&&homeMap){homeMap.invalidateSize();return}
+    lastMapKey=key;
+    if(!homeMap){
+      homeMap=L.map(root,{scrollWheelZoom:false,zoomControl:true}).setView(mapFallback[destination]||mapFallback.Cardiff,11);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+        attribution:'&copy; OpenStreetMap contributors',maxZoom:18
+      }).addTo(homeMap);
+      homeMarkers=L.layerGroup().addTo(homeMap);
+    }
+    homeMarkers.clearLayers();
+    const bounds=[];
+    for(const group of groups.values()){
+      bounds.push(group.pos);
+      const title=group.exact&&group.pubs.length===1?group.pubs[0].name:group.area+' · '+group.pubs.length+' '+(group.pubs.length===1?'pub':'pubs');
+      const popup=document.createElement('div');
+      popup.className='home-map-popup';
+      const heading=document.createElement('strong');
+      heading.textContent=title;
+      popup.append(heading);
+      for(const pub of group.pubs){
+        const button=document.createElement('button');
+        button.type='button';
+        button.className='home-map-pub-button';
+        button.textContent=pub.name+' ↗';
+        button.addEventListener('click',()=>{
+          homeMap.closePopup();
+          location.hash='pub='+encodeURIComponent(pub.id);
+        });
+        popup.append(button);
+      }
+      L.marker(group.pos,{title,alt:title}).addTo(homeMarkers).bindPopup(popup,{maxHeight:220});
+    }
+    homeMap.invalidateSize();
+    if(bounds.length)homeMap.fitBounds(bounds,{padding:[20,20],maxZoom:13});
+    else homeMap.setView(mapFallback[destination]||mapFallback.Cardiff,11);
+    const shown=pubs.length-unmapped;
+    status.textContent=shown+' of '+pubs.length+' pubs mapped · Area pins are approximate, not exact addresses'+(unmapped?' · '+unmapped+' without locations':'');
+  }
+
   function render(state={}){
     lastState=state;
     const {destination='Cardiff',pubs=[],reviews=[],connected=false,addedPubs=[],initial=false}=state;
@@ -58,6 +119,7 @@
     const chosen=names[activeDestination];
     const inArea=pubs.filter(p=>p.region===activeDestination);
     const count=inArea.length;
+    renderHomeMap(activeDestination,inArea);
     const label=$('home-destination-label'),city=$('home-hero-city'),heroCount=$('home-hero-count');
     if(label)label.textContent=chosen;
     if(city)city.textContent=chosen;
