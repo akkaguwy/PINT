@@ -109,6 +109,8 @@
     const root=$('home-pub-map');
     if(!root||root.getBoundingClientRect().width<10)return;
     homeMap.invalidateSize();
+    const points=[...homeGroups.values()].map(group=>group.pos);
+    if(points.length)homeMap.fitBounds(points,{padding:[30,30],maxZoom:13,animate:false});
   }
   function renderHomeMap(destination,pubs){
     const root=$('home-pub-map'),status=$('home-map-status');
