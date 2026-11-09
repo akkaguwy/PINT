@@ -44,7 +44,7 @@
 .home-share-shortcut span:nth-last-child(2){flex:1}
 .home-share-shortcut span:last-child{color:#afc0aa;font-size:17px}
 .home-stats-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;height:calc(100% - 42px);min-height:151px}
-.home-stats-grid>div{background:#19221b;border:1px solid #354337;border-radius:13px;padding:22px 12px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:9px}
+.home-stats-grid>a{background:#19221b;border:1px solid #354337;border-radius:13px;padding:22px 12px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:9px;text-decoration:none;color:inherit;cursor:pointer;transition:border-color .18s ease,transform .18s ease,background .18s ease}.home-stats-grid>a:hover{background:#202d23;border-color:#9cb69a}.home-stats-grid>a:active{transform:scale(.97)}.home-stats-grid>a:focus-visible{outline:3px solid #d6b978;outline-offset:3px}@media (prefers-reduced-motion:reduce){.home-stats-grid>a{transition:none}}
 .home-stats-grid strong{font:760 clamp(26px,2.5vw,36px)/1 'DM Sans',sans-serif;letter-spacing:-.055em;color:#f0f2ea;font-variant-numeric:tabular-nums}
 .home-stats-grid span{font-size:9px;font-weight:750;letter-spacing:.085em;color:#a4b3a4;text-align:center}
 .home-community{grid-column:1/-1;grid-row:3;margin-top:11px}
