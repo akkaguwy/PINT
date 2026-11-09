@@ -153,3 +153,37 @@
 .home-map-pub-button:hover{text-decoration:underline}
 .home-pub-map .leaflet-container{font-family:'DM Sans',sans-serif}
 @media(max-width:890px){.home-stats-grid>a{min-height:107px;padding:16px 7px}.home-pub-map{height:250px}}
+
+/* Full-width dashboard pub explorer: map and searchable venue list. */
+.home-map-panel{grid-column:1/-1;grid-row:3;background:#18231c;border:1px solid #394c3e;border-radius:16px;padding:19px;min-width:0}
+.home-map-panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:16px}
+.home-map-panel-head h2{font:740 19px/1.25 'DM Sans',sans-serif;color:#edf2e9;margin:0 0 6px}
+.home-map-panel-head p{font-size:12px;line-height:1.5;color:#acbfad;margin:0}
+.home-map-panel-head>a{color:#d8c393;font-size:12px;font-weight:750;white-space:nowrap}
+.home-map-layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(225px,1fr);gap:14px;min-width:0}
+.home-map-panel .home-pub-map{height:355px;border:1px solid #506553;border-radius:12px;min-width:0;z-index:0}
+.home-map-sidebar{height:355px;min-height:0;display:flex;flex-direction:column;gap:7px;background:#222d24;border:1px solid #3b5140;border-radius:12px;padding:12px}
+.home-map-sidebar>label{font-size:11px;font-weight:760;color:#d5e3d4}
+.home-map-sidebar>select,.home-map-sidebar>input{width:100%;min-width:0;min-height:37px;color:#f0f4ec;background:#18221b;border:1px solid #506252;border-radius:8px;padding:8px 10px;font-size:12px}
+.home-map-sidebar>select option{background:#18221b;color:white}
+.home-map-venue-list{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;border-top:1px solid #405344;margin-top:6px}
+.home-map-list-count{font-size:11px;font-weight:750;color:#c8d7c7;margin:10px 3px}
+.home-map-list-empty{font-size:12px;color:#acbfae;padding:8px}
+.home-map-list-item{width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:10px 6px;text-align:left;color:#edf1e9;background:transparent;border:0;border-bottom:1px solid #3b4b3f;cursor:pointer}
+.home-map-list-item:hover,.home-map-list-item:focus-visible{background:#324536}
+.home-map-list-item strong{font-size:12px}
+.home-map-list-item small{font-size:10px;color:#adc0af}
+.home-map-popup>small{display:block;color:#596b5b;margin:4px 0}
+.home-map-panel .home-map-status{margin:12px 2px 0;font-size:11px}
+.home-community{grid-row:4}
+.home-dashboard #shared-status{grid-row:5}
+@media(max-width:890px){
+ .home-map-panel{margin-bottom:24px;padding:15px}
+ .home-map-layout{grid-template-columns:minmax(0,1.35fr) minmax(190px,1fr)}
+}
+@media(max-width:620px){
+ .home-map-panel-head{flex-direction:column;gap:8px}
+ .home-map-layout{display:flex;flex-direction:column}
+ .home-map-panel .home-pub-map{height:315px}
+ .home-map-sidebar{height:310px}
+}
