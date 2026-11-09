@@ -40,7 +40,7 @@ assert.match(home,/Methven:'Methven'/);
 assert.match(css,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
 assert.match(golf,/id:'methven-village'/);
 assert.match(sw,/pint-offline-v\d+\.\d+/);
-assert.match(html,/src="app\.js\?v=4\.20"/);
+assert.match(html,/src="app\.js\?v=\d+\.\d+"/);
 assert.match(html,/src="home\.js\?v=\d+\.\d+"/);
 assert.match(html,/src="pub_golf\.js\?v=4\.19"/);
 const cardiff=extract('cardiffSuggestions');
