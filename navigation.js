@@ -30,6 +30,7 @@
       else link.removeAttribute('aria-current');
     });
     if(mobile())window.scrollTo(0,0);
+    document.dispatchEvent(new CustomEvent('pint:screen-change',{detail:{screen:current}}));
   }
   function navigate(id){
     id=valid(id);
