@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="polish.css?v=4.5" />
   <link rel="stylesheet" href="pub_identity.css?v=4.5" />
   <link rel="stylesheet" href="profile.css?v=4.5" />
-  <link rel="stylesheet" href="home.css?v=4.21" />
+  <link rel="stylesheet" href="home.css?v=4.22" />
   <link rel="stylesheet" href="update.css?v=4.5" />
   <link rel="stylesheet" href="theme.css?v=4.19" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoT6kLFxMAH2U=" crossorigin="" />
@@ -111,6 +111,12 @@
           <a href="#my-pints" aria-label="View community reviews"><strong id="stat-logs">0</strong><span>REVIEWS</span></a>
           <a href="#explore" id="home-saved-link" aria-label="View saved pubs in the selected destination"><strong id="stat-favourites">0</strong><span>SAVED</span></a>
         </div>
+        <div class="home-map-head">
+          <strong>Pub map</strong>
+          <a href="#explore" id="home-map-explore">Explore pubs ↗</a>
+        </div>
+        <div id="home-pub-map" class="home-pub-map" role="region" aria-label="Interactive map of pubs in the selected destination"></div>
+        <p id="home-map-status" class="home-map-status" role="status">Loading pub locations…</p>
       </section>
 
       <section class="home-community" aria-labelledby="home-community-heading">
@@ -351,7 +357,7 @@
   <script src="pub_identity.js?v=4.8" defer></script>
   <script src="profile.js?v=4.11" defer></script>
   <script type="module" src="firebase_auth.js?v=4.5"></script>
-  <script src="home.js?v=4.21" defer></script>
+  <script src="home.js?v=4.22" defer></script>
   <script src="custom_golf.js?v=4.19" defer></script>
   <script src="gallery.js?v=4.19" defer></script>
   <script src="app.js?v=4.20" defer></script>
