@@ -189,7 +189,7 @@
       .map(pub=>window.PintPubGeo?.centre(pub)).filter(Boolean);
     if(positions.length)homeMap.fitBounds(positions,{padding:[30,30],maxZoom:14});
   });
-  window.addEventListener('resize',updateHomeMapVisibility);
+  window.addEventListener?.('resize',updateHomeMapVisibility);
   document.addEventListener('visibilitychange',updateHomeMapVisibility);
   document.addEventListener('pint:screen-change',updateHomeMapVisibility);
 
