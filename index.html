@@ -96,6 +96,11 @@
             <span><strong>Pub Golf</strong><small>Pick a route</small></span>
             <span class="home-shortcut-arrow" aria-hidden="true">↗</span>
           </a>
+          <button type="button" class="home-share-shortcut" data-feedback-open>
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4zM8 9h8m-8 3h6"/></svg>
+            <span>Suggest a change</span>
+            <span aria-hidden="true">↗</span>
+          </button>
           <button type="button" id="share-pint-button" class="home-share-shortcut">
             <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8 11 7.7-4.6M8 13l7.7 4.6"/></svg>
             <span>Invite your mates to PINT</span>
@@ -315,6 +320,31 @@
   </nav>
   <footer class="shell footer"><div class="footer-brand">PINT<span>.</span></div><p>FIND IT. VISIT IT. RATE IT.</p><span>Cardiff · Vale of Glamorgan · Dublin · Methven NZ · © <span id="year"></span></span></footer>
 
+  <dialog id="feedback-dialog" class="modal" aria-labelledby="feedback-heading">
+    <form id="feedback-form" class="modal-body">
+      <button id="feedback-close" type="button" class="close" aria-label="Close feedback">×</button>
+      <span class="overline">HELP IMPROVE PINT</span>
+      <h2 id="feedback-heading">Suggest a change</h2>
+      <p>Your message goes privately to the PINT owner. Leave your name blank to send it anonymously.</p>
+      <label>Category
+        <select name="category" required>
+          <option value="Feature idea">Feature idea</option>
+          <option value="Bug report">Bug report</option>
+          <option value="Pub listing">Pub listing addition or correction</option>
+          <option value="Other">Other</option>
+        </select>
+      </label>
+      <label>What would you change?
+        <textarea name="message" rows="4" minlength="5" maxlength="1000" placeholder="For a bug, tell us which screen you were on." required autofocus></textarea>
+      </label>
+      <label>Your name (optional)
+        <input name="senderName" type="text" maxlength="40" autocomplete="nickname" />
+      </label>
+      <button type="submit" class="button button-gold full">Send feedback</button>
+      <p id="feedback-status" role="status"></p>
+    </form>
+  </dialog>
+
   <dialog id="entry-dialog" class="modal"><form id="entry-form" class="modal-body"><button type="button" class="close" data-close="entry-dialog" aria-label="Close">×</button><span class="overline">REVIEWS</span><h2>Review a visit</h2><label>Pub<select name="pubId" id="entry-pub" required></select></label><label>Overall experience (out of 5 stars)<select name="rating" required><option value="">Choose stars</option><option value="1">★☆☆☆☆ — 1</option><option value="2">★★☆☆☆ — 2</option><option value="3">★★★☆☆ — 3</option><option value="4">★★★★☆ — 4</option><option value="5">★★★★★ — 5</option></select></label><label>Guinness quality<select name="guinness"><option value="">Didn't try / not sure</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label><details id="review-details" class="review-details"><summary>Add details</summary><div class="review-detail-fields"><div class="form-row"><label>Atmosphere<select name="atmosphere"><option value="">Not rated</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label><label>Area / setting<select name="setting"><option value="">Not rated</option><option value="1">★☆☆☆☆</option><option value="2">★★☆☆☆</option><option value="3">★★★☆☆</option><option value="4">★★★★☆</option><option value="5">★★★★★</option></select></label></div><div class="form-row"><label><span id="entry-price-label">Price of pint (local currency: £ / € / NZ$) · optional</span><input name="price" type="number" min="0.01" max="100" step="0.01" placeholder="5.50" /></label><label>Date<input name="date" type="date" id="entry-date" required /></label></div><label>Your verdict<textarea name="notes" rows="3" maxlength="300" placeholder="Great Guinness, friendly bar, nice beer garden..."></textarea></label><label>Photos (up to three) <span class="photo-help">Take a photo or choose from your camera roll</span><input id="review-photos" name="photos" type="file" accept="image/*" multiple /></label><p class="photo-usage-note">Photos you share with a review may be displayed on the pub card as a real customer photo. Only upload photos you have permission to share.</p><label class="cover-photo-choice"><input type="checkbox" name="coverPhoto" value="yes" /> Prioritise my first photo as this pub’s cover</label><div class="photo-preview" id="photo-preview" aria-live="polite"></div><button id="clear-review-photos" type="button" class="button button-outline" hidden>Remove photos</button></div></details><p id="review-draft-status" role="status" hidden></p><p id="review-form-error" class="review-form-error" role="alert" hidden></p><button class="button button-gold full" type="submit">Save my review ↗</button></form></dialog>
 
   <dialog id="photo-dialog" class="photo-dialog"><button type="button" class="close" data-close="photo-dialog" aria-label="Close photo">×</button><img id="photo-full" alt="Pub review photo" /><div id="photo-gallery-caption" class="photo-gallery-caption" hidden><div class="gallery-photo-controls" aria-label="Browse gallery photos">
@@ -361,7 +391,8 @@
   </aside>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="photos.js" defer></script>
-  <script src="shared.js?v=4.20" defer></script>
+  <script src="shared.js?v=4.24" defer></script>
+  <script src="feedback.js?v=4.24" defer></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
   <script src="dublin_directory.js?v=4.5" defer></script>
   <script src="dublin_explore.js?v=4.5" defer></script>
