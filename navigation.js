@@ -1,9 +1,10 @@
 /* PINT screen router — navigation history stays in sync with the browser. */
 (() => {
   'use strict';
-  const names={home:'Home',explore:'Explore pubs',games:'Games','pub-golf':'Pub Golf','pub-bingo':'Pub Bingo','my-pints':'Community',gallery:'Photo Gallery',profile:'Profile'};
+  const names={home:'Home',explore:'Explore pubs',games:'Games','pub-golf':'Pub Golf','pub-bingo':'Pub Bingo',darts:'Darts Scorer','my-pints':'Community',gallery:'Photo Gallery',profile:'Profile'};
   const allowed=new Set(Object.keys(names));
-  const gameScreens=new Set(['games','pub-golf','pub-bingo']);
+  const gameHeadings={'pub-golf':'golf-heading','pub-bingo':'bingo-heading',darts:'darts-heading'};
+  const gameScreens=new Set(['games',...Object.keys(gameHeadings)]);
   const mobileQuery=window.matchMedia('(max-width: 620px)');
   const mobile=()=>mobileQuery.matches;
   const header=document.getElementById('screen-header');
@@ -63,9 +64,9 @@
   gamesSelect?.addEventListener('change',()=>{
     const game=gamesSelect.value;
     gamesSelect.value='';
-    if(game!=='pub-golf'&&game!=='pub-bingo')return;
+    if(!Object.hasOwn(gameHeadings,game))return;
     navigate(game);
-    document.getElementById(game==='pub-golf'?'golf-heading':'bingo-heading')?.focus({preventScroll:true});
+    document.getElementById(gameHeadings[game])?.focus({preventScroll:true});
   });
   back?.addEventListener('click',()=>{
     if(depth>0){history.back();return}

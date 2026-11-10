@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="home.css?v=4.23" />
   <link rel="stylesheet" href="update.css?v=4.5" />
   <link rel="stylesheet" href="theme.css?v=4.19" />
-  <link rel="stylesheet" href="games.css?v=4.25" />
+  <link rel="stylesheet" href="games.css?v=4.26" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoT6kLFxMAH2U=" crossorigin="" />
   <style>
     .pub-price{font-size:11px;margin-top:12px;min-height:18px}
@@ -94,7 +94,7 @@
           </button>
           <a href="#games" class="home-shortcut">
             <span class="home-shortcut-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 4v16M4 12h16"/></svg></span>
-            <span><strong>Games</strong><small>Pub Golf and Bingo</small></span>
+            <span><strong>Games</strong><small>Golf, Bingo and Darts</small></span>
             <span class="home-shortcut-arrow" aria-hidden="true">↗</span>
           </a>
           <button type="button" class="home-share-shortcut" data-feedback-open>
@@ -155,12 +155,13 @@
         <div class="games-picker">
           <span class="overline">PLAY WITH YOUR MATES</span>
           <h2 id="games-heading" tabindex="-1">Games</h2>
-          <p>Pick a Pub Golf route or see who can get a line in Pub Bingo.</p>
+          <p>Pick a Pub Golf route, play Pub Bingo or keep score at the dartboard.</p>
           <label for="games-select">Choose a game</label>
           <select id="games-select">
             <option value="">Select a game</option>
             <option value="pub-golf">Pub Golf</option>
             <option value="pub-bingo">Pub Bingo</option>
+            <option value="darts">Darts Scorer</option>
           </select>
         </div>
       </div>
@@ -184,6 +185,70 @@
           <p id="bingo-progress" class="bingo-progress" role="status"></p>
           <div id="bingo-card" class="bingo-card" role="group" aria-label="Your bingo squares"></div>
           <p class="bingo-note">Everyone gets the same challenges. Ticks stay on your device, so call out when you get a line.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="games-section" id="darts" aria-labelledby="darts-heading">
+      <div class="shell">
+        <a class="games-back" href="#games">← All games</a>
+        <div class="darts-panel">
+          <span class="overline">AT THE OCHE</span>
+          <h2 id="darts-heading" tabindex="-1">Darts Scorer</h2>
+          <p>Pass the phone or keep it with one scorer. Enter the total after each visit to the board.</p>
+
+          <form id="darts-setup" class="darts-form">
+            <div class="darts-fields">
+              <label>Starting score
+                <select name="start"><option value="501">501</option><option value="301">301</option></select>
+              </label>
+              <label>Finish rule
+                <select name="finish"><option value="double">Double out</option><option value="straight">Straight out</option></select>
+              </label>
+              <label>Players
+                <select name="count">
+                  <option value="1">1 · Practice</option><option value="2" selected>2 players</option>
+                  <option value="3">3 players</option><option value="4">4 players</option>
+                </select>
+              </label>
+            </div>
+            <div class="darts-fields">
+              <label>Player 1<input name="player1" placeholder="Player 1" maxlength="20" /></label>
+              <label>Player 2<input name="player2" placeholder="Player 2" maxlength="20" /></label>
+              <label hidden>Player 3<input name="player3" placeholder="Player 3" maxlength="20" /></label>
+              <label hidden>Player 4<input name="player4" placeholder="Player 4" maxlength="20" /></label>
+            </div>
+            <div class="darts-actions">
+              <button class="button button-gold" type="submit">Start game</button>
+              <button id="darts-cancel" class="button button-outline" type="button" hidden>Back to scorecard</button>
+            </div>
+          </form>
+
+          <div id="darts-match" hidden>
+            <p id="darts-rules"></p>
+            <ul id="darts-scores" class="darts-scores" aria-label="Remaining scores"></ul>
+            <p id="darts-turn" class="darts-turn" role="status"></p>
+            <form id="darts-visit" class="darts-form">
+              <label>Visit total
+                <input name="score" type="number" min="0" max="180" step="1" inputmode="numeric" placeholder="0–180" required />
+              </label>
+              <label id="darts-double-label" hidden>Did the last dart hit a double or the bullseye?
+                <select name="double" disabled>
+                  <option value="">Choose yes or no</option><option value="yes">Yes</option><option value="no">No</option>
+                </select>
+              </label>
+              <button class="button button-gold" type="submit">Add score</button>
+            </form>
+            <div class="darts-actions">
+              <button id="darts-undo" class="button button-outline" type="button">Undo last visit</button>
+              <button id="darts-new" class="button button-outline" type="button">New game</button>
+            </div>
+            <details>
+              <summary>Recent visits</summary>
+              <ol id="darts-history" reversed></ol>
+            </details>
+            <p class="darts-note" id="darts-storage-note">The scorecard saves on this device as you play.</p>
+          </div>
         </div>
       </div>
     </section>
@@ -442,11 +507,12 @@
   <script src="home.js?v=4.23" defer></script>
   <script src="custom_golf.js?v=4.19" defer></script>
   <script src="gallery.js?v=4.19" defer></script>
-  <script src="app.js?v=4.25" defer></script>
+  <script src="app.js?v=4.26" defer></script>
   <script src="shortlists.js?v=4.20" defer></script>
   <script src="pub_golf.js?v=4.19" defer></script>
   <script src="pwa.js?v=4.6" defer></script>
   <script src="bingo.js?v=4.25" defer></script>
-  <script src="navigation.js?v=4.25" defer></script>
+  <script src="darts.js?v=4.26" defer></script>
+  <script src="navigation.js?v=4.26" defer></script>
 </body>
 </html>

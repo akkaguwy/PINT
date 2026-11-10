@@ -1,8 +1,9 @@
 body:not([data-screen="games"]) #home > #games,
 body:not([data-screen="pub-golf"]) #home > #pub-golf,
 body:not([data-screen="pub-bingo"]) #home > #pub-bingo,
-body:is([data-screen="games"], [data-screen="pub-golf"], [data-screen="pub-bingo"])
-  #home > :not(#games, #pub-golf, #pub-bingo) {
+body:not([data-screen="darts"]) #home > #darts,
+body:is([data-screen="games"], [data-screen="pub-golf"], [data-screen="pub-bingo"], [data-screen="darts"])
+  #home > :not(#games, #pub-golf, #pub-bingo, #darts) {
   display: none;
 }
 
@@ -12,7 +13,7 @@ body:is([data-screen="games"], [data-screen="pub-golf"], [data-screen="pub-bingo
   border-block: 1px solid var(--line);
 }
 
-.games-picker, .bingo-panel {
+.games-picker, .bingo-panel, .darts-panel {
   width: min(100%, 620px);
   padding: clamp(18px, 4vw, 36px);
   background: var(--surface);
@@ -127,4 +128,77 @@ body:is([data-screen="games"], [data-screen="pub-golf"], [data-screen="pub-bingo
 .mobile-nav a[aria-current="location"] {
   color: var(--green);
   background: var(--green-light);
+}
+
+.darts-fields, .darts-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.darts-form {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.darts-form[hidden], .darts-form [hidden] {
+  display: none;
+}
+
+.darts-form label {
+  display: grid;
+  flex: 1 1 130px;
+  gap: 5px;
+  font-weight: 700;
+}
+
+.darts-form input, .darts-form select {
+  width: 100%;
+  min-height: 46px;
+  padding: 8px 11px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid #a99e88;
+  border-radius: 8px;
+}
+
+.darts-scores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+  padding: 0;
+  margin: 0 0 13px;
+  list-style: none;
+}
+
+.darts-scores li {
+  padding: 10px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.darts-scores li[data-active] {
+  background: var(--green-light);
+  border-color: var(--green);
+}
+
+.darts-scores strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 1.65rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.darts-panel .darts-turn {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.darts-panel details, .darts-panel .darts-note {
+  margin: 14px 0 0;
+  font-size: 14px;
 }
