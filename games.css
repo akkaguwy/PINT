@@ -259,7 +259,6 @@ body:is([data-screen="games"], [data-screen="pub-golf"], [data-screen="pub-bingo
   background: var(--darts-card);
   border-radius: 8px;
 }
-.darts-panel .darts-checkout[hidden] { display: none; }
 .darts-checkout span { font-size: .68rem; letter-spacing: .1em; }
 
 .darts-entry {
@@ -288,3 +287,22 @@ body:is([data-screen="games"], [data-screen="pub-golf"], [data-screen="pub-bingo
 #darts-keypad [data-total] { min-height: 44px; color: var(--darts-lime); }
 #darts-keypad [data-digit] { font-size: 1.25rem; }
 .darts-panel details, .darts-panel .darts-note { margin: 12px 0 0; font-size: 13px; }
+
+.darts-panel .darts-submit {
+  width: 100%;
+  min-height: 56px;
+  gap: 9px;
+  border-color: #42db82;
+  background: #42db82;
+  color: #0a2416;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  touch-action: manipulation;
+}
+
+.darts-panel .darts-submit:hover {
+  background: #65e99a;
+  border-color: #65e99a;
+  transform: none;
+}

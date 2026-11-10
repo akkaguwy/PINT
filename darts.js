@@ -11,7 +11,6 @@
   const cancel = $('darts-cancel');
   const undo = $('darts-undo');
   const rematch = $('darts-rematch');
-  const checkout = $('darts-checkout');
   const doubleLabel = $('darts-double-label');
   const validScore = value => Number.isInteger(value) && value >= 0 && value <= 180;
 
@@ -134,8 +133,7 @@
     visit.hidden = winner !== null;
     rematch.hidden = winner === null;
     const route = game.finish === 'double' && winner === null ? checkoutRoute(remaining[active]) : '';
-    checkout.hidden = !route;
-    $('darts-route').textContent = route || '';
+    $('darts-route').textContent = route || '—';
     visit.reset();
     showFinishPrompt();
     undo.disabled = history.length === 0;
@@ -215,8 +213,8 @@
     game.visits.push({ score: points, double: finishDouble.value === 'yes' });
     save();
     render();
-    if (state.winner === null) score.focus();
-    else rematch.focus();
+    // Keep focus on the control used to submit, so tapping Add score never scrolls to the input.
+    if (state.winner !== null) rematch.focus({ preventScroll: true });
   });
 
   undo.addEventListener('click', () => {
@@ -224,7 +222,6 @@
     game.visits.pop();
     save();
     render();
-    score.focus();
   });
 
   showNames();
