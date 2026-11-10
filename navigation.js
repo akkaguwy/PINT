@@ -1,20 +1,25 @@
-/* PINT mobile screen router — navigation history stays in sync with the browser. */
+/* PINT screen router — navigation history stays in sync with the browser. */
 (() => {
   'use strict';
-  const names={home:'Home',explore:'Explore pubs','pub-golf':'Pub Golf','my-pints':'Community',gallery:'Photo Gallery',profile:'Profile'};
+  const names={home:'Home',explore:'Explore pubs',games:'Games','pub-golf':'Pub Golf','pub-bingo':'Pub Bingo','my-pints':'Community',gallery:'Photo Gallery',profile:'Profile'};
   const allowed=new Set(Object.keys(names));
+  const gameScreens=new Set(['games','pub-golf','pub-bingo']);
   const mobileQuery=window.matchMedia('(max-width: 620px)');
   const mobile=()=>mobileQuery.matches;
   const header=document.getElementById('screen-header');
   const back=document.getElementById('screen-back');
   const screenLabel=document.getElementById('screen-title');
-  const fromURL=()=>new URL(location.href).searchParams.get('screen');
+  const fromURL=()=>{
+    const url=new URL(location.href);
+    return url.searchParams.get('screen')||(gameScreens.has(url.hash.slice(1))?url.hash.slice(1):null);
+  };
   const valid=id=>allowed.has(id)?id:'home';
   let current=valid(fromURL());
   let depth=Number.isInteger(history.state?.pintDepth)?history.state.pintDepth:0;
   function urlFor(id){
     const url=new URL(location.href);
     url.searchParams.set('screen',id);
+    if(id!=='pub-bingo')url.searchParams.delete('bingo');
     url.hash='';
     return url;
   }
@@ -25,16 +30,17 @@
     if(header)header.hidden=!mobile()||current==='home';
     if(screenLabel)screenLabel.textContent=names[current];
     if(back)back.setAttribute('aria-label','Back from '+names[current]);
+    const tab=gameScreens.has(current)?'games':current;
     document.querySelectorAll('.mobile-nav a[href^="#"]').forEach(link=>{
-      if(link.getAttribute('href')==='#'+current)link.setAttribute('aria-current','page');
+      if(link.getAttribute('href')==='#'+tab)link.setAttribute('aria-current',tab===current?'page':'location');
       else link.removeAttribute('aria-current');
     });
-    if(mobile())window.scrollTo(0,0);
+    if(mobile()||gameScreens.has(current))window.scrollTo(0,0);
     document.dispatchEvent(new CustomEvent('pint:screen-change',{detail:{screen:current}}));
   }
   function navigate(id){
     id=valid(id);
-    if(!mobile()){
+    if(!mobile()&&!gameScreens.has(id)&&!gameScreens.has(current)){
       const target=document.getElementById(id);
       if(target)target.scrollIntoView({behavior:'smooth'});
       return;
@@ -43,6 +49,7 @@
     depth+=1;
     history.pushState({pintScreen:id,pintDepth:depth},'',urlFor(id));
     display(id);
+    if(!mobile()&&!gameScreens.has(id))document.getElementById(id)?.scrollIntoView({behavior:'smooth'});
   }
   document.addEventListener('click',event=>{
     const anchor=event.target.closest('a[href^="#"]');
@@ -51,6 +58,14 @@
     if(!allowed.has(id))return;
     event.preventDefault();
     navigate(id);
+  });
+  const gamesSelect=document.getElementById('games-select');
+  gamesSelect?.addEventListener('change',()=>{
+    const game=gamesSelect.value;
+    gamesSelect.value='';
+    if(game!=='pub-golf'&&game!=='pub-bingo')return;
+    navigate(game);
+    document.getElementById(game==='pub-golf'?'golf-heading':'bingo-heading')?.focus({preventScroll:true});
   });
   back?.addEventListener('click',()=>{
     if(depth>0){history.back();return}

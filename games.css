@@ -1,0 +1,130 @@
+body:not([data-screen="games"]) #home > #games,
+body:not([data-screen="pub-golf"]) #home > #pub-golf,
+body:not([data-screen="pub-bingo"]) #home > #pub-bingo,
+body:is([data-screen="games"], [data-screen="pub-golf"], [data-screen="pub-bingo"])
+  #home > :not(#games, #pub-golf, #pub-bingo) {
+  display: none;
+}
+
+.games-section {
+  padding: clamp(26px, 5vw, 64px) 0;
+  background: var(--linen);
+  border-block: 1px solid var(--line);
+}
+
+.games-picker, .bingo-panel {
+  width: min(100%, 620px);
+  padding: clamp(18px, 4vw, 36px);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+
+.games-section h2 {
+  margin: 8px 0 10px;
+  font: 700 clamp(36px, 6vw, 57px)/1.1 var(--display);
+}
+
+.games-section p {
+  margin: 0 0 18px;
+  color: var(--quiet);
+  line-height: 1.55;
+}
+
+.games-picker label, #bingo-link-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+#bingo-link-label[hidden] {
+  display: none;
+}
+
+.games-picker select, #bingo-link {
+  width: 100%;
+  min-height: 46px;
+  padding: 9px 12px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid #a99e88;
+  border-radius: 8px;
+}
+
+.games-back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-bottom: 12px;
+  color: var(--green);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.bingo-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.bingo-panel .bingo-share-status:empty {
+  display: none;
+}
+
+.bingo-panel .bingo-progress {
+  margin-bottom: 8px;
+  color: var(--green);
+  font-weight: 700;
+}
+
+.bingo-card {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(4px, 1.4vw, 10px);
+}
+
+.bingo-square {
+  display: grid;
+  place-content: center;
+  gap: 4px;
+  min-height: clamp(82px, 20vw, 116px);
+  padding: 8px 4px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  overflow-wrap: anywhere;
+  font-size: clamp(11px, 2.8vw, 15px);
+  font-weight: 700;
+  text-align: center;
+}
+
+.bingo-square[aria-pressed="true"] {
+  background: var(--green);
+  color: var(--surface);
+  border-color: var(--green);
+}
+
+.bingo-square.is-winning {
+  box-shadow: inset 0 0 0 2px #e6c88d;
+}
+
+.bingo-mark {
+  min-height: 1em;
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+.bingo-panel .bingo-note {
+  margin: 13px 0 0;
+  font-size: 13px;
+}
+
+.mobile-nav a[aria-current="location"] {
+  color: var(--green);
+  background: var(--green-light);
+}
