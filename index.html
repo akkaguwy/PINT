@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="home.css?v=4.23" />
   <link rel="stylesheet" href="update.css?v=4.5" />
   <link rel="stylesheet" href="theme.css?v=4.19" />
-  <link rel="stylesheet" href="games.css?v=4.26" />
+  <link rel="stylesheet" href="games.css?v=4.27" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoT6kLFxMAH2U=" crossorigin="" />
   <style>
     .pub-price{font-size:11px;margin-top:12px;min-height:18px}
@@ -193,11 +193,15 @@
       <div class="shell">
         <a class="games-back" href="#games">← All games</a>
         <div class="darts-panel">
-          <span class="overline">AT THE OCHE</span>
-          <h2 id="darts-heading" tabindex="-1">Darts Scorer</h2>
-          <p>Pass the phone or keep it with one scorer. Enter the total after each visit to the board.</p>
+          <header class="darts-header">
+            <div class="darts-emblem" aria-hidden="true">◎</div>
+            <div><span class="overline">PINT GAMES / X01</span>
+              <h2 id="darts-heading" tabindex="-1">Darts Scorer</h2>
+            </div>
+          </header>
 
           <form id="darts-setup" class="darts-form">
+            <p>Set up a leg of 301 or 501, then keep score on one phone.</p>
             <div class="darts-fields">
               <label>Starting score
                 <select name="start"><option value="501">501</option><option value="301">301</option></select>
@@ -225,23 +229,42 @@
           </form>
 
           <div id="darts-match" hidden>
-            <p id="darts-rules"></p>
+            <div class="darts-match-bar">
+              <p id="darts-rules"></p>
+              <button id="darts-new" class="button button-outline" type="button">New game</button>
+            </div>
             <ul id="darts-scores" class="darts-scores" aria-label="Remaining scores"></ul>
             <p id="darts-turn" class="darts-turn" role="status"></p>
             <form id="darts-visit" class="darts-form">
-              <label>Visit total
-                <input name="score" type="number" min="0" max="180" step="1" inputmode="numeric" placeholder="0–180" required />
-              </label>
+              <p id="darts-checkout" class="darts-checkout" hidden><span>CHECKOUT</span><strong id="darts-route"></strong></p>
+              <div class="darts-entry">
+                <label for="darts-score-input">Visit total</label>
+                <input id="darts-score-input" name="score" type="number" min="0" max="180" step="1" inputmode="none" placeholder="—" required />
+              </div>
+              <div id="darts-keypad">
+                <div class="darts-presets" aria-label="Common visit totals" role="group">
+                  <button type="button" data-total="26" aria-label="Set score to 26">26</button>
+                  <button type="button" data-total="45" aria-label="Set score to 45">45</button>
+                  <button type="button" data-total="60" aria-label="Set score to 60">60</button>
+                  <button type="button" data-total="100" aria-label="Set score to 100">100</button>
+                </div>
+                <div class="darts-keys" aria-label="Score keypad" role="group">
+                  <button type="button" data-digit="1">1</button><button type="button" data-digit="2">2</button><button type="button" data-digit="3">3</button>
+                  <button type="button" data-digit="4">4</button><button type="button" data-digit="5">5</button><button type="button" data-digit="6">6</button>
+                  <button type="button" data-digit="7">7</button><button type="button" data-digit="8">8</button><button type="button" data-digit="9">9</button>
+                  <button type="button" data-key="clear" aria-label="Clear score">Clear</button><button type="button" data-digit="0">0</button><button type="button" data-key="delete" aria-label="Delete last digit">⌫</button>
+                </div>
+              </div>
               <label id="darts-double-label" hidden>Did the last dart hit a double or the bullseye?
                 <select name="double" disabled>
-                  <option value="">Choose yes or no</option><option value="yes">Yes</option><option value="no">No</option>
+                  <option value="">Choose yes or no</option><option value="yes">Yes, checked out</option><option value="no">No, bust</option>
                 </select>
               </label>
-              <button class="button button-gold" type="submit">Add score</button>
+              <button class="button button-gold" type="submit">Score visit <span aria-hidden="true">↵</span></button>
             </form>
             <div class="darts-actions">
-              <button id="darts-undo" class="button button-outline" type="button">Undo last visit</button>
-              <button id="darts-new" class="button button-outline" type="button">New game</button>
+              <button id="darts-undo" class="button button-outline" type="button">↶ Undo last visit</button>
+              <button id="darts-rematch" class="button button-gold" type="button" hidden>Play again</button>
             </div>
             <details>
               <summary>Recent visits</summary>
@@ -507,12 +530,12 @@
   <script src="home.js?v=4.23" defer></script>
   <script src="custom_golf.js?v=4.19" defer></script>
   <script src="gallery.js?v=4.19" defer></script>
-  <script src="app.js?v=4.26" defer></script>
+  <script src="app.js?v=4.27" defer></script>
   <script src="shortlists.js?v=4.20" defer></script>
   <script src="pub_golf.js?v=4.19" defer></script>
   <script src="pwa.js?v=4.6" defer></script>
   <script src="bingo.js?v=4.25" defer></script>
-  <script src="darts.js?v=4.26" defer></script>
+  <script src="darts.js?v=4.27" defer></script>
   <script src="navigation.js?v=4.26" defer></script>
 </body>
 </html>
