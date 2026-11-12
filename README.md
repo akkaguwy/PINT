@@ -51,3 +51,14 @@ Visit `http://localhost:8000`.
 5. GitHub will show the published URL once deployment finishes (usually `https://YOUR-USERNAME.github.io/PINT/`).
 
 The GitHub Pages frontend and shared-data service are both public. The backend endpoint configured in `shared.js` is `https://pint-live-data-akka.akkaguwy.chatgpt.site`; it stores public reviews, submitted pubs and JPEG photos in Cloudflare D1/R2 through the Sites hosting service.
+
+## Night recaps
+Open **What happened last night?** on Home (or **Nights** on desktop), name your night and share its link. Contributors can take photos, record videos, choose existing media, or post a note. Each moment has a contributor name, optional venue and editable occurrence time before posting; timelines sort by that time across midnight. Photos are resized to JPEG; MP4/MOV/WebM videos are limited to 30 MB per moment. Playback depends on the device supporting the video's codec.
+
+Nights and moments are stored in the existing shared D1/R2 service. Night links grant read and contribution access; keep them within the group. There is no public album directory, and no verified identity or post editing/deletion in this first version. The local recent-nights list is only a shortcut; keep the shared link to reopen a night on another device. Uploads require a connection; failed uploads remain in the open form for retry and are not an offline queue.
+
+Regression check: `node tests/recaps.cjs`.
+
+## Shared night recaps
+
+Open Nights (or the home recap card), name a night and invite mates with its link. Take photos, record short videos or choose existing media. Each moment can include an optional note, place and editable time; note-only memories work too. Photos are resized before upload (20 MB source limit); videos support MP4, MOV and WebM up to 30 MB each. Uploads show progress and preserve the selected content on failure for retry. The timeline refreshes while open. Night links grant anyone holding them access to view and contribute; recent nights are remembered on the device, so keep the link.

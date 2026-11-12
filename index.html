@@ -40,11 +40,12 @@
     @media(max-width:900px){.toolbar select,.filter-button{flex:1 1 150px}}
     @media(max-width:620px){.toolbar select,.filter-button{flex:1 1 43%}.pub-metrics strong{font-size:16px}}
   </style>
+  <link rel="stylesheet" href="recaps.css?v=4.29" />
 </head>
 <body>
   <header class="topbar shell">
     <a class="brand" href="#home" aria-label="PINT home"><span class="brand-mark">P<span class="brand-dot">.</span></span><span class="brand-name">PINT <small>DISCOVER · REVIEW · SHARE</small></span></a>
-    <nav aria-label="Primary navigation"><a href="#explore">Explore</a><a href="#games">Games</a><a href="#my-pints">Community</a><a href="#gallery">Gallery</a><a href="#profile">Profile</a></nav>
+    <nav aria-label="Primary navigation"><a href="#explore">Explore</a><a href="#games">Games</a><a href="#my-pints">Community</a><a href="#gallery">Gallery</a><a href="#recaps">Nights</a><a href="#profile">Profile</a></nav>
     <button class="button button-outline small" id="add-pub-button">+ Add a pub</button>
   </header>
 
@@ -86,6 +87,7 @@
         <button id="home-resume-round" class="home-shortcut" type="button" hidden>
           <span><strong>Resume round</strong><small id="home-resume-stop"></small></span><span aria-hidden="true">↗</span>
         </button>
+        <a href="#recaps" class="home-shortcut recap-home"><span><strong id="home-recap-label">What happened last night?</strong><small>Your mates. Your photos. The missing pieces.</small></span><span aria-hidden="true">↗</span></a>
         <div class="home-shortcut-grid">
           <button type="button" id="log-first-button" class="home-shortcut">
             <span class="home-shortcut-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9Z"/></svg></span>
@@ -378,6 +380,31 @@
       <p class="empty-state" id="empty-state" hidden>No pubs match that search. Try another area or add a new pub.</p>
     </section>
 
+    <section id="recaps" class="recap-section shell" aria-labelledby="recap-heading">
+      <span class="overline">THE MORNING AFTER</span><h2 id="recap-heading">What happened last night?</h2>
+      <p>Put the night back together. One shared album for photos, videos and the bits everyone remembers.</p>
+      <form id="recap-create" class="recap-create"><label>Name your night<input name="title" maxlength="80" required placeholder="Dublin · Friday night" /></label><button class="button button-gold" type="submit">Start a night +</button></form>
+      <div id="recap-saved" class="recap-saved" aria-label="Your recent nights"></div>
+      <p id="recap-status" role="status" aria-live="polite"></p>
+      <div id="recap-album" hidden>
+        <div class="recap-heading"><div><h3 id="recap-title"></h3><p id="recap-summary"></p></div><button id="recap-share" class="button button-gold" type="button">Invite your mates ↗</button><button id="recap-refresh" class="button button-outline" type="button">Refresh</button></div>
+        <details class="recap-link"><summary>Night link &amp; sharing</summary><label>Send this link to your mates<input id="recap-share-link" readonly type="url" /></label><p>Anyone with this link can view and add moments. Names are supplied by contributors. Keep the link within your group.</p></details>
+        <details class="recap-compose" open><summary>Add a moment</summary>
+          <form id="recap-moment-form">
+            <div class="recap-capture"><button id="recap-take-photo" type="button" class="button button-gold">Take photo</button><button id="recap-record-video" type="button" class="button button-outline">Record video</button></div>
+            <input id="recap-camera-photo" type="file" accept="image/*" capture="environment" hidden /><input id="recap-camera-video" type="file" accept="video/*" capture="environment" hidden />
+            <div class="recap-capture"><label class="button button-gold">Take photo<input id="recap-camera-photo" type="file" accept="image/*" capture="environment" class="recap-camera-input" /></label><label class="button button-gold">Record video<input id="recap-camera-video" type="file" accept="video/*" capture="environment" class="recap-camera-input" /></label></div>
+            <label class="recap-file">Or choose a photo / video<input id="recap-media" type="file" accept="image/*,video/mp4,video/quicktime,video/webm" /></label>
+            <p class="small-print">Use your phone’s camera or choose from your library. One photo or video per moment; videos up to 30 MB. You can add more afterwards.</p>
+            <div id="recap-preview"></div><button id="recap-remove-media" type="button" class="button button-outline">Clear attachment</button>
+            <div class="recap-fields"><label>Your name<input name="author" maxlength="40" required autocomplete="nickname" /></label><label>Where? (optional)<input name="venue" maxlength="100" placeholder="Pub or place" list="recap-venues" /></label><label>When did it happen?<input name="occurredAt" type="datetime-local" required /></label></div>
+            <label>Remember when… (optional)<textarea name="note" maxlength="1000" rows="3" placeholder="What happened here? You can also post just a note."></textarea></label>
+            <button class="button button-gold" type="submit">Add moment ↗</button><progress id="recap-progress" max="100" value="0" hidden aria-label="Upload progress"></progress>
+          </form>
+        </details><datalist id="recap-venues"></datalist>
+        <div id="recap-timeline" class="recap-timeline"></div>
+      </div>
+    </section>
     <section class="gallery-section shell" id="gallery" aria-labelledby="gallery-title">
       <div class="section-heading">
         <div><span class="overline">PINT COMMUNITY</span><h2 id="gallery-title">Photo Gallery</h2><p>Photos shared with pub reviews. Tap any photo to see it full size.</p></div>
@@ -536,6 +563,7 @@
   <script src="pwa.js?v=4.6" defer></script>
   <script src="bingo.js?v=4.25" defer></script>
   <script src="darts.js?v=4.28" defer></script>
-  <script src="navigation.js?v=4.26" defer></script>
+  <script src="recaps.js?v=4.29" defer></script>
+  <script src="navigation.js?v=4.29" defer></script>
 </body>
 </html>

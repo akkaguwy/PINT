@@ -1,10 +1,11 @@
 /* PINT screen router — navigation history stays in sync with the browser. */
 (() => {
   'use strict';
-  const names={home:'Home',explore:'Explore pubs',games:'Games','pub-golf':'Pub Golf','pub-bingo':'Pub Bingo',darts:'Darts Scorer','my-pints':'Community',gallery:'Photo Gallery',profile:'Profile'};
+  const names={home:'Home',explore:'Explore pubs',games:'Games','pub-golf':'Pub Golf','pub-bingo':'Pub Bingo',darts:'Darts Scorer','my-pints':'Community',gallery:'Photo Gallery',recaps:'Night Recaps',profile:'Profile'};
   const allowed=new Set(Object.keys(names));
   const gameHeadings={'pub-golf':'golf-heading','pub-bingo':'bingo-heading',darts:'darts-heading'};
   const gameScreens=new Set(['games',...Object.keys(gameHeadings)]);
+  const fullScreens=new Set([...gameScreens,'recaps']);
   const mobileQuery=window.matchMedia('(max-width: 620px)');
   const mobile=()=>mobileQuery.matches;
   const header=document.getElementById('screen-header');
@@ -36,12 +37,12 @@
       if(link.getAttribute('href')==='#'+tab)link.setAttribute('aria-current',tab===current?'page':'location');
       else link.removeAttribute('aria-current');
     });
-    if(mobile()||gameScreens.has(current))window.scrollTo(0,0);
+    if(mobile()||fullScreens.has(current))window.scrollTo(0,0);
     document.dispatchEvent(new CustomEvent('pint:screen-change',{detail:{screen:current}}));
   }
   function navigate(id){
     id=valid(id);
-    if(!mobile()&&!gameScreens.has(id)&&!gameScreens.has(current)){
+    if(!mobile()&&!fullScreens.has(id)&&!fullScreens.has(current)){
       const target=document.getElementById(id);
       if(target)target.scrollIntoView({behavior:'smooth'});
       return;
@@ -50,7 +51,7 @@
     depth+=1;
     history.pushState({pintScreen:id,pintDepth:depth},'',urlFor(id));
     display(id);
-    if(!mobile()&&!gameScreens.has(id))document.getElementById(id)?.scrollIntoView({behavior:'smooth'});
+    if(!mobile()&&!fullScreens.has(id))document.getElementById(id)?.scrollIntoView({behavior:'smooth'});
   }
   document.addEventListener('click',event=>{
     const anchor=event.target.closest('a[href^="#"]');
