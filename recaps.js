@@ -12,7 +12,10 @@
   function link(id){const u=new URL(location.href);u.search='';u.hash='';u.searchParams.set('screen','recaps');u.searchParams.set('night',id);return u.href}
   async function call(path,body){const r=await fetch(API+path,{method:body?'POST':'GET',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined,cache:'no-store',signal:AbortSignal.timeout(20000)});const v=await r.json();if(!r.ok)throw Error(v.error||'Request failed');return v}
   $('recap-venues').innerHTML=(typeof window.PintDirectory?.pubs==='function'?window.PintDirectory.pubs():[]).map(p=>`<option value="${safe(p.name)}"></option>`).join('');
-  function list(){ $('recap-saved').innerHTML=nights.length?nights.map(n=>`<button class="button button-outline" type="button" data-night="${safe(n.id)}">${safe(n.title)}</button>`).join(''):'<p class="small-print">No nights saved in this app yet. Join with a link or start one below.</p>';const last=nights[0];$('home-recap-label').textContent=last?'Revisit '+last.title:'What happened last night?'; }
+  function list(){
+    $('recap-saved').innerHTML=nights.length?nights.map(n=>`<div class="recap-saved-item"><button class="button button-outline" type="button" data-night="${safe(n.id)}">${safe(n.title)}</button><button class="button recap-remove-night" type="button" data-remove-night="${safe(n.id)}" aria-label="Remove ${safe(n.title)} from My nights">Remove</button></div>`).join(''):'<p class="small-print">No nights saved in this app yet. Join with a link or start one below.</p>';
+    const last=nights[0];$('home-recap-label').textContent=last?'Revisit '+last.title:'What happened last night?';
+  }
   function remember(n){nights=[n,...nights.filter(x=>x.id!==n.id)].slice(0,30);storage.set('pint-recap-nights',nights);list()}
   function timeline(moments){const next=JSON.stringify(moments);if(next===signature)return;signature=next;
     $('recap-summary').textContent=`${moments.length} moments · ${moments.filter(m=>m.mediaType==='image/jpeg').length} photos · ${moments.filter(m=>m.mediaType.startsWith('video/')).length} videos`;
@@ -47,7 +50,44 @@
     }finally{button.disabled=false}
   });
   $('recap-create').addEventListener('submit',async e=>{e.preventDefault();if(busy){message('Wait for your upload to finish.');return}const b=e.submitter;b.disabled=true;message('Creating night…');try{const v=await call('/api/recaps',{id:createId,title:e.target.elements.title.value.trim()});createId=crypto.randomUUID();e.target.reset();await load(v.night.id);const u=new URL(location.href);u.searchParams.set('night',v.night.id);history.replaceState(history.state,'',u);}catch(e){message(e.message)}finally{b.disabled=false}});
-  $('recap-saved').addEventListener('click',e=>{const id=e.target.closest('[data-night]')?.dataset.night;if(id){if(busy){message('Wait for your upload to finish.');return}const u=new URL(location.href);u.searchParams.set('night',id);history.replaceState(history.state,'',u);load(id)}});
+  $('recap-saved').addEventListener('click',e=>{
+    const removal=e.target.closest('[data-remove-night]');
+    if(removal){
+      if(busy||loading){message('Finish the current action before removing a night.');return}
+      const id=removal.dataset.removeNight;
+      const night=nights.find(n=>n.id===id);
+      if(!night)return;
+      const active=current?.id===id;
+      const warning=`Remove "${night.title}" from My nights on this device?\n\nThis does NOT delete the shared night, its photos or videos. Your mates and anyone with the invitation link can still open it.${active?' Any unposted moment in this night will be cleared.':''}`;
+      if(!window.confirm(warning))return;
+      nights=nights.filter(n=>n.id!==id);
+      storage.set('pint-recap-nights',nights);
+      if(active){
+        current=null;signature='';
+        $('recap-album').hidden=true;
+        $('recap-title').textContent='';
+        $('recap-summary').textContent='';
+        $('recap-timeline').replaceChildren();
+        chosenFile=null;clearPreview();
+        fileInput.value='';$('recap-camera-photo').value='';$('recap-camera-video').value='';
+        form.elements.note.value='';form.elements.venue.value='';
+      }
+      const url=new URL(location.href);
+      if(url.searchParams.get('night')===id){
+        url.searchParams.delete('night');
+        history.replaceState(history.state,'',url);
+      }
+      list();
+      message('Removed from My nights on this device. The shared album is still available through its invitation link.');
+      return;
+    }
+    const id=e.target.closest('[data-night]')?.dataset.night;
+    if(id){
+      if(busy||loading){message('Finish the current action before opening a night.');return}
+      const u=new URL(location.href);u.searchParams.set('night',id);
+      history.replaceState(history.state,'',u);load(id);
+    }
+  });
   $('recap-share').addEventListener('click',async()=>{if(!current)return;const url=link(current.id);try{if(navigator.share)await navigator.share({title:current.title,text:'Add your photos, videos and memories to our PINT night.',url});else{await navigator.clipboard.writeText(url);message('Night link copied. Send it to your mates.')}}catch(e){if(e.name!=='AbortError'){ $('recap-share-link').focus();$('recap-share-link').select();message('Copy the night link below.')}}});
   $('recap-refresh').addEventListener('click',()=>current&&load(current.id));
   const previews=$('recap-preview');function clearPreview(){if(previewURL)URL.revokeObjectURL(previewURL);previewURL=null;previews.replaceChildren()}
