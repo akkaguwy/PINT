@@ -290,7 +290,7 @@
     }catch{return null}
   }
   const mapDirections=pub=>'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(pub.name+', '+(pub.address||pub.area)+(pub.region==='Dublin'?', Ireland':pub.region==='Methven'?', New Zealand':', Wales'));
-  let nearPosition=null,view='list',pubMap=null,mapMarkers=null,lastFiltered=[];
+  let nearPosition=null,view='list',pubMap=null,mapMarkers=null,lastFiltered=[],lastMapSignature='';
   function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
   let toastTimer;
   function toast(message){const el=$('#toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3000)}
@@ -455,6 +455,11 @@
   }
   function renderMap(){
     if(view!=='map')return;
+    const root=$('#pub-map');
+    // The Explore screen is hidden until the mobile router opens it.
+    if(!root||!root.getClientRects().length)return;
+    const rect=root.getBoundingClientRect();
+    if(rect.width<80||rect.height<100)return;
     const mode=$('#map-filter').value;
     const ownReviewIds=new Set(window.PintProfile?.ids()||[]);
     const visited=new Set(visibleLogs().filter(log=>!log.shared||ownReviewIds.has(log.id)).map(log=>log.pubId));
@@ -491,8 +496,9 @@
       ?(pubs.length-unpinned.length)+' of '+pubs.length+' matching pubs on the map'
       :'No pubs match these map filters.';
     if(!window.L){$('#pub-map').textContent='The interactive map needs an internet connection.';return}
+    const isFirstMap=!pubMap;
     if(!pubMap){
-      pubMap=L.map('pub-map',{scrollWheelZoom:false}).setView([51.467,-3.29],10);
+      pubMap=L.map('pub-map',{scrollWheelZoom:false,tap:false}).setView([51.467,-3.29],10);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:18}).addTo(pubMap);
       mapMarkers=L.layerGroup().addTo(pubMap);
     }
@@ -501,7 +507,12 @@
     for(const {pos,exact,pubs:venues} of groups.values()){
       bounds.push(pos);
       const title=exact&&venues.length===1?venues[0].name:venues[0].area+' · '+venues.length+' '+(venues.length===1?'pub':'pubs');
-      const marker=L.marker(pos,{title,alt:title}).addTo(mapMarkers);
+      const markerIcon=L.divIcon({
+        className:'pint-map-marker-shell',
+        html:'<span class="pint-map-marker '+(exact?'is-exact':'is-area')+'" aria-hidden="true">'+(venues.length>1?venues.length:'🍺')+'</span>',
+        iconSize:[38,42],iconAnchor:[19,39],popupAnchor:[0,-32]
+      });
+      const marker=L.marker(pos,{title,alt:title,icon:markerIcon}).addTo(mapMarkers);
       const popup=document.createElement('div');
       popup.className='map-popup-pubs';
       const heading=document.createElement('strong');
@@ -513,11 +524,16 @@
       L.circleMarker(nearPosition,{radius:8,color:'#f6e7c7',fillColor:'#c9a35b',fillOpacity:1}).addTo(mapMarkers).bindPopup('Your approximate location');
       if(bounds.length&&bounds.some(pos=>distanceKm(pos,nearPosition)<50))bounds.push(nearPosition);
     }
-    pubMap.invalidateSize();
-    if(bounds.length)pubMap.fitBounds(bounds,{padding:[25,25],maxZoom:14});
-    else {
-      const centres={Cardiff:[51.48,-3.18],Vale:[51.43,-3.42],Dublin:[53.35,-6.26],Methven:[-43.63,171.65]};
-      pubMap.setView(centres[$('#region-filter').value],11);
+    pubMap.invalidateSize({pan:false,animate:false});
+    // Preserve pan/zoom when background reviews sync; refit on actual filter changes.
+    const signature=[$('#region-filter').value,$('#area-filter').value,mode,bounds.map(p=>p.join(',')).join(';')].join('|');
+    if(isFirstMap||signature!==lastMapSignature){
+      lastMapSignature=signature;
+      if(bounds.length)pubMap.fitBounds(bounds,{padding:[25,25],maxZoom:14,animate:false});
+      else {
+        const centres={Cardiff:[51.48,-3.18],Vale:[51.43,-3.42],Dublin:[53.35,-6.26],Methven:[-43.63,171.65]};
+        pubMap.setView(centres[$('#region-filter').value]||centres.Cardiff,11);
+      }
     }
   }
   function detailReviewMarkup(log){
@@ -733,6 +749,17 @@
   $('#map-view-button').addEventListener('click',()=>showView('map'));
   $('#home-map-link').addEventListener('click',()=>showView('map'));
   $('#map-filter').addEventListener('change',renderMap);
+   const refreshExploreMap=()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{
+     if(view==='map'){renderMap();pubMap?.invalidateSize({pan:false,animate:false})}
+   }));
+   document.addEventListener('pint:screen-change',event=>{
+     if(event.detail?.screen==='explore')refreshExploreMap();
+   });
+   window.addEventListener('resize',refreshExploreMap);
+   if(window.ResizeObserver){
+     const el=$('#pub-map');
+     if(el)new ResizeObserver(refreshExploreMap).observe(el);
+   }
   ['guinness-filter','guinness-count','nearby-radius'].forEach(id=>document.getElementById(id).addEventListener('change',resetDirectory));
   $('#nearby-button').addEventListener('click',()=>{
     if(nearPosition){nearPosition=null;$('#nearby-radius').hidden=true;$('#nearby-radius').value='0';$('#nearby-button').textContent='⌖ Near me';$('#nearby-button').setAttribute('aria-pressed','false');$('#sort-filter').value='name';$('#location-note').textContent='';render();return}
