@@ -198,7 +198,6 @@
   background:#e7ebe5;
   border:1px solid #b1bdb1;
   border-radius:14px;
-  touch-action:pan-x pan-y;
 }
 .home-map-panel .leaflet-control-attribution{font-size:9px}
 .home-map-panel .leaflet-popup-content{margin:12px 15px;max-height:220px;overflow-y:auto}
