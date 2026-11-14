@@ -643,6 +643,12 @@ window.PintDublinExtra = [
     "description": "Dublin pub suggestion — check opening hours and details before visiting."
   },
   {
+    "name": "Bad Ass Cafe",
+    "area": "Temple Bar",
+    "address": "9-11 Crown Alley, Temple Bar, Dublin 2, Ireland",
+    "description": "Temple Bar pub and cafe with live music, pints and food."
+  },
+  {
     "name": "Brannigan's",
     "area": "Cathedral Street",
     "address": "9 Cathedral Street, Dublin 1, D01 FH29, Ireland",
@@ -737,11 +743,5 @@ window.PintDublinExtra = [
     "area": "Talbot Street",
     "address": "19 Talbot Street, Dublin 1, D01 W303, Ireland",
     "description": "Traditional Dublin pub along Talbot Street, within walking distance of the Spire."
-  },
-  {
-    "name": "Bad Ass Cafe",
-    "area": "Temple Bar",
-    "address": "9-11 Crown Alley, Temple Bar, Dublin 2, Ireland",
-    "description": "Temple Bar pub and cafe with live music, pints and food."
   }
 ];
