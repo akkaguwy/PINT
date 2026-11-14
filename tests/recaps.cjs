@@ -12,6 +12,8 @@ node('recap-create').elements={title:{value:'Dublin test'}};
 node('recap-create').reset=()=>{};
 const join=node('recap-join');join.elements={invite:{value:''}};join.querySelector=()=>({disabled:false});join.reset=()=>{join.elements.invite.value=''};
 const stored={};
+let confirmed=false,confirmationText='';
+const pageLocation={href:'https://akkaguwy.github.io/PINT/?screen=recaps&night=00000000-0000-4000-8000-000000000001'};
 let moments=[],uploadError=true,reads=0,submitted=[];
 const night={id:'00000000-0000-4000-8000-000000000001',title:'Friday <mates>'};
 const invited={id:'00000000-0000-4000-8000-000000000002',title:'Saturday with mates'};
@@ -19,7 +21,7 @@ class FormData{constructor(){this.data={}}set(k,v){this.data[k]=v}}
 class XHR{upload={};open(){}send(data){submitted.push(data.data);queueMicrotask(()=>{this.status=uploadError?503:201;this.responseText=JSON.stringify(uploadError?{error:'Try again'}:{saved:true});if(!uploadError)moments=[{id:'moment',nightId:night.id,mediaType:'',author:'<Akka>',venue:'The pub',note:'<script>alert(1)</script>',occurredAt:Date.now()}];this.onload()})}}
 class TestURL extends URL{static createObjectURL(){return 'blob:preview'}static revokeObjectURL(){}}
 const events={};
-const context={window:{PintDirectory:{pubs:()=>[]},PintPhotos:{resize:async()=> 'data:image/jpeg;base64,AA=='},addEventListener(){}},document:{getElementById:node,createElement(tag){return{tagName:tag.toUpperCase(),src:'',textContent:'',append(){}}},addEventListener(k,fn){events[k]=fn},body:{dataset:{screen:'recaps'}},hidden:false},location:{href:'https://akkaguwy.github.io/PINT/?screen=recaps&night='+night.id},history:{state:{},replaceState(){}},localStorage:{getItem(k){return stored[k]||null},setItem(k,v){stored[k]=v}},navigator:{},crypto:require('node:crypto').webcrypto,URL:TestURL,Date,AbortSignal,FormData,XMLHttpRequest:XHR,setInterval(){},fetch:async url=>{if(String(url).startsWith('data:'))return{blob:async()=>({type:'image/jpeg'})};reads++;const isInvite=String(url).includes(encodeURIComponent(invited.id));return{ok:true,json:async()=>({night:isInvite?invited:night,moments:isInvite?[]:moments})}}};
+const context={window:{PintDirectory:{pubs:()=>[]},PintPhotos:{resize:async()=> 'data:image/jpeg;base64,AA=='},confirm(text){confirmationText=text;return confirmed},addEventListener(){}},document:{getElementById:node,createElement(tag){return{tagName:tag.toUpperCase(),src:'',textContent:'',append(){}}},addEventListener(k,fn){events[k]=fn},body:{dataset:{screen:'recaps'}},hidden:false},location:pageLocation,history:{state:{},replaceState(_state,_title,url){pageLocation.href=String(url.href||url)}},localStorage:{getItem(k){return stored[k]||null},setItem(k,v){stored[k]=v}},navigator:{},crypto:require('node:crypto').webcrypto,URL:TestURL,Date,AbortSignal,FormData,XMLHttpRequest:XHR,setInterval(){},fetch:async url=>{if(String(url).startsWith('data:'))return{blob:async()=>({type:'image/jpeg'})};reads++;const isInvite=String(url).includes(encodeURIComponent(invited.id));return{ok:true,json:async()=>({night:isInvite?invited:night,moments:isInvite?[]:moments})}}};
 vm.runInNewContext(fs.readFileSync('recaps.js','utf8'),context);
 const tick=()=>new Promise(r=>setImmediate(r));
 (async()=>{
@@ -46,5 +48,16 @@ const tick=()=>new Promise(r=>setImmediate(r));
  assert.match(node('recap-saved').innerHTML,/Saturday with mates/,'Joined night appears in My nights');
  assert.equal(JSON.parse(stored['pint-recap-nights'])[0].id,invited.id,'Joined night persists on this device');
  assert.equal(join.elements.invite.value,'','Invite field clears after joining');
+ const savedList=node('recap-saved');
+ const removeClick=()=>savedList.listeners.click({target:{closest(sel){return sel==='[data-remove-night]'?{dataset:{removeNight:invited.id}}:null}}});
+ removeClick();
+ assert.match(confirmationText,/does NOT delete the shared night/i);
+ assert.equal(JSON.parse(stored['pint-recap-nights'])[0].id,invited.id,'Cancellation keeps night saved');
+ confirmed=true;removeClick();
+ assert(!savedList.innerHTML.includes('Saturday with mates'),'Removed night no longer listed');
+ assert(!JSON.parse(stored['pint-recap-nights']).some(n=>n.id===invited.id),'Removed night no longer saved');
+ assert.equal(node('recap-album').hidden,true,'Removing open night closes its album');
+ assert(!pageLocation.href.includes(invited.id),'Removed night ID gone from active URL');
+ assert.match(node('recap-status').textContent,/shared album is still available/i);
  assert(reads>=3);console.log('Night recap checks passed: invite joining and saved nights, shared loading, safe rendering, photo capture, upload retry and idempotency.');
 })().catch(e=>{console.error(e);process.exitCode=1});
