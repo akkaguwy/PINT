@@ -97,7 +97,7 @@ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
 .view-switch button.active{background:var(--gold);color:#171610}
 #location-note{color:#aaa18e;font-size:11px;line-height:1.5;text-align:right}
 .map-container{margin-bottom:25px;background:#22231f;border:1px solid #63583f;border-radius:10px;overflow:hidden}
-#pub-map{height:min(58vh,580px);min-height:320px;color:#d0c8b6;display:grid;place-items:center;font-size:13px}
+#pub-map{height:min(58vh,580px);min-height:340px;width:100%;position:relative;display:block;overflow:hidden;background:#e7ebe5;color:#d0c8b6;font-size:13px}
 .map-disclaimer{padding:9px 16px 12px;color:#b3ab9b;font-size:11px;line-height:1.6;margin:0}
 .leaflet-popup-content{font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.7}
 .map-popup-button{font-size:12px;font-weight:700;border:0;background:transparent;color:#74521b;cursor:pointer;padding:5px 0}
