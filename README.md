@@ -53,6 +53,11 @@ Visit `http://localhost:8000`.
 The GitHub Pages frontend and shared-data service are both public. The backend endpoint configured in `shared.js` is `https://pint-live-data-akka.akkaguwy.chatgpt.site`; it stores public reviews, submitted pubs and JPEG photos in Cloudflare D1/R2 through the Sites hosting service.
 
 ## Night recaps
+
+### Inviting friends who already have PINT installed
+
+Each night is shared by a link. Opening an invite in WhatsApp or Safari may save it only in that browser, not in the separate iPhone Home Screen web app. Friends can copy the invite, open their installed PINT app, choose **What happened last night? → Join night**, and paste it. PINT loads the shared album and saves the night under **My nights** on that device, so they can return without the link. This is a device-local shortcut, not an account-synchronised membership; opening an invite does not install the PINT app automatically. If the invite opens inside the installed app directly, it is saved there automatically.
+
 Open **What happened last night?** on Home (or **Nights** on desktop), name your night and share its link. Contributors can take photos, record videos, choose existing media, or post a note. Each moment has a contributor name, optional venue and editable occurrence time before posting; timelines sort by that time across midnight. Photos are resized to JPEG; MP4/MOV/WebM videos are limited to 30 MB per moment. Playback depends on the device supporting the video's codec.
 
 Nights and moments are stored in the existing shared D1/R2 service. Night links grant read and contribution access; keep them within the group. There is no public album directory, and no verified identity or post editing/deletion in this first version. The local recent-nights list is only a shortcut; keep the shared link to reopen a night on another device. Uploads require a connection; failed uploads remain in the open form for retry and are not an offline queue.
