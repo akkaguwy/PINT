@@ -273,7 +273,19 @@
     'Methven|Methven':[-43.6324,171.6473],
     'Dublin|Temple Bar':[53.3455,-6.2635],'Dublin|City Centre South':[53.3428,-6.2640],'Dublin|Grafton Street':[53.3422,-6.2600],
     'Dublin|Trinity':[53.3462,-6.2516],'Dublin|Merrion Row':[53.3385,-6.2516],'Dublin|Baggot Street':[53.3375,-6.2470],
-    'Dublin|Smithfield':[53.3496,-6.2786],'Dublin|The Liberties':[53.3445,-6.2766],'Dublin|Glasnevin':[53.3698,-6.2716]
+    'Dublin|Smithfield':[53.3496,-6.2786],'Dublin|The Liberties':[53.3445,-6.2766],'Dublin|Glasnevin':[53.3698,-6.2716],
+    // Approximate street-area centres only: pins do not claim precise pub entrances.
+    'Dublin|North City Centre':[53.3490,-6.2600],
+    'Dublin|Cathedral Street':[53.3500,-6.2590],
+    'Dublin|North Earl Street':[53.3500,-6.2578],
+    'Dublin|O\'Connell Street':[53.3508,-6.2605],
+    'Dublin|Marlborough Street':[53.3499,-6.2561],
+    'Dublin|Abbey Street':[53.3482,-6.2576],
+    'Dublin|Sackville Place':[53.3489,-6.2584],
+    'Dublin|Eden Quay':[53.3470,-6.2539],
+    'Dublin|Bachelors Walk':[53.3471,-6.2624],
+    'Dublin|Parnell Street':[53.3527,-6.2599],
+    'Dublin|Talbot Street':[53.3510,-6.2517]
   };
   const distanceKm=(a,b)=>{const rad=Math.PI/180,dLat=(b[0]-a[0])*rad,dLon=(b[1]-a[1])*rad,x=Math.sin(dLat/2)**2+Math.cos(a[0]*rad)*Math.cos(b[0]*rad)*Math.sin(dLon/2)**2;return 6371*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))};
   const pubCentre=pub=>(Number.isFinite(pub.lat)&&Number.isFinite(pub.lon)?[pub.lat,pub.lon]:(centres[pub.region+'|'+pub.area]||centres[pub.area]));
