@@ -285,7 +285,17 @@
     'Dublin|Eden Quay':[53.3470,-6.2539],
     'Dublin|Bachelors Walk':[53.3471,-6.2624],
     'Dublin|Parnell Street':[53.3527,-6.2599],
-    'Dublin|Talbot Street':[53.3510,-6.2517]
+    'Dublin|Talbot Street':[53.3510,-6.2517],
+    'Dublin|Amiens Street':[53.3509,-6.2495],
+    'Dublin|Westmoreland Street':[53.3463,-6.2599],
+    'Dublin|College Street':[53.3454,-6.2567],
+    'Dublin|Hawkins Street':[53.3471,-6.2572],
+    'Dublin|Aston Quay':[53.3461,-6.2634],
+    'Dublin|Jervis Street':[53.3485,-6.2674],
+    'Dublin|Little Mary Street':[53.3493,-6.2723],
+    'Dublin|Store Street':[53.3504,-6.2494],
+    'Dublin|Suffolk Street':[53.3436,-6.2611],
+    'Dublin|Nassau Street':[53.3430,-6.2558]
   };
   const distanceKm=(a,b)=>{const rad=Math.PI/180,dLat=(b[0]-a[0])*rad,dLon=(b[1]-a[1])*rad,x=Math.sin(dLat/2)**2+Math.cos(a[0]*rad)*Math.cos(b[0]*rad)*Math.sin(dLon/2)**2;return 6371*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))};
   const pubCentre=pub=>(Number.isFinite(pub.lat)&&Number.isFinite(pub.lon)?[pub.lat,pub.lon]:(centres[pub.region+'|'+pub.area]||centres[pub.area]));
