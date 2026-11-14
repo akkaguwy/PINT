@@ -641,5 +641,11 @@ window.PintDublinExtra = [
     "area": "Howth",
     "address": "Harbour Road, Dublin, Ireland",
     "description": "Dublin pub suggestion — check opening hours and details before visiting."
+  },
+  {
+    "name": "Bad Ass Cafe",
+    "area": "Temple Bar",
+    "address": "9-11 Crown Alley, Temple Bar, Dublin 2, Ireland",
+    "description": "Temple Bar pub and cafe with live music, pints and food."
   }
 ];
