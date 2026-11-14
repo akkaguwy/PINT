@@ -6,3 +6,9 @@ body:not([data-screen="recaps"]) #home>#recaps{display:none!important}body[data-
 .recap-capture{display:flex;flex-wrap:wrap;gap:10px}.recap-capture button{flex:1}
 
 .recap-capture{display:flex;gap:12px;flex-wrap:wrap}.recap-capture label{position:relative;flex:1;cursor:pointer;align-items:center;justify-content:center;min-height:54px}.recap-camera-input{position:absolute;inset:0;opacity:0;cursor:pointer}.recap-capture label:focus-within{outline:3px solid #ba963c;outline-offset:3px}
+
+/* A saved night and its local-only remove action stay together on small screens. */
+.recap-saved-item{display:flex;align-items:stretch;gap:6px;flex:0 0 auto}
+.recap-saved-item>.button:first-child{min-width:0}
+.recap-saved-item>.recap-remove-night{background:transparent;border:1px solid #bdc8be;color:#42564c;font-size:13px;padding-inline:12px}
+.recap-saved-item>.recap-remove-night:hover,.recap-saved-item>.recap-remove-night:focus-visible{border-color:#9b4c4c;color:#963737}
