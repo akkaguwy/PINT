@@ -10,13 +10,16 @@ assert(!html.includes('id="recap-take-photo"'),'No disconnected programmatic cam
 const form=node('recap-moment-form');form.elements=['author','venue','note','occurredAt'].map(node);for(const n of form.elements)form.elements[n.id]=n;
 node('recap-create').elements={title:{value:'Dublin test'}};
 node('recap-create').reset=()=>{};
+const join=node('recap-join');join.elements={invite:{value:''}};join.querySelector=()=>({disabled:false});join.reset=()=>{join.elements.invite.value=''};
+const stored={};
 let moments=[],uploadError=true,reads=0,submitted=[];
 const night={id:'00000000-0000-4000-8000-000000000001',title:'Friday <mates>'};
+const invited={id:'00000000-0000-4000-8000-000000000002',title:'Saturday with mates'};
 class FormData{constructor(){this.data={}}set(k,v){this.data[k]=v}}
 class XHR{upload={};open(){}send(data){submitted.push(data.data);queueMicrotask(()=>{this.status=uploadError?503:201;this.responseText=JSON.stringify(uploadError?{error:'Try again'}:{saved:true});if(!uploadError)moments=[{id:'moment',nightId:night.id,mediaType:'',author:'<Akka>',venue:'The pub',note:'<script>alert(1)</script>',occurredAt:Date.now()}];this.onload()})}}
 class TestURL extends URL{static createObjectURL(){return 'blob:preview'}static revokeObjectURL(){}}
 const events={};
-const context={window:{PintDirectory:{pubs:()=>[]},PintPhotos:{resize:async()=> 'data:image/jpeg;base64,AA=='},addEventListener(){}},document:{getElementById:node,createElement(tag){return{tagName:tag.toUpperCase(),src:'',textContent:'',append(){}}},addEventListener(k,fn){events[k]=fn},body:{dataset:{screen:'recaps'}},hidden:false},location:{href:'https://akkaguwy.github.io/PINT/?screen=recaps&night='+night.id},history:{state:{},replaceState(){}},localStorage:{getItem(){return null},setItem(){}},navigator:{},crypto:require('node:crypto').webcrypto,URL:TestURL,Date,AbortSignal,FormData,XMLHttpRequest:XHR,setInterval(){},fetch:async url=>{if(String(url).startsWith('data:'))return{blob:async()=>({type:'image/jpeg'})};reads++;return{ok:true,json:async()=>({night,moments})}}};
+const context={window:{PintDirectory:{pubs:()=>[]},PintPhotos:{resize:async()=> 'data:image/jpeg;base64,AA=='},addEventListener(){}},document:{getElementById:node,createElement(tag){return{tagName:tag.toUpperCase(),src:'',textContent:'',append(){}}},addEventListener(k,fn){events[k]=fn},body:{dataset:{screen:'recaps'}},hidden:false},location:{href:'https://akkaguwy.github.io/PINT/?screen=recaps&night='+night.id},history:{state:{},replaceState(){}},localStorage:{getItem(k){return stored[k]||null},setItem(k,v){stored[k]=v}},navigator:{},crypto:require('node:crypto').webcrypto,URL:TestURL,Date,AbortSignal,FormData,XMLHttpRequest:XHR,setInterval(){},fetch:async url=>{if(String(url).startsWith('data:'))return{blob:async()=>({type:'image/jpeg'})};reads++;const isInvite=String(url).includes(encodeURIComponent(invited.id));return{ok:true,json:async()=>({night:isInvite?invited:night,moments:isInvite?[]:moments})}}};
 vm.runInNewContext(fs.readFileSync('recaps.js','utf8'),context);
 const tick=()=>new Promise(r=>setImmediate(r));
 (async()=>{
@@ -35,5 +38,13 @@ const tick=()=>new Promise(r=>setImmediate(r));
  await form.listeners.submit({preventDefault(){}});await tick();
  assert.equal(submitted[2].media.type,'image/jpeg','Camera image uploaded through Add moment');
  assert.match(node('recap-status').textContent,/Moment added/);
- assert(reads>=2);console.log('Night recap checks passed: shared loading, safe rendering, photo capture and upload, failed upload retention and idempotent retries.');
+ join.elements.invite.value='not-an-invite';await join.listeners.submit({preventDefault(){}});
+ assert.match(node('recap-status').textContent,/valid PINT night invitation/);
+ join.elements.invite.value='https://akkaguwy.github.io/PINT/?screen=recaps&night='+invited.id;
+ await join.listeners.submit({preventDefault(){}});await tick();
+ assert.match(node('recap-status').textContent,/Joined!/);
+ assert.match(node('recap-saved').innerHTML,/Saturday with mates/,'Joined night appears in My nights');
+ assert.equal(JSON.parse(stored['pint-recap-nights'])[0].id,invited.id,'Joined night persists on this device');
+ assert.equal(join.elements.invite.value,'','Invite field clears after joining');
+ assert(reads>=3);console.log('Night recap checks passed: invite joining and saved nights, shared loading, safe rendering, photo capture, upload retry and idempotency.');
 })().catch(e=>{console.error(e);process.exitCode=1});
