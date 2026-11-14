@@ -24,10 +24,21 @@
   $('recap-share').addEventListener('click',async()=>{if(!current)return;const url=link(current.id);try{if(navigator.share)await navigator.share({title:current.title,text:'Add your photos, videos and memories to our PINT night.',url});else{await navigator.clipboard.writeText(url);message('Night link copied. Send it to your mates.')}}catch(e){if(e.name!=='AbortError'){ $('recap-share-link').focus();$('recap-share-link').select();message('Copy the night link below.')}}});
   $('recap-refresh').addEventListener('click',()=>current&&load(current.id));
   const previews=$('recap-preview');function clearPreview(){if(previewURL)URL.revokeObjectURL(previewURL);previewURL=null;previews.replaceChildren()}
-  function chooseMedia(e){requestId=crypto.randomUUID();clearPreview();const f=e.target.files[0];if(!f)return;chosenFile=f;if(f.size>30*1024*1024){message('Choose a video of 30 MB or less.');e.target.value='';chosenFile=null;return}previewURL=URL.createObjectURL(f);const el=document.createElement(f.type.startsWith('video/')?'video':'img');el.src=previewURL;if(el.tagName==='VIDEO'){el.controls=true;el.playsInline=true}else el.alt='Selected photo';previews.append(el);const label=document.createElement('p');label.textContent=f.name+' · '+(f.size/1024/1024).toFixed(1)+' MB';previews.append(label)}
+  function chooseMedia(e){
+    const f=e.target.files?.[0];
+    if(!f)return; // Cancelling the camera must not discard an earlier attachment.
+    const isPhoto=f.type.startsWith('image/');
+    const maxMB=isPhoto?20:30;
+    if(f.size>maxMB*1024*1024){message('Choose a '+(isPhoto?'photo':'video')+' of '+maxMB+' MB or less.');e.target.value='';return}
+    requestId=crypto.randomUUID();clearPreview();chosenFile=f;
+    previewURL=URL.createObjectURL(f);
+    const el=document.createElement(f.type.startsWith('video/')?'video':'img');
+    el.src=previewURL;if(el.tagName==='VIDEO'){el.controls=true;el.playsInline=true}else el.alt='Selected photo';
+    previews.append(el);
+    const label=document.createElement('p');label.textContent=f.name+' · '+(f.size/1024/1024).toFixed(1)+' MB';previews.append(label);
+    message(isPhoto?'Photo ready. Tap Add moment to upload it to this night.':'Video ready. Tap Add moment to upload it to this night.');
+  }
   [fileInput,$('recap-camera-photo'),$('recap-camera-video')].forEach(el=>el.addEventListener('change',chooseMedia));
-  $('recap-take-photo').addEventListener('click',()=>$('recap-camera-photo').click());
-  $('recap-record-video').addEventListener('click',()=>$('recap-camera-video').click());
   $('recap-remove-media').addEventListener('click',()=>{fileInput.value='';$('recap-camera-photo').value='';$('recap-camera-video').value='';chosenFile=null;clearPreview();requestId=crypto.randomUUID()});
   form.addEventListener('input',()=>{requestId=crypto.randomUUID()});
   form.elements.author.value=storage.get('pint-recap-author','')||window.PintProfile?.load()?.name||'';
