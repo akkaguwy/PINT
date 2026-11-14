@@ -643,6 +643,102 @@ window.PintDublinExtra = [
     "description": "Dublin pub suggestion — check opening hours and details before visiting."
   },
   {
+    "name": "Brannigan's",
+    "area": "Cathedral Street",
+    "address": "9 Cathedral Street, Dublin 1, D01 FH29, Ireland",
+    "description": "Traditional family-run Dublin pub with Guinness, food and live sport just off O'Connell Street."
+  },
+  {
+    "name": "Madigan's Earl Street",
+    "area": "North Earl Street",
+    "address": "25 North Earl Street, Dublin 1, D01 KX67, Ireland",
+    "description": "Traditional Irish pub just around the corner from Brannigan's, with food and pints."
+  },
+  {
+    "name": "Madigan's O'Connell Street",
+    "area": "O'Connell Street",
+    "address": "19 O'Connell Street Upper, Dublin 1, D01 E796, Ireland",
+    "description": "Lively traditional pub on O'Connell Street with music, food and a busy city-centre atmosphere."
+  },
+  {
+    "name": "Murray's Bar",
+    "area": "O'Connell Street",
+    "address": "33-34 O'Connell Street Upper, Dublin 1, D01 E0W2, Ireland",
+    "description": "Large Irish pub with live music, sport and food on Upper O'Connell Street."
+  },
+  {
+    "name": "Mooney's Bar & Restaurant",
+    "area": "Abbey Street",
+    "address": "4 Abbey Street Lower, Dublin 1, D01 V0Y3, Ireland",
+    "description": "Traditional pub and food spot close to O'Connell Street and the Abbey Theatre."
+  },
+  {
+    "name": "Briody's",
+    "area": "Marlborough Street",
+    "address": "97 Marlborough Street, Dublin 1, D01 PP92, Ireland",
+    "description": "Small no-frills traditional local known for its pints and relaxed atmosphere."
+  },
+  {
+    "name": "Piper's Corner",
+    "area": "Marlborough Street",
+    "address": "105-106 Marlborough Street, Dublin 1, D01 FD28, Ireland",
+    "description": "Traditional music pub on Marlborough Street; check session times before visiting."
+  },
+  {
+    "name": "The Sackville Lounge",
+    "area": "Sackville Place",
+    "address": "16 Sackville Place, Dublin 1, D01 V0C7, Ireland",
+    "description": "Intimate cocktail-led lounge just off O'Connell Street, known for Irish coffee."
+  },
+  {
+    "name": "The Silver Penny",
+    "area": "Abbey Street",
+    "address": "12A Abbey Street Lower, Dublin 1, Ireland",
+    "description": "Spacious Wetherspoon pub with budget food and drinks near the Abbey Street Luas stop."
+  },
+  {
+    "name": "Meaghers O'Connell Bridge",
+    "area": "Eden Quay",
+    "address": "3 Eden Quay, Dublin 1, D01 W896, Ireland",
+    "description": "Traditional-style pub on the north quays near O'Connell Bridge."
+  },
+  {
+    "name": "O'Connell's Bar",
+    "area": "Bachelors Walk",
+    "address": "30 Bachelors Walk, Dublin 1, D01 YP70, Ireland",
+    "description": "Lively Irish pub beside the Liffey, near O'Connell Bridge."
+  },
+  {
+    "name": "Lanigan's",
+    "area": "Eden Quay",
+    "address": "10-11 Eden Quay, Dublin 1, D01 V6F4, Ireland",
+    "description": "Central Dublin bar close to the river and Abbey Street."
+  },
+  {
+    "name": "The Big Romance",
+    "area": "Parnell Street",
+    "address": "98 Parnell Street, Dublin 1, D01 T2T3, Ireland",
+    "description": "Music-led Dublin bar with an eclectic atmosphere and carefully selected drinks."
+  },
+  {
+    "name": "The Wiley Fox",
+    "area": "Eden Quay",
+    "address": "28 Eden Quay, Dublin 1, D01 DE44, Ireland",
+    "description": "Lively city-centre pub and music venue overlooking the Liffey."
+  },
+  {
+    "name": "Fibber Magee's",
+    "area": "Parnell Street",
+    "address": "80-81 Parnell Street, Dublin 1, D01 CK74, Ireland",
+    "description": "Long-running rock and live music bar just off O'Connell Street."
+  },
+  {
+    "name": "O'Shea's Merchant",
+    "area": "Talbot Street",
+    "address": "19 Talbot Street, Dublin 1, D01 W303, Ireland",
+    "description": "Traditional Dublin pub along Talbot Street, within walking distance of the Spire."
+  },
+  {
     "name": "Bad Ass Cafe",
     "area": "Temple Bar",
     "address": "9-11 Crown Alley, Temple Bar, Dublin 2, Ireland",
