@@ -739,7 +739,7 @@ window.PintDublinExtra = [
     "description": "Long-running rock and live music bar just off O'Connell Street."
   },
   {
-    "name": "O'Shea's Merchant",
+    "name": "O'Shea's (Talbot Street)",
     "area": "Talbot Street",
     "address": "19 Talbot Street, Dublin 1, D01 W303, Ireland",
     "description": "Traditional Dublin pub along Talbot Street, within walking distance of the Spire."
