@@ -391,9 +391,7 @@
         <details class="recap-link"><summary>Night link &amp; sharing</summary><label>Send this link to your mates<input id="recap-share-link" readonly type="url" /></label><p>Anyone with this link can view and add moments. Names are supplied by contributors. Keep the link within your group.</p></details>
         <details class="recap-compose" open><summary>Add a moment</summary>
           <form id="recap-moment-form">
-            <div class="recap-capture"><button id="recap-take-photo" type="button" class="button button-gold">Take photo</button><button id="recap-record-video" type="button" class="button button-outline">Record video</button></div>
-            <input id="recap-camera-photo" type="file" accept="image/*" capture="environment" hidden /><input id="recap-camera-video" type="file" accept="video/*" capture="environment" hidden />
-            <div class="recap-capture"><label class="button button-gold">Take photo<input id="recap-camera-photo" type="file" accept="image/*" capture="environment" class="recap-camera-input" /></label><label class="button button-gold">Record video<input id="recap-camera-video" type="file" accept="video/*" capture="environment" class="recap-camera-input" /></label></div>
+            <div class="recap-capture"><label class="button button-gold">Take photo<input id="recap-camera-photo" type="file" accept="image/*" capture="environment" class="recap-camera-input" aria-label="Take a photo to add to this night" /></label><label class="button button-outline">Record video<input id="recap-camera-video" type="file" accept="video/*" capture="environment" class="recap-camera-input" aria-label="Record a video to add to this night" /></label></div>
             <label class="recap-file">Or choose a photo / video<input id="recap-media" type="file" accept="image/*,video/mp4,video/quicktime,video/webm" /></label>
             <p class="small-print">Use your phone’s camera or choose from your library. One photo or video per moment; videos up to 30 MB. You can add more afterwards.</p>
             <div id="recap-preview"></div><button id="recap-remove-media" type="button" class="button button-outline">Clear attachment</button>
@@ -557,13 +555,13 @@
   <script src="home.js?v=4.23" defer></script>
   <script src="custom_golf.js?v=4.19" defer></script>
   <script src="gallery.js?v=4.19" defer></script>
-  <script src="app.js?v=4.28" defer></script>
+  <script src="app.js?v=4.30" defer></script>
   <script src="shortlists.js?v=4.20" defer></script>
   <script src="pub_golf.js?v=4.19" defer></script>
   <script src="pwa.js?v=4.6" defer></script>
   <script src="bingo.js?v=4.25" defer></script>
   <script src="darts.js?v=4.28" defer></script>
-  <script src="recaps.js?v=4.29" defer></script>
+  <script src="recaps.js?v=4.30" defer></script>
   <script src="navigation.js?v=4.29" defer></script>
 </body>
 </html>
