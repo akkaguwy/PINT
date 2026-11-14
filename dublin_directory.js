@@ -743,5 +743,125 @@ window.PintDublinExtra = [
     "area": "Talbot Street",
     "address": "19 Talbot Street, Dublin 1, D01 W303, Ireland",
     "description": "Traditional Dublin pub along Talbot Street, within walking distance of the Spire."
+  },
+  {
+    "name": "Thomas Clarke's",
+    "area": "O'Connell Street",
+    "address": "35 O'Connell Street Upper, Dublin 1, D01 K2X5, Ireland",
+    "description": "Traditional-style bar next to Murray's on Upper O'Connell Street."
+  },
+  {
+    "name": "The Deer's Head",
+    "area": "Parnell Street",
+    "address": "151-152 Parnell Street, Dublin 1, D01 V9Y6, Ireland",
+    "description": "Central Dublin pub on Parnell Street near The Big Romance."
+  },
+  {
+    "name": "Hophouse",
+    "area": "Parnell Street",
+    "address": "160 Parnell Street, Dublin 1, D01 Y4A7, Ireland",
+    "description": "Pub and Korean food venue on Parnell Street."
+  },
+  {
+    "name": "Mema's",
+    "area": "Parnell Street",
+    "address": "155 Parnell Street, Dublin 1, D01 N8C7, Ireland",
+    "description": "Independent bar on Parnell Street with a relaxed neighbourhood feel."
+  },
+  {
+    "name": "The Morris Bar",
+    "area": "Talbot Street",
+    "address": "15 Talbot Street, Dublin 1, D01 V9P2, Ireland",
+    "description": "Characterful Talbot Street pub with live music and pizza."
+  },
+  {
+    "name": "Toddy's Bar & Brasserie",
+    "area": "O'Connell Street",
+    "address": "20-23 O'Connell Street Upper, Dublin 1, D01 C3W7, Ireland",
+    "description": "Bar and brasserie inside the Gresham Hotel on O'Connell Street."
+  },
+  {
+    "name": "The Brew Dock",
+    "area": "Amiens Street",
+    "address": "1 Amiens Street, Dublin 1, D01 FK19, Ireland",
+    "description": "Galway Bay Brewery pub near Busaras with craft beer and food."
+  },
+  {
+    "name": "Cassidy's Westmoreland Street",
+    "area": "Westmoreland Street",
+    "address": "27 Westmoreland Street, Dublin 2, D02 PX77, Ireland",
+    "description": "Atmospheric independent pub with craft beer and music close to O'Connell Bridge."
+  },
+  {
+    "name": "Doyle's",
+    "area": "College Street",
+    "address": "9 College Street, Dublin 2, Ireland",
+    "description": "Lively pub across from Trinity College known for music and late evenings."
+  },
+  {
+    "name": "Chaplin's",
+    "area": "Hawkins Street",
+    "address": "2 Hawkins Street, Dublin 2, D02 K590, Ireland",
+    "description": "Late-night central Dublin bar near the river and Trinity College."
+  },
+  {
+    "name": "Fitzgerald's Bar",
+    "area": "Aston Quay",
+    "address": "22 Aston Quay, Dublin 2, D02 FH28, Ireland",
+    "description": "Traditional Victorian-style bar with snugs on the River Liffey."
+  },
+  {
+    "name": "T.P. Smith's",
+    "area": "Jervis Street",
+    "address": "9-10 Jervis Street, Dublin 1, D01 XV66, Ireland",
+    "description": "Three-floor pub and restaurant near Jervis Luas stop."
+  },
+  {
+    "name": "The Hacienda",
+    "area": "Little Mary Street",
+    "address": "15 Little Mary Street, Dublin 1, Ireland",
+    "description": "Distinctive old-school bar on Little Mary Street; check admission arrangements."
+  },
+  {
+    "name": "Woolshed Bar & Kitchen",
+    "area": "Parnell Street",
+    "address": "Parnell Street, Dublin 1, D01 K5N8, Ireland",
+    "description": "Large sports bar with screens showing rugby, football and other matches."
+  },
+  {
+    "name": "Molloy's",
+    "area": "Talbot Street",
+    "address": "59 Talbot Street, Dublin 1, D01 K298, Ireland",
+    "description": "Traditional Dublin early house near Connolly Station known for Guinness."
+  },
+  {
+    "name": "Ryan's Bar & Cafe",
+    "area": "Store Street",
+    "address": "19 Store Street, Dublin 1, D01 NY02, Ireland",
+    "description": "Family-run traditional pub close to Busaras and Connolly Station."
+  },
+  {
+    "name": "O'Donoghue's Suffolk Street",
+    "area": "Suffolk Street",
+    "address": "15 Suffolk Street, Dublin 2, D02 C671, Ireland",
+    "description": "City-centre pub near Trinity and Grafton Street with food and music."
+  },
+  {
+    "name": "Tapped",
+    "area": "Nassau Street",
+    "address": "44-46 Nassau Street, Dublin 2, Ireland",
+    "description": "Large craft-beer bar with dozens of taps, live sport and late nights."
+  },
+  {
+    "name": "J.J. Grainger",
+    "area": "Talbot Street",
+    "address": "51 Talbot Street, Dublin 1, D01 P6K1, Ireland",
+    "description": "Traditional Talbot Street pub in Dublin's north city centre."
+  },
+  {
+    "name": "Le Monde Café Bar",
+    "area": "Store Street",
+    "address": "21 Store Street, Dublin 1, D01 T9R2, Ireland",
+    "description": "Cafe bar close to Busaras and Connolly Station."
   }
 ];
