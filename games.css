@@ -1,9 +1,10 @@
+body:not([data-screen="christmas"]) #home > #christmas,
 body:not([data-screen="games"]) #home > #games,
 body:not([data-screen="pub-golf"]) #home > #pub-golf,
 body:not([data-screen="pub-bingo"]) #home > #pub-bingo,
 body:not([data-screen="darts"]) #home > #darts,
-body:is([data-screen="games"], [data-screen="pub-golf"], [data-screen="pub-bingo"], [data-screen="darts"])
-  #home > :not(#games, #pub-golf, #pub-bingo, #darts) {
+body:is([data-screen="christmas"], [data-screen="games"], [data-screen="pub-golf"], [data-screen="pub-bingo"], [data-screen="darts"])
+  #home > :not(#christmas, #games, #pub-golf, #pub-bingo, #darts) {
   display: none;
 }
 
@@ -306,3 +307,14 @@ body:is([data-screen="games"], [data-screen="pub-golf"], [data-screen="pub-bingo
   border-color: #65e99a;
   transform: none;
 }
+
+.christmas-panel form {display:grid;gap:.8rem;margin:1rem 0}
+.christmas-panel [hidden] {display:none!important}
+.christmas-panel input {display:block;width:100%;margin-top:.4rem;padding:.7rem;font:inherit;border:1px solid var(--line);border-radius:8px}
+.christmas-panel h3 {margin:1.3rem 0 .4rem}
+#x-route {padding-left:1.8rem}
+#x-route li {padding:.65rem .2rem;border-bottom:1px solid var(--line)}
+#x-route small {display:block;color:var(--quiet)}
+#x-route button {margin:.35rem .3rem 0 0;padding:.45rem .65rem}
+#x-saved a {display:block;padding:.5rem 0}
+#x-status:not(:empty) {margin:1rem 0}

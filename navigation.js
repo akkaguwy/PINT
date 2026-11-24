@@ -1,9 +1,9 @@
 /* PINT screen router — navigation history stays in sync with the browser. */
 (() => {
   'use strict';
-  const names={home:'Home',explore:'Explore pubs',games:'Games','pub-golf':'Pub Golf','pub-bingo':'Pub Bingo',darts:'Darts Scorer','my-pints':'Community',gallery:'Photo Gallery',recaps:'Night Recaps',profile:'Profile'};
+  const names={home:'Home',explore:'Explore pubs',games:'Games',christmas:'12 Pubs of Christmas','pub-golf':'Pub Golf','pub-bingo':'Pub Bingo',darts:'Darts Scorer','my-pints':'Community',gallery:'Photo Gallery',recaps:'Night Recaps',profile:'Profile'};
   const allowed=new Set(Object.keys(names));
-  const gameHeadings={'pub-golf':'golf-heading','pub-bingo':'bingo-heading',darts:'darts-heading'};
+  const gameHeadings={christmas:'christmas-heading','pub-golf':'golf-heading','pub-bingo':'bingo-heading',darts:'darts-heading'};
   const gameScreens=new Set(['games',...Object.keys(gameHeadings)]);
   const fullScreens=new Set([...gameScreens,'recaps']);
   const mobileQuery=window.matchMedia('(max-width: 620px)');
@@ -22,6 +22,7 @@
     const url=new URL(location.href);
     url.searchParams.set('screen',id);
     if(id!=='pub-bingo')url.searchParams.delete('bingo');
+    if(id!=='christmas')url.searchParams.delete('outing');
     url.hash='';
     return url;
   }

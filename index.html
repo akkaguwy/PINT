@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="home.css?v=4.34" />
   <link rel="stylesheet" href="update.css?v=4.5" />
   <link rel="stylesheet" href="theme.css?v=4.19" />
-  <link rel="stylesheet" href="games.css?v=4.28" />
+  <link rel="stylesheet" href="games.css?v=4.37" />
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css?v=4.34" />
   <style>
     .pub-price{font-size:11px;margin-top:12px;min-height:18px}
@@ -96,7 +96,7 @@
           </button>
           <a href="#games" class="home-shortcut">
             <span class="home-shortcut-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 4v16M4 12h16"/></svg></span>
-            <span><strong>Games</strong><small>Golf, Bingo and Darts</small></span>
+            <span><strong>Games</strong><small>Christmas outings, Golf, Bingo and Darts</small></span>
             <span class="home-shortcut-arrow" aria-hidden="true">↗</span>
           </a>
           <button type="button" class="home-share-shortcut" data-feedback-open>
@@ -157,14 +157,48 @@
         <div class="games-picker">
           <span class="overline">PLAY WITH YOUR MATES</span>
           <h2 id="games-heading" tabindex="-1">Games</h2>
-          <p>Pick a Pub Golf route, play Pub Bingo or keep score at the dartboard.</p>
+          <p>Plan your Christmas pub route, play Pub Golf or Bingo, or keep score at the dartboard.</p>
           <label for="games-select">Choose a game</label>
           <select id="games-select">
             <option value="">Select a game</option>
+            <option value="christmas">12 Pubs of Christmas</option>
             <option value="pub-golf">Pub Golf</option>
             <option value="pub-bingo">Pub Bingo</option>
             <option value="darts">Darts Scorer</option>
           </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="games-section" id="christmas" aria-labelledby="christmas-heading">
+      <div class="shell">
+        <a class="games-back" href="#games">← All games</a>
+        <div class="games-picker christmas-panel">
+          <h2 id="christmas-heading" tabindex="-1">12 Pubs of Christmas</h2>
+          <div id="x-lobby">
+            <p>Start an outing and send the link to your mates. Everyone who joins can help choose the twelve stops.</p>
+            <div id="x-saved"></div>
+            <form id="x-create">
+              <label>Outing name<input name="title" maxlength="70" placeholder="Cowbridge Christmas crawl" required></label>
+              <label>Your name<input name="person" maxlength="40" autocomplete="nickname" required></label>
+              <button class="button button-gold">Start outing</button>
+            </form>
+          </div>
+          <div id="x-outing" hidden>
+            <h3 id="x-title"></h3><p id="x-members"></p>
+            <form id="x-join"><label>Your name<input name="person" maxlength="40" autocomplete="nickname" required></label>
+              <button class="button button-gold">Join outing</button></form>
+            <button id="x-invite" class="button button-outline">Share invite</button>
+            <input id="x-link" aria-label="Copy outing invitation link" readonly hidden>
+            <h3 id="x-count"></h3><ol id="x-route"></ol>
+            <form id="x-add" hidden>
+              <label>Find a pub<input id="x-search" type="search" placeholder="Search by pub, town or region"></label>
+              <label>Matching pubs<select id="x-options"></select></label>
+              <button class="button button-gold">Add stop</button>
+            </form>
+          </div>
+          <p id="x-status" role="status"></p>
+          <button id="x-back" class="button button-outline" hidden>My outings</button>
         </div>
       </div>
     </section>
@@ -548,7 +582,7 @@
   </aside>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="photos.js" defer></script>
-  <script src="shared.js?v=4.24" defer></script>
+  <script src="shared.js?v=4.37" defer></script>
   <script src="feedback.js?v=4.24" defer></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
   <script src="dublin_directory.js?v=4.36" defer></script>
@@ -559,13 +593,14 @@
   <script src="home.js?v=4.34" defer></script>
   <script src="custom_golf.js?v=4.19" defer></script>
   <script src="gallery.js?v=4.19" defer></script>
-  <script src="app.js?v=4.36" defer></script>
+  <script src="app.js?v=4.37" defer></script>
   <script src="shortlists.js?v=4.20" defer></script>
   <script src="pub_golf.js?v=4.19" defer></script>
   <script src="pwa.js?v=4.6" defer></script>
   <script src="bingo.js?v=4.25" defer></script>
   <script src="darts.js?v=4.28" defer></script>
   <script src="recaps.js?v=4.32" defer></script>
-  <script src="navigation.js?v=4.29" defer></script>
+  <script src="christmas.js?v=4.37" defer></script>
+  <script src="navigation.js?v=4.37" defer></script>
 </body>
 </html>
