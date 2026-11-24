@@ -27,6 +27,23 @@
   <link rel="stylesheet" href="games.css?v=4.37" />
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css?v=4.34" />
   <style>
+    .tom-roast {
+      grid-column: 1 / -1;
+      grid-row: span 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
+      padding: clamp(1rem, 3vw, 2rem);
+      border-radius: 16px;
+      background: #f6d487;
+      color: #203426;
+    }
+    .tom-roast h2 { margin: 0 0 .4rem; color: inherit; font: 800 clamp(1.5rem, 3vw, 2.25rem)/1.1 'Playfair Display', serif; }
+    .tom-roast p { margin: 0; max-width: 66ch; color: inherit; font-size: 1.08rem; line-height: 1.45; }
+    .tom-roast button { flex: none; min-height: 44px; padding: .65rem 1.1rem; border: 0; border-radius: 9px; background: #203426; color: white; font: inherit; font-weight: 700; cursor: pointer; }
+    @media (max-width: 890px) { .tom-roast { margin-bottom: 1rem; } }
+    @media (max-width: 620px) { .tom-roast { align-items: flex-start; flex-direction: column; gap: .75rem; } }
     .pub-price{font-size:11px;margin-top:12px;min-height:18px}
     .pub-metrics strong{font-size:17px}
     .pub-metrics span{font-size:8px}
@@ -54,6 +71,13 @@
   <div id="screen-header" class="screen-header shell" hidden><button id="screen-back" type="button" aria-label="Back">‹ <span>Back</span></button><strong id="screen-title">Explore pubs</strong></div>
   <main id="home">
     <section class="home-dashboard shell" id="home-dashboard" aria-labelledby="home-heading">
+      <section class="tom-roast" aria-labelledby="tom-joke-title">
+        <div>
+          <h2 id="tom-joke-title">Tom’s roast</h2>
+          <p id="tom-joke" aria-live="polite"></p>
+        </div>
+        <button id="tom-next-joke" type="button">Next joke <span aria-hidden="true">↻</span></button>
+      </section>
       <div class="home-destination" aria-label="Select a destination">
         <div class="home-destination-head">
           <div><span class="home-overline">CURRENT DESTINATION</span><h2 id="home-destination-label">Cardiff</h2></div>
@@ -112,11 +136,6 @@
             <span aria-hidden="true">↗</span>
           </button>
         </div>
-        <section aria-labelledby="tom-joke-title" style="margin-top:1.25rem">
-          <div class="home-section-title"><h2 id="tom-joke-title">Tom’s roast</h2></div>
-          <p id="tom-joke" aria-live="polite"></p>
-          <button id="tom-next-joke" class="button button-outline" type="button">Next joke</button>
-        </section>
       </section>
 
       <section class="home-overview" aria-label="Destination statistics">
@@ -616,18 +635,106 @@
   <script>
     (() => {
       const jokes = [
-        "Tom reckons he’s just big-boned. Fair play, I’ve never seen anyone else with a collarbone in a 38-inch waistcoat.",
-        "Tom’s mum came third in the pub quiz. Four teams offered to appeal on her behalf.",
-        "Tom’s been working on his six-pack. At the minute it’s still in the keg.",
-        "Tom’s mum said she liked a man in a tie. By half nine there wasn’t a curtain cord left in Cowbridge.",
-        "Tom asked if these jeans made him look fat. His belt asked if it could speak to a union rep first.",
-        "Tom’s mum asked if anyone had a light. Three lads switched on their phone torches and one set fire to a beer mat.",
-        "Tom said he’d lost a stone since last Christmas. His shirt buttons have asked for an independent recount.",
-        "Tom’s mum waved across the beer garden. Six blokes waved back. She was trying to get Tom to move the car.",
-        "Tom went as a slim bloke for Halloween. His mate asked when the costume was arriving.",
-        "Tom’s mum said she was into darts. Half the pub updated their dating profile to ‘semi-professional arrows player’.",
-        "Tom bought a shirt marked ‘slim fit’. So far it’s a lovely fit on the hanger.",
-        "Tom’s mum asked the barman what was on tap. He forgot the word ‘lager’."
+        "Tom told the barber, “Leave a bit at the front.” The barber said, “Got any on you?”",
+        "Tom’s shirt fits like a glove. Unfortunately he bought it to wear round his middle.",
+        "Tom showed the barber a photo from 2016. “Same again?” “Mate, I cut hair. I don’t restore listed buildings.”",
+        "Tom does have a six-pack. It’s just in the original protective packaging.",
+        "Tom went for a middle parting. The barber said, “Middle of what’s left or middle of where it used to be?”",
+        "Tom got into skinny jeans on Saturday. We’re hoping to get him out by Thursday.",
+        "Tom gets his fringe trimmed by post. It’s moved and he hasn’t got the new address.",
+        "Tom’s belt has more extra time than a Cardiff derby.",
+        "Tom put on a sweatband. For the first time in years his eyebrows had a neighbour.",
+        "Tom tried on a waistcoat. Lovely fit until the tailor asked him to breathe.",
+        "Tom asked if his hair was thinning. The barber held up a mirror. “You can ask them both yourself.”",
+        "Tom’s shirt lost a button in the pub. The darts scorer called out double top.",
+        "Tom still uses two-in-one shampoo. One drop on each side.",
+        "Tom calls it a dad bod. The belly’s old enough to have a dad bod of its own.",
+        "Tom’s fringe is like the last bus from Cowbridge. It was here a minute ago and now we’re walking.",
+        "Tom’s scales said he’d lost four pounds. Turned out he’d put his pint down.",
+        "Tom asked for a fade. The barber said, “Looks like somebody’s already started.”",
+        "Tom says his jeans shrank in the wash. Funny how his belt’s been in the same wash six times.",
+        "Tom let his hair down on Friday. Took him a second to work out which one.",
+        "Tom tried sucking his stomach in for the team photo. The photographer said, “Best make it a video, lads. He can’t hold that.”",
+        "Tom’s hairline is the only line in the pub that moves faster when you join it.",
+        "Tom’s idea of a light fitting is trying on a T-shirt with the lights off.",
+        "Tom said his forehead was catching the sun. Ten minutes later it was catching Radio Wales.",
+        "Tom said he’d gone down a size. Fair play, he was holding the tape measure in inches this time.",
+        "Tom asked the barber for more volume up front. He turned the radio up.",
+        "Tom’s belly gets to the bar first and still leaves him to pay for the round.",
+        "Tom still has a full head of hair in his passport. Border control asked when the other bloke was flying.",
+        "Tom bought a reversible belt. Lovely bit of kit. Now he can wear out the last hole in two colours.",
+        "Tom’s hairline has withdrawn so far Cardiff council have given the land back to the allotments.",
+        "Tom wore vertical stripes to look slimmer. From across the pub his shirt looked like a barrel with staves.",
+        "Tom tried a comb-over in Llangennith. One gust and the secret was out as far as Swansea.",
+        "Tom’s got a washboard stomach. Someone’s left the duvet on it.",
+        "Tom told us he was growing his hair out. Judging by the front, it’s fully moved out.",
+        "Tom asked for a fitted shirt. The tailor said, “Course. What are we fitting it over, the table?”",
+        "Tom gets nostalgic when he raises his eyebrows. They’re visiting the old hairline.",
+        "Tom’s trouser button came off during the quiz. First time all night our table got a point on the board.",
+        "Tom said his hairline was just maturing. At this rate it’ll be collecting its pension before Christmas.",
+        "Tom’s belt buckle’s engraved. None of us knew until he leaned backwards to finish his pint.",
+        "Tom asked for highlights. The barber read him the best bits from when he had a fringe.",
+        "Tom said he’d found the perfect angle for a slim photo. Took a lovely picture of the ceiling.",
+        "Tom’s hairline plays a very deep defensive line. At this point the keeper’s shouting at it to push up.",
+        "Tom says he’s in shape for rugby. Specifically, the ball.",
+        "Tom reckons his hair’s thicker when it’s wet. So is a tea towel, Tom, but you can still see the rail.",
+        "Tom ordered a made-to-measure suit online. The website asked if he’d accidentally entered the delivery postcode.",
+        "Tom bought hair wax in bulk. His great-grandchildren are sorted.",
+        "Tom wears a weightlifting belt to the pub. Calls it smart casual because it’s the black one.",
+        "Tom’s fringe took one look at his eyebrows and requested a long-distance relationship.",
+        "Tom’s been working on his core. It’s got the sort of insulation people get grants for.",
+        "Tom thought he’d found a grey hair at the front. We were more surprised he’d found a hair at the front.",
+        "Tom’s been counting his steps. From his belt buckle to the next usable hole it’s about twelve.",
+        "Tom wants curtains like he had in school. The barber can do the tiebacks.",
+        "Tom asked for slimming mirrors in the changing room. The lad at the till offered panorama mode.",
+        "Tom insists it’s a widow’s peak. It’s more of a solitary bloke on a hill these days.",
+        "Tom bent down to tie a lace and his shirt rode up. The barman rang the bell for last orders on crop tops.",
+        "Tom put a pencil behind his ear. Finally, something holding the hairline up at the sides.",
+        "Tom’s got abs of steel. Judging by the finish, they’re upholstered.",
+        "Tom checks his hairline with two mirrors. One for today, one angled towards last year.",
+        "Tom wore a Christmas jumper with a reindeer on it. By pudding it looked more like a moose.",
+        "Tom says he gets his best ideas in the shower. Plenty of clear headspace up front.",
+        "Tom tried a French tuck. France have requested the rest of the shirt.",
+        "Tom said he was bringing his fringe back. Somebody get the reversing camera on.",
+        "Tom let his belt out after dinner. You’d swear Wales had scored, the relief in that room.",
+        "Tom’s barber offered to square off his temples. Tom asked if the quote included scaffolding.",
+        "Tom says he can touch his toes. We’ve seen him do it. He takes his shoes off and brings them up to the table.",
+        "Tom’s hair gel promises 24-hour hold. We’re more interested in where it was for the last five years.",
+        "Tom tried on a double-breasted jacket. The two sides are still texting about where to meet.",
+        "Tom says the hair at the front is lying flat. Fair play, you’d never know there was anyone home.",
+        "Tom’s shirt says “one size fits all”. He keeps the receipt tucked in the gap between the buttons.",
+        "Tom drew a little arrow on his shampoo saying “start here”. Has to move it back every payday.",
+        "Tom reckons his belly is all muscle memory. It seems to remember every Sunday roast individually.",
+        "Tom’s hairline would be brilliant at pub golf. It’s permanently three holes ahead of the group.",
+        "Tom put his pint on his belly to prove it was level. Asked for a beer mat so it wouldn’t mark the finish.",
+        "Tom got a haircut before the wedding. “Anything off the front?” “Bit late to ask, isn’t it?”",
+        "Tom’s jeans are labelled “relaxed fit”. Nobody’s told the zip.",
+        "Tom left the barbers with a sharp new hairline. From the side you could see where the biro ran out.",
+        "Tom calls his stomach a beer belly. Bit rude to the pies that put the early work in.",
+        "Tom’s barber asked where he usually parts his hair. “Just above the left eye.” “Historically, yes.”",
+        "Tom bought a jacket with a bit of room to grow. It was a brilliant investment for about a fortnight.",
+        "Tom’s fringe went missing on a night out. The recap photos put its last known location somewhere in 2019.",
+        "Tom went as a six-pack for fancy dress. Wore his usual shirt and told us it was a blind tasting.",
+        "Tom’s hairline is doing the twelve pubs of Christmas. His eyebrows are still ordering in pub one.",
+        "Tom said he’d tightened his belt this month. Financially, obviously. The leather one’s on annual leave.",
+        "Tom says he washes his hair in no time. It’s drying the surrounding patio that takes a while.",
+        "Tom tried a tape measure round his waist. The bit that says “please retract slowly” felt quite personal.",
+        "Tom still asks for short back and sides. At this point that’s also a fairly detailed inventory.",
+        "Tom’s shirt came untucked at the front. The back’s still clinging on for the appearance fee.",
+        "Tom’s got the same hairstyle he had at sixteen. It’s just sitting a couple of postcodes further north.",
+        "Tom dropped a crisp onto his stomach. Picked it up and said, “Love a pub with table service.”",
+        "Tom bought a fringe trimmer. The bloke at the till asked if it was a gift.",
+        "Tom said his weight was evenly distributed. To be fair, his jumper’s stretched in all four compass directions.",
+        "Tom’s hairline has finally settled down. Bought a nice little place overlooking the back of his neck.",
+        "Tom said his old rugby kit still fits. He produced one sock and ended the press conference.",
+        "Tom looked at his old student ID and said, “I miss those days.” His forehead’s about the only thing that’s had an extension.",
+        "Tom asked if the pub did halves. His belt said, “Finally, someone’s listening.”",
+        "Tom’s side parting used to need a comb. These days he just points left and asks everyone to imagine it.",
+        "Tom’s put a new hole in his belt every Christmas. You can date it like a tree.",
+        "Tom told the barber he wanted a number two on top. “I usually call them Gareth and Rhys, but it’s your head.”",
+        "Tom’s shirt buttons should be on the group chat. They’re the only ones who know when he’s genuinely fit to burst.",
+        "Tom’s forehead and his belly have started a pub quiz team. Called themselves the Expansion Pack.",
+        "Tom asked what was going up top and coming out round the middle. The barber said, “Are we still doing riddles or shall I fetch the gown?”"
       ];
       const key = 'pint-tom-joke-v1';
       let index = Math.floor(Math.random() * jokes.length);
