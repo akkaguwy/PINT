@@ -112,6 +112,11 @@
             <span aria-hidden="true">↗</span>
           </button>
         </div>
+        <section aria-labelledby="tom-joke-title" style="margin-top:1.25rem">
+          <div class="home-section-title"><h2 id="tom-joke-title">Tom’s roast</h2></div>
+          <p id="tom-joke" aria-live="polite"></p>
+          <button id="tom-next-joke" class="button button-outline" type="button">Next joke</button>
+        </section>
       </section>
 
       <section class="home-overview" aria-label="Destination statistics">
@@ -608,5 +613,36 @@
   <script src="recaps.js?v=4.32" defer></script>
   <script src="christmas.js?v=4.38" defer></script>
   <script src="navigation.js?v=4.37" defer></script>
+  <script>
+    (() => {
+      const jokes = [
+        "Tom reckons he’s just big-boned. Fair play, I’ve never seen anyone else with a collarbone in a 38-inch waistcoat.",
+        "Tom’s mum came third in the pub quiz. Four teams offered to appeal on her behalf.",
+        "Tom’s been working on his six-pack. At the minute it’s still in the keg.",
+        "Tom’s mum said she liked a man in a tie. By half nine there wasn’t a curtain cord left in Cowbridge.",
+        "Tom asked if these jeans made him look fat. His belt asked if it could speak to a union rep first.",
+        "Tom’s mum asked if anyone had a light. Three lads switched on their phone torches and one set fire to a beer mat.",
+        "Tom said he’d lost a stone since last Christmas. His shirt buttons have asked for an independent recount.",
+        "Tom’s mum waved across the beer garden. Six blokes waved back. She was trying to get Tom to move the car.",
+        "Tom went as a slim bloke for Halloween. His mate asked when the costume was arriving.",
+        "Tom’s mum said she was into darts. Half the pub updated their dating profile to ‘semi-professional arrows player’.",
+        "Tom bought a shirt marked ‘slim fit’. So far it’s a lovely fit on the hanger.",
+        "Tom’s mum asked the barman what was on tap. He forgot the word ‘lager’."
+      ];
+      const key = 'pint-tom-joke-v1';
+      let index = Math.floor(Math.random() * jokes.length);
+      try {
+        const previous = localStorage.getItem(key);
+        if (previous !== null && /^\d+$/.test(previous)) index = (Number(previous) + 1) % jokes.length;
+      } catch {}
+      function showJoke() {
+        document.getElementById('tom-joke').textContent = jokes[index];
+        try { localStorage.setItem(key, String(index)); } catch {}
+        index = (index + 1) % jokes.length;
+      }
+      document.getElementById('tom-next-joke').addEventListener('click', showJoke);
+      showJoke();
+    })();
+  </script>
 </body>
 </html>
