@@ -35,6 +35,17 @@
       a.textContent = 'Reopen ' + item.title;
       $('saved').append(a);
     }
+    if (!$('saved').childElementCount) $('saved').textContent = 'No outings saved on this device yet. Start one or open an invite from a mate.';
+  }
+  function showPanel(panel) {
+    for (const name of ['saved','create']) {
+      const open = name === panel;
+      $(name).hidden = !open;
+      $('show-' + name).setAttribute('aria-expanded', String(open));
+    }
+  }
+  for (const name of ['saved','create']) {
+    $('show-' + name).onclick = () => showPanel($(name).hidden ? name : null);
   }
   function options() {
     if (!outing) return;
@@ -111,6 +122,7 @@
     $('search').value = '';
     message(activeId ? 'Loading outing…' : '');
     $('status').dataset.loading = '1';
+    showPanel(null);
     listSaved();
     refresh();
   }
@@ -169,7 +181,11 @@
       if (error.name !== 'AbortError') { $('link').hidden = false; $('link').select(); message('Copy the invite link.'); }
     }
   };
-  $('back').onclick = () => switchTo(null);
+  $('back').onclick = () => {
+    switchTo(null);
+    showPanel('saved');
+    $('show-saved').focus();
+  };
   document.addEventListener('pint:screen-change', activate);
   document.addEventListener('visibilitychange', refresh);
   window.setInterval(refresh, 5000);
