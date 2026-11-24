@@ -1,0 +1,47 @@
+/* Seasonal colours feed PINT's existing shared component palette. */
+:root[data-season="winter"] {
+  --paper:#eff3f5; --linen:#dfe8eb; --green:#24485a; --green-light:#e1ecf0;
+  --season-glow:#466578; --season-trim:#c2e1eb; --season-mark:"❄";
+}
+:root[data-season="spring"], :root[data-season="stdavid"] {
+  --paper:#f5f4e6; --linen:#e7ead6; --green:#355533; --green-light:#e4efdb;
+  --season-glow:#546738; --season-trim:#f7dc87; --season-mark:"✿";
+}
+:root[data-season="stdavid"] { --season-mark:"🌼"; --season-trim:#ffd44a; --brass:#805711; }
+:root[data-season="stpatrick"] {
+  --paper:#f0f5e9; --linen:#dfead8; --green:#164c36; --green-light:#dcefe2;
+  --season-glow:#2e6342; --season-trim:#dfcb81; --season-mark:"☘";
+}
+:root[data-season="summer"] {
+  --paper:#fff4dd; --linen:#f5e7c9; --green:#245751; --green-light:#e0eeea;
+  --season-glow:#426966; --season-trim:#ffe2a0; --season-mark:"☀";
+}
+:root[data-season="autumn"] {
+  --paper:#f8efe3; --linen:#efdfcb; --green:#643c2b; --green-light:#f1e4d7;
+  --season-glow:#80523b; --season-trim:#edbb75; --season-mark:"🍂";
+}
+:root[data-season="halloween"] {
+  --paper:#f6ede4; --linen:#eaded6; --green:#473247; --green-light:#eee2ec;
+  --season-glow:#634356; --season-trim:#ffbe79; --season-mark:"🎃";
+}
+:root[data-season="christmas"] {
+  --paper:#f8f1e5; --linen:#ede2cf; --green:#174536; --green-light:#e1ecdf;
+  --brass:#8a333b; --season-glow:#345541; --season-trim:#f3ce84; --season-mark:"🎄";
+}
+html[data-season] .home-feature { background:linear-gradient(115deg,var(--green) 44%,var(--season-glow)); }
+html[data-season] .home-feature-ring { position:relative; }
+html[data-season] .home-feature-ring::after {
+  content:var(--season-mark); position:absolute; top:2%; right:0; display:grid; place-items:center;
+  width:1.45em; height:1.45em; font:1.75rem/1 Georgia,serif; color:var(--season-trim);
+  border:1px solid currentColor; border-radius:50%; background:var(--green); transform:rotate(8deg);
+}
+html[data-season] .home-feature-button { background:var(--season-trim); color:var(--green); }
+html[data-season] .home-feature-kicker, html[data-season] .home-feature-ring>span span { color:var(--season-trim); }
+html[data-season="christmas"] .home-feature::after, html[data-season="christmas"] .topbar {
+  background-image:radial-gradient(circle at 6px 4px,#bb4148 0 2px,transparent 3px),
+    radial-gradient(circle at 20px 4px,#e3b854 0 2px,transparent 3px),
+    radial-gradient(circle at 34px 4px,#659578 0 2px,transparent 3px);
+  background-size:42px 9px; background-repeat:repeat-x;
+}
+html[data-season="christmas"] .home-feature::after { height:9px; background-color:transparent; }
+html[data-season="christmas"] .brand-mark { background:#84323c; }
