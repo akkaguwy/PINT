@@ -28,6 +28,8 @@
     addReview: review => call('/api/reviews', review),
     addPub: pub => call('/api/pubs', pub),
     sendFeedback: feedback => call('/api/feedback', feedback),
+    christmas: id => call('/api/christmas?id=' + encodeURIComponent(id)),
+    christmasWrite: payload => call('/api/christmas', payload),
     customRound: id => call('/api/custom-golf?id=' + encodeURIComponent(id)),
     publishCustomRound: payload => call('/api/custom-golf', payload),
     shortlist: id => call('/api/shortlists?id=' + encodeURIComponent(id)),
