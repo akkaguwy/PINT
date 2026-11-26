@@ -31,8 +31,7 @@
       grid-column: 1 / -1;
       grid-row: span 1 / 1;
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
+      grid-template-columns: minmax(0, 1fr);
     }
     .tom-roast {
       min-width: 0;
@@ -48,9 +47,6 @@
     .tom-roast h2 { margin: 0 0 .4rem; color: inherit; font: 800 clamp(1.5rem, 3vw, 2.25rem)/1.1 'Playfair Display', serif; }
     .tom-roast p { margin: 0; max-width: 66ch; color: inherit; font-size: 1.08rem; line-height: 1.45; }
     .tom-roast button { flex: none; min-height: 44px; padding: .65rem 1.1rem; border: 0; border-radius: 9px; background: #203426; color: white; font: inherit; font-weight: 700; cursor: pointer; }
-    .tom-mum-roast { background: #e9c8d7; color: #402538; }
-    .tom-mum-roast button { background: #402538; }
-    @media (max-width: 1100px) { .tom-joke-sections { grid-template-columns: minmax(0, 1fr); } }
     @media (max-width: 890px) { .tom-joke-sections { margin-bottom: 1rem; } }
     @media (max-width: 620px) { .tom-roast { align-items: flex-start; flex-direction: column; gap: .75rem; } }
     .pub-price{font-size:11px;margin-top:12px;min-height:18px}
@@ -87,13 +83,6 @@
             <p id="tom-joke" aria-live="polite"></p>
           </div>
           <button id="tom-next-joke" type="button">Next joke <span aria-hidden="true">↻</span></button>
-        </section>
-        <section class="tom-roast tom-mum-roast" aria-labelledby="tom-mum-joke-title">
-          <div>
-            <h2 id="tom-mum-joke-title">Tom’s mum jokes</h2>
-            <p id="tom-mum-joke" aria-live="polite"></p>
-          </div>
-          <button id="tom-mum-next-joke" type="button">Next joke <span aria-hidden="true">↻</span></button>
         </section>
       </div>
       <div class="home-destination" aria-label="Select a destination">
@@ -641,7 +630,7 @@
   <script src="home.js?v=4.34" defer></script>
   <script src="custom_golf.js?v=4.19" defer></script>
   <script src="gallery.js?v=4.19" defer></script>
-  <script src="app.js?v=4.42" defer></script>
+  <script src="app.js?v=4.43" defer></script>
   <script src="shortlists.js?v=4.20" defer></script>
   <script src="pub_golf.js?v=4.19" defer></script>
   <script src="pwa.js?v=4.6" defer></script>
@@ -752,59 +741,57 @@
         "Tom told the barber he wanted a number two on top. “I usually call them Gareth and Rhys, but it’s your head.”",
         "Tom’s shirt buttons should be on the group chat. They’re the only ones who know when he’s genuinely fit to burst.",
         "Tom’s forehead and his belly have started a pub quiz team. Called themselves the Expansion Pack.",
-        "Tom asked what was going up top and coming out round the middle. The barber said, “Are we still doing riddles or shall I fetch the gown?”"
-      ];
-      const mumJokes = [
-        "Tom’s mum walked into the pub and suddenly every lad remembered his manners.",
-        "Tom asked why we’re always round his house. Mate, it’s not for the Xbox.",
-        "Tom’s mum is the only reason the group chat has ever agreed on a venue.",
-        "Tom said his mum was doing a Sunday roast. We cancelled a lads’ weekend to attend.",
-        "Tom’s mum said we were welcome anytime. The boys have started discussing a season ticket.",
-        "Tom thinks we’re his mates. Technically we’re all on a very long audition to be his stepdad.",
-        "Tom’s mum walked past the pub quiz and half our team forgot the capital of France.",
-        "Tom said his mum was single. The group chat briefly became LinkedIn.",
-        "Tom’s mum asked who wanted a cup of tea. Six lads offered to put the kettle on and one started washing the car.",
-        "Tom invited us over to watch the rugby. His mum got more attention than the referee.",
-        "Tom’s mum complimented my shirt. I’ve worn it to every social occasion since.",
-        "Tom’s mum is the only person who can get the whole group to turn up on time.",
-        "Tom asked why I was dressed smart to pick him up. No reason, mate. Is your mum in?",
-        "Tom’s mum said she liked a man with ambition. I updated my CV before finishing my pint.",
-        "Tom’s mum is the real reason we keep suggesting pre-drinks at his.",
-        "Tom’s mum waved at the boys. We’ve been arguing for three days about who she waved at.",
-        "Tom said his mum makes a lovely dinner. I’m already practicing how to say ‘lovely to see you again’.",
-        "Tom’s mum could get the lads to help move a sofa on a Saturday. Tom can’t even get us to answer the group chat.",
-        "Tom put his mum on speaker. Suddenly the pub sounded like a library.",
-        "Tom’s mum asked if anyone needed a lift. The lads abandoned a perfectly good taxi.",
-        "Tom said his mum was joining us for one drink. Everybody mysteriously had time for another.",
-        "Tom’s mum asked what we do for work. Four of the boys instantly promoted themselves.",
-        "Tom’s mum said she loved a good Sunday walk. The boys have suddenly become hiking enthusiasts.",
-        "Tom’s mum told us to make ourselves at home. That was a dangerous thing to say to the future stepdad committee.",
-        "Tom’s mum said ‘see you soon’. The boys have put it in the calendar.",
-        "Tom asked me to be his best man. Bit awkward if I’m already sitting at the parents’ table.",
-        "Tom’s mum joined the pub quiz team. For once the lads were trying to impress someone with their general knowledge.",
-        "Tom said his mum was putting the Christmas decorations up. Three of us arrived with ladders and a fourth brought mistletoe.",
-        "Tom’s mum asked who was the designated driver. Suddenly we were a group of six teetotallers.",
-        "Tom asked why I bought flowers on the way to his birthday. They’re not for you, big man.",
-        "Tom’s mum said she needed someone to open a jar. The boys formed an orderly queue like it was a job interview.",
-        "Tom’s mum posted a family photo. The lads spent longer looking for themselves than looking for Tom.",
-        "Tom’s mum said she fancied a change of scenery. I’ve prepared a PowerPoint on weekend breaks for two.",
-        "Tom’s mum turned up to watch the darts. Suddenly every throw had a follow-through worthy of the world championship.",
-        "Tom complained that I never bring anything when I visit. Funny, your mum seemed delighted with the chocolates.",
-        "Tom asked what I wanted for Christmas. I said a place at his family dinner table.",
-        "Tom’s mum said she liked a good sense of humour. I’ve been rehearsing my pub quiz material in the mirror.",
-        "Tom’s mum was looking for a restaurant recommendation. I sent a table-for-two booking link. Efficient, really.",
-        "Tom’s mum mentioned she needed the garden tidied. The lads arrived looking like a full episode of Garden Rescue.",
-        "Tom said his mum was picking him up at eleven. Nobody in our group has ever been so enthusiastic about last orders.",
-        "Tom’s mum said she liked the sea. I nearly bought a boat before she finished the sentence.",
-        "Tom’s mum said she was making pancakes. The boys have declared Shrove Tuesday a bank holiday.",
-        "Tom asked if I’d be up for another family barbecue. I’m available for weddings, christenings and bin day too.",
-        "Tom’s mum said she liked my aftershave. I’ve cancelled every other subscription to fund it.",
-        "Tom’s mum asked me to pass the salt. Best conversation I’ve had all week.",
-        "Tom’s mum mentioned she liked live music. The lads suddenly started a band with absolutely no instruments.",
-        "Tom’s mum asked if we could help with the shopping. Never seen six blokes fight over who gets to carry the milk.",
-        "Tom’s mum said she was going to the pub garden. The boys developed a sudden appreciation for horticulture.",
-        "Tom asked why we’d put his mum down as captain for pub golf. She’s clearly the only person we’re prepared to take instructions from.",
-        "Tom’s mum asked what our plans were for the weekend. Five lads said ‘nothing’, despite having non-refundable flights."
+        "Tom asked what was going up top and coming out round the middle. The barber said, “Are we still doing riddles or shall I fetch the gown?”",
+        "Tom’s BMI doesn’t need a calculator. It needs a building surveyor.",
+        "Tom stood on the bathroom scales and they asked him to select a vehicle class.",
+        "Tom’s belt isn’t a fashion accessory. It’s a retaining structure.",
+        "Tom said he was cutting. We assumed he meant the cake.",
+        "Tom ordered a light lunch. The waiter asked whether he meant the starter or the lighting above the buffet.",
+        "Tom went to the gym to work on his shoulders. They’re already carrying the entire takeaway industry.",
+        "Tom’s got a great centre of gravity. It’s the surrounding suburbs that worry us.",
+        "Tom’s jeans have more tension than the final leg of the World Darts Championship.",
+        "Tom’s idea of portion control is making sure nobody else gets a portion.",
+        "Tom said he was on a liquid diet. The gravy boat was absolutely delighted.",
+        "Tom’s shirt has a slim-fit label. That’s a statement of ambition rather than a description of current conditions.",
+        "Tom doesn’t need a beer garden. He needs a beer allotment with planning permission.",
+        "Tom’s got a personal trainer. The poor bloke’s asked for a second opinion from a structural engineer.",
+        "Tom’s belt buckle has seen things no piece of metal should have to endure.",
+        "Tom tried a calorie deficit. The deficit filed a missing persons report.",
+        "Tom’s got a body like a pub. The extension at the front was definitely built without permission.",
+        "Tom asked for a table for one. The waiter brought the same table and removed the chairs either side.",
+        "Tom’s fitness watch counted the walk to the fridge as a commute.",
+        "Tom said he’d dropped two stone. Turns out he’d put his shopping down.",
+        "Tom’s stomach has got a better pension plan than him. It’s been growing steadily for years.",
+        "Tom’s belt is sponsored by the same people who make ratchet straps.",
+        "Tom wore a compression top. It’s now officially a pressure vessel.",
+        "Tom’s idea of a recovery meal is recovering the chips everyone else left on their plates.",
+        "Tom doesn’t get dressed in the morning. He negotiates a ceasefire with his wardrobe.",
+        "Tom told us he was trying intermittent fasting. There was a full seventeen seconds between the starter and the main.",
+        "Tom’s the only bloke who needs a booster seat at the bar and an extension at the waist.",
+        "Tom’s built like a pint that someone accidentally ordered in a half-pint glass.",
+        "Tom’s height and waist are competing in different divisions. Only one of them is going up.",
+        "Tom’s stood on his dignity before. Still couldn’t see over the bar.",
+        "Tom’s the only bloke who can get a low centre of gravity without bending his knees.",
+        "Tom went to the tailor for a longer shirt. The tailor suggested turning the fabric sideways.",
+        "Tom was told to stand tall. He said he’d already exhausted every available option.",
+        "Tom’s growth spurt got the wrong postcode and turned up at his waist.",
+        "Tom’s the reason the pub has a separate menu for small plates and large portions.",
+        "Tom said he was going up in the world. The rest of us thought he’d finally found a step ladder.",
+        "Tom’s got the dimensions of a rugby ball and the turning circle of the team bus.",
+        "Tom tried to look down on us. Had to ask the barman for a crate.",
+        "Tom’s height is measured in feet. His belt is measured in engineering tolerances.",
+        "Tom says he’s compact. Mate, compact things are supposed to save space.",
+        "Tom could hide behind a bar stool if the stool came with an extension on either side.",
+        "Tom’s wearing elevator shoes. His waistline is already on the penthouse floor.",
+        "Tom says good things come in small packages. His tailor says the package is anything but small.",
+        "Tom’s height stopped developing years ago. Apparently the rest of him never received the email.",
+        "Tom went for a vertical stripe to add height. The stripe took a scenic detour round his belly.",
+        "Tom’s got a short reach in darts. Luckily his stomach can collect the scores from the board.",
+        "Tom said he was built for speed. The only thing aerodynamic about him is the receding hairline.",
+        "Tom bought a tape measure for his height. The bloke at the till asked if he wanted the industrial one for his waist.",
+        "Tom’s the only person who can be overlooked in a crowd and still take up most of the group photo.",
+        "Tom tried to reach the top shelf. The biscuits on the bottom shelf were never in danger of being overlooked.",
+        "Tom’s built like somebody clicked ‘resize horizontally’ and forgot to lock the aspect ratio."
       ];
       function initJokeRotation(jokes, key, textId, buttonId) {
         const target = document.getElementById(textId);
@@ -824,7 +811,6 @@
         showJoke();
       }
       initJokeRotation(roastJokes, 'pint-tom-roast-v2', 'tom-joke', 'tom-next-joke');
-      initJokeRotation(mumJokes, 'pint-tom-mum-joke-v1', 'tom-mum-joke', 'tom-mum-next-joke');
     })();
   </script>
 </body>
