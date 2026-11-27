@@ -32,6 +32,7 @@
       grid-row: span 1 / 1;
       display: grid;
       grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
     }
     .tom-roast {
       min-width: 0;
@@ -47,6 +48,8 @@
     .tom-roast h2 { margin: 0 0 .4rem; color: inherit; font: 800 clamp(1.5rem, 3vw, 2.25rem)/1.1 'Playfair Display', serif; }
     .tom-roast p { margin: 0; max-width: 66ch; color: inherit; font-size: 1.08rem; line-height: 1.45; }
     .tom-roast button { flex: none; min-height: 44px; padding: .65rem 1.1rem; border: 0; border-radius: 9px; background: #203426; color: white; font: inherit; font-weight: 700; cursor: pointer; }
+    .tom-mum-roast { background: #e9c8d7; color: #402538; }
+    .tom-mum-roast button { background: #402538; }
     @media (max-width: 890px) { .tom-joke-sections { margin-bottom: 1rem; } }
     @media (max-width: 620px) { .tom-roast { align-items: flex-start; flex-direction: column; gap: .75rem; } }
     .pub-price{font-size:11px;margin-top:12px;min-height:18px}
@@ -83,6 +86,13 @@
             <p id="tom-joke" aria-live="polite"></p>
           </div>
           <button id="tom-next-joke" type="button">Next joke <span aria-hidden="true">↻</span></button>
+        </section>
+        <section class="tom-roast tom-mum-roast" aria-labelledby="tom-mum-joke-title">
+          <div>
+            <h2 id="tom-mum-joke-title">Tom’s mum jokes</h2>
+            <p id="tom-mum-joke" aria-live="polite"></p>
+          </div>
+          <button id="tom-mum-next-joke" type="button">Next joke <span aria-hidden="true">↻</span></button>
         </section>
       </div>
       <div class="home-destination" aria-label="Select a destination">
@@ -993,6 +1003,58 @@
         "Tom's got a figure eight: two tits at the top and an absolutely enormous fucking loop at the bottom.",
         "Tom's forehead, tits and belly are all expanding. Unfortunately the hair and legs never got the memo."
       ];
+      const mumJokes = [
+        "Tom’s mum walked into the pub and suddenly every lad remembered his manners.",
+        "Tom asked why we’re always round his house. Mate, it’s not for the Xbox.",
+        "Tom’s mum is the only reason the group chat has ever agreed on a venue.",
+        "Tom said his mum was doing a Sunday roast. We cancelled a lads’ weekend to attend.",
+        "Tom’s mum said we were welcome anytime. The boys have started discussing a season ticket.",
+        "Tom thinks we’re his mates. Technically we’re all on a very long audition to be his stepdad.",
+        "Tom’s mum walked past the pub quiz and half our team forgot the capital of France.",
+        "Tom said his mum was single. The group chat briefly became LinkedIn.",
+        "Tom’s mum asked who wanted a cup of tea. Six lads offered to put the kettle on and one started washing the car.",
+        "Tom invited us over to watch the rugby. His mum got more attention than the referee.",
+        "Tom’s mum complimented my shirt. I’ve worn it to every social occasion since.",
+        "Tom’s mum is the only person who can get the whole group to turn up on time.",
+        "Tom asked why I was dressed smart to pick him up. No reason, mate. Is your mum in?",
+        "Tom’s mum said she liked a man with ambition. I updated my CV before finishing my pint.",
+        "Tom’s mum is the real reason we keep suggesting pre-drinks at his.",
+        "Tom’s mum waved at the boys. We’ve been arguing for three days about who she waved at.",
+        "Tom said his mum makes a lovely dinner. I’m already practicing how to say ‘lovely to see you again’.",
+        "Tom’s mum could get the lads to help move a sofa on a Saturday. Tom can’t even get us to answer the group chat.",
+        "Tom put his mum on speaker. Suddenly the pub sounded like a library.",
+        "Tom’s mum asked if anyone needed a lift. The lads abandoned a perfectly good taxi.",
+        "Tom said his mum was joining us for one drink. Everybody mysteriously had time for another.",
+        "Tom’s mum asked what we do for work. Four of the boys instantly promoted themselves.",
+        "Tom’s mum said she loved a good Sunday walk. The boys have suddenly become hiking enthusiasts.",
+        "Tom’s mum told us to make ourselves at home. That was a dangerous thing to say to the future stepdad committee.",
+        "Tom’s mum said ‘see you soon’. The boys have put it in the calendar.",
+        "Tom asked me to be his best man. Bit awkward if I’m already sitting at the parents’ table.",
+        "Tom’s mum joined the pub quiz team. For once the lads were trying to impress someone with their general knowledge.",
+        "Tom said his mum was putting the Christmas decorations up. Three of us arrived with ladders and a fourth brought mistletoe.",
+        "Tom’s mum asked who was the designated driver. Suddenly we were a group of six teetotallers.",
+        "Tom asked why I bought flowers on the way to his birthday. They’re not for you, big man.",
+        "Tom’s mum said she needed someone to open a jar. The boys formed an orderly queue like it was a job interview.",
+        "Tom’s mum posted a family photo. The lads spent longer looking for themselves than looking for Tom.",
+        "Tom’s mum said she fancied a change of scenery. I’ve prepared a PowerPoint on weekend breaks for two.",
+        "Tom’s mum turned up to watch the darts. Suddenly every throw had a follow-through worthy of the world championship.",
+        "Tom complained that I never bring anything when I visit. Funny, your mum seemed delighted with the chocolates.",
+        "Tom asked what I wanted for Christmas. I said a place at his family dinner table.",
+        "Tom’s mum said she liked a good sense of humour. I’ve been rehearsing my pub quiz material in the mirror.",
+        "Tom’s mum was looking for a restaurant recommendation. I sent a table-for-two booking link. Efficient, really.",
+        "Tom’s mum mentioned she needed the garden tidied. The lads arrived looking like a full episode of Garden Rescue.",
+        "Tom said his mum was picking him up at eleven. Nobody in our group has ever been so enthusiastic about last orders.",
+        "Tom’s mum said she liked the sea. I nearly bought a boat before she finished the sentence.",
+        "Tom’s mum said she was making pancakes. The boys have declared Shrove Tuesday a bank holiday.",
+        "Tom asked if I’d be up for another family barbecue. I’m available for weddings, christenings and bin day too.",
+        "Tom’s mum said she liked my aftershave. I’ve cancelled every other subscription to fund it.",
+        "Tom’s mum asked me to pass the salt. Best conversation I’ve had all week.",
+        "Tom’s mum mentioned she liked live music. The lads suddenly started a band with absolutely no instruments.",
+        "Tom’s mum asked if we could help with the shopping. Never seen six blokes fight over who gets to carry the milk.",
+        "Tom’s mum said she was going to the pub garden. The boys developed a sudden appreciation for horticulture.",
+        "Tom asked why we’d put his mum down as captain for pub golf. She’s clearly the only person we’re prepared to take instructions from.",
+        "Tom’s mum asked what our plans were for the weekend. Five lads said ‘nothing’, despite having non-refundable flights."
+      ];
       function initJokeRotation(jokes, key, textId, buttonId) {
         const target = document.getElementById(textId);
         const button = document.getElementById(buttonId);
@@ -1011,6 +1073,7 @@
         showJoke();
       }
       initJokeRotation(roastJokes, 'pint-tom-roast-v3', 'tom-joke', 'tom-next-joke');
+      initJokeRotation(mumJokes, 'pint-tom-mum-joke-v2', 'tom-mum-joke', 'tom-mum-next-joke');
     })();
   </script>
 </body>
